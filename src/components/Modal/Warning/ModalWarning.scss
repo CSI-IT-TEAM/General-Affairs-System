@@ -1,0 +1,75 @@
+@import "../../../styles/color.scss";
+
+.s-modal{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    border-radius: 15px;
+    background-color: $color-white;
+    border: none !important;
+    padding: 25px;
+    outline: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+
+    @media screen and (max-width: 479px) {
+       max-width: 80%;
+       padding: 20px 20px 15px;
+    }
+
+    &__thumb{
+        width: 100px;
+        top: -65px;
+        right: 20px;
+        position: absolute;
+
+        @media screen and (max-width: 375px) {
+            width: 90px;
+            top: -55px;
+        }
+    }
+
+    &__thumb--warn{
+        top: -60px;
+
+        @media screen and (max-width: 375px) {
+            top: -50px;
+        }
+    }
+
+    .s-mt{
+        top: -50px;
+
+        @media screen and (max-width: 375px) {
+            top: -45px;
+        }
+    }
+
+    &__title{
+        font-weight: 600 !important;
+        color: $color-organe;
+        margin-bottom: 5px !important;
+
+        @media screen and (max-width: 479px) {
+            font-size: 22px !important;
+        }
+    }
+
+    &__desc{
+        color: $color-shadow;
+        font-size: 18px !important;
+
+        @media screen and (max-width: 479px) {
+            font-size: 17px !important;
+        }
+    }
+
+    &__bot{
+        margin: 15px 0 5px;
+
+        .btn-round{
+            width: calc(50% - 7px);
+        }
+    }
+}

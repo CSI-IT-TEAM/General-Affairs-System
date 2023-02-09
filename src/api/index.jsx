@@ -1,0 +1,4 @@
+const downloadURL = 'http://172.30.10.120/LMES/PKG_GA_SYSTEM_REQUEST.SMT_DOWNLOAD';
+const uploadURL = 'http://172.30.10.120/LMES/PKG_GA_SYSTEM_REQUEST.UPLOAD_REQUEST_DATA/SAVE';
+
+export { downloadURL, uploadURL }

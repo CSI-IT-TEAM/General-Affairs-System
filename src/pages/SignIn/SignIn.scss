@@ -1,0 +1,112 @@
+@import "../../styles/color.scss";
+
+.s-layout{
+    padding: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background: linear-gradient(45deg, $color-bg, $color-main);
+    flex-direction: column;
+
+    .s-logo{
+        font-size: 50px;
+        font-weight: bold;
+        border-top: 7px solid $color-white;
+        border-bottom: 7px solid $color-white;
+        color: $color-white;
+        margin-bottom: 30px;
+        line-height: 1;
+        
+        @media screen and (max-width: 479px) {
+            font-size: 40px;
+            border-top-width: 6px;
+            border-bottom-width: 6px;
+            margin-bottom: 25px;
+        }
+    }
+
+    .b-box{
+        width: 500px;
+        height: auto;
+        border-radius: 10px;
+        background-color: $color-white;
+        overflow: hidden;
+        border: 1px solid $color-border;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+
+        @media screen and (max-width: 479px) {
+            width: 90%;
+        }
+    }
+
+    .s-form {
+        padding: 65px 55px 55px 55px;
+
+        @media screen and (max-width: 479px) {
+            padding: 40px 25px 40px 25px;
+        }
+    
+        .b-thumb {
+            max-width: 350px;
+            margin: 0 auto 40px;
+
+            @media screen and (max-width: 479px) {
+                max-width: 300px;
+                margin-bottom: 20px;
+            }
+        }
+    
+        .b-bot{
+            margin-top: 50px;
+        }
+
+        .b-input {
+            background-color: $color-bg-white;
+        }
+    
+        .p-title {
+            display: block;
+            font-size: 38px;
+            color: $color-shadow;
+            line-height: 1.2;
+            text-align: center;
+            font-weight: bold;
+            padding-bottom: 15px;
+
+            @media screen and (max-width: 479px) {
+                font-size: 34px;
+            }
+
+            &:after{
+                //content: '';
+                width: 80px;
+                height: 5px;
+                background-color: $color-bg;
+                position: relative;
+                display: inherit;
+                border-radius: 10px;
+                margin: 5px auto 0;
+            }
+        }
+    
+        .p-label {
+            font-size: 16px;
+            color: $color-black-500;
+            line-height: 1.5;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+    
+        .p-info {
+            color: $color-black-600;
+            margin-right: 3px;
+        }
+
+        .s-mid{
+            margin-top: 15px;
+        }
+    }
+}

@@ -1,0 +1,73 @@
+@import "../../styles/color.scss";
+
+.s-error{
+    width: 100%;
+
+    &-thumb{
+        max-width: 120px;
+        margin: 0 auto 10px;
+
+        @media screen and (max-width: 479px) {
+            max-width: 100px;
+        }
+    }
+
+    &-title{
+        position: relative;
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        margin: 0 !important;
+        letter-spacing: 3px;
+        text-align: center;
+        color: $color-text-sub;
+
+        @media screen and (max-width: 479px) {
+            font-size: 18px !important;
+        }
+    }
+
+    &-sub{
+        font-size: 252px !important;
+        font-weight: 900 !important;
+        color: $color-main;
+        text-transform: uppercase;
+        letter-spacing: -40px;
+        margin-left: -20px !important;
+        text-align: center;
+        line-height: 0.8 !important;
+        margin-top: 10px !important;
+        margin-bottom: 20px !important;
+
+        @media screen and (max-width: 479px) {
+            font-size: 200px !important;
+        }
+
+        @media screen and (max-width: 325px) {
+            font-size: 180px !important;
+        }
+
+        span{
+            text-shadow: -8px 0 0 $color-white;
+        }
+    }
+
+    &-desc{
+        font-size: 18px !important;
+        font-weight: 500 !important;
+        max-width: 45%;
+        margin: 0 auto 30px !important;
+        text-align: center;
+        color: $color-shadow;
+
+        @media screen and (max-width: 479px) {
+            max-width: 100%;
+            font-size: 16px !important;
+        }
+    }
+
+    &-bot{
+        max-width: 280px;
+        margin: 0 auto;
+    }
+}

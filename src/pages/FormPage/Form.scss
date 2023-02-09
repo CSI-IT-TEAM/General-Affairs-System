@@ -1,0 +1,175 @@
+@import "../../styles/color.scss";
+
+.s-form{
+    padding: 40px 0;
+    padding-top: 120px;
+    background-image: url("../../assets/images/bg-02.png");
+    background-repeat: repeat;
+    background-position: center;
+
+    @media screen and (max-width: 991px) {
+        padding-top: 110px;
+    }
+
+    @media screen and (max-width: 479px) {
+        padding-top: 95px;
+        padding-bottom: 30px;
+        background-size: contain;
+    }
+
+    &-title {
+        color: $color-text-gray;
+        font-size: 40px;
+        text-align: center;
+        margin: 0 0 20px;
+        font-weight: bold;
+        line-height: 1.2;
+
+        & > span {
+            color: $color-text-purple;
+        }
+
+        @media screen and (max-width: 479px) {
+            font-size: 30px;
+            margin-bottom: 0;
+        }
+    }
+
+    &-content{
+        border-radius: 10px;
+        background-color: $color-white;
+        overflow: hidden;
+        border: 1px solid $color-border;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        padding: 30px 50px 40px;
+
+        @media screen and (max-width: 767px) {
+            padding: 20px 30px 30px;
+        }
+
+        @media screen and (max-width: 767px) {
+            padding: 15px 15px 20px;
+        }
+
+        @media screen and (max-width: 479px) {
+            padding: 0;
+            box-shadow: none;
+            border: none;
+        }
+    }
+
+    .b-text-input{
+
+        margin-bottom: 10px !important;
+
+        @media screen and (max-width: 479px) {
+            margin-bottom: 0 !important;
+        }
+ 
+        &__title{
+            color: $color-text-gray;
+            font-size: 17px !important;
+            min-width: 160px;
+
+            @media screen and (max-width: 991px) {
+                min-width: 130px;
+                line-height: 1.3;
+            }
+
+            @media screen and (max-width: 479px) {
+                min-width: 120px;
+                font-size: 16px !important;
+            }
+        }
+    
+        input{
+            padding: 12px 15px !important;
+            background-color: $color-bg-white;
+
+            @media screen and (max-width: 479px) {
+                padding: 10px !important;
+                font-size: 16px !important;
+            }
+        }
+    }
+
+    textarea{
+        font-size: 17px;
+
+        @media screen and (max-width: 479px) {
+            font-size: 16px !important;
+        }
+    }
+
+    .b-text-select{
+        margin-bottom: 10px !important;
+
+        @media screen and (max-width: 479px) {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    &-bot{
+        max-width: 250px;
+        margin: 40px auto 0;
+
+        @media screen and (max-width: 479px) {
+            margin-top: 30px;
+        }
+    }
+
+    .b-italic{
+        font-style: italic;
+
+        span{
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: $color-red;
+        }
+    }
+
+    .b-validate{
+        font-size: 13px;
+        font-style: italic;
+        font-weight: 500;
+        color: $color-organe;
+        margin-top: 5px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    @media screen and (max-width: 479px) {
+        .css-1t0y5th-MuiInputBase-root-MuiOutlinedInput-root{
+            padding: 10px !important;
+        }
+
+        .css-mhc70k-MuiGrid-root>.MuiGrid-item {
+            padding-top: 10px;
+        }
+
+        .css-mhc70k-MuiGrid-root{
+            margin-top: 0 !important;
+        }
+
+        .css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
+            padding:  10px !important;
+        }
+
+        .mt-10{
+            margin-top: 10px;
+        }
+
+        .b-spec{
+            align-items: flex-start;
+
+            .b-text-input__title{
+                margin-top: 20px;
+            }
+        }
+    }
+}
+
+.MuiPickersToolbar-penIconButton {
+    visibility: hidden
+}

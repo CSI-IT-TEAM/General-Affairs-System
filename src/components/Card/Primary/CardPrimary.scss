@@ -1,0 +1,168 @@
+@import "../../../styles/color.scss";
+
+.b-card{
+    display: block;
+    height: calc(100% - 60px);
+    padding-bottom: 60px;
+    border-radius: 10px !important;
+    position: relative;
+    overflow: visible !important;
+    background-color: $color-bg-card !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+    transition: transform 0.4s ease-in-out !important;
+    cursor: pointer;
+
+    @media screen and (max-width: 479px) {
+        height: calc(100% - 55px);
+        padding-bottom: 55px;
+    }
+
+    .b-thumb{
+        height: 200px;
+        border-radius: 10px;
+        margin-bottom: 40px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @media screen and (max-width: 479px) {
+            height: 110px;
+            margin-bottom: 15px;
+        }
+    }
+
+    .b-thumb--first{
+        @media screen and (max-width: 479px) {
+            height: 120px;
+        }
+    }
+
+    .b-image{
+        width: 80%;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translate(-50%, 0);
+
+        img{
+            transition: transform 0.4s ease-in-out;
+        }
+
+        @media screen and (max-width: 479px) {
+            width: 65%;
+            top: 0;
+        }
+
+        @media screen and (max-width: 425px) {
+            width: 70%;
+            top: 5px;
+        }
+
+        @media screen and (max-width: 375px) {
+            width: 80%;
+            top: 10px;
+        }
+    }
+    
+    .b-image--first{
+
+        @media screen and (max-width: 767px) {
+            width: 40%;
+            top: 0;
+        }
+
+        @media screen and (max-width: 479px) {
+            width: 50%;
+            top: -15px;
+        }
+    }
+
+    .b-image--sub{
+        width: 65%;
+        top: 0;
+
+        @media screen and (max-width: 479px) {
+            width: 55%;
+            top: 5px;
+        }
+
+        @media screen and (max-width: 425px) {
+            width: 60%;
+            top: 10px;
+        }
+
+        @media screen and (max-width: 375px) {
+            width: 70%;
+        }
+    }
+
+    &:hover{
+        transform: translate(0, -5px);
+        
+        img{
+            transform: translateY(-10%) scale(1.1);
+        }
+
+        .btn-secondary{
+            background-color: $color-blue;
+        }
+    }
+
+    .b-content {
+        padding: 5px 25px 30px;
+        position: relative;
+        z-index: 99;
+
+        @media screen and (max-width: 479px) {
+            padding: 0 10px 15px !important;
+        }
+
+        .b-title{
+            font-weight: 600;
+            color: $color-shadow;
+
+            @media screen and (max-width: 479px) {
+                font-size: 20px;
+            }
+
+            @media screen and (max-width: 425px) {
+                font-size: 18px;
+            }
+
+            &:after {
+                content: '';
+                width: 50px;
+                height: 4px;
+                background-color: #25799a;
+                position: relative;
+                display: inherit;
+                border-radius: 10px;
+                margin-top: 5px;
+            }
+        }
+
+        .b-desc{
+            font-size: 15px;
+            font-weight: 500;
+
+            @media screen and (max-width: 479px) {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .b-bot{
+        position: absolute;
+        width: calc(100% - 40px);
+        left: 20px;
+        bottom: 20px;
+        z-index: 99;
+
+        @media screen and (max-width: 479px) {
+            width: calc(100% - 20px);
+            left: 10px;
+            bottom: 10px;
+        }
+    }
+}
