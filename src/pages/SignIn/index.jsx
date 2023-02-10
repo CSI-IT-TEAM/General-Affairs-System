@@ -10,7 +10,7 @@ import ModalInfo from "../../components/Modal/Info";
 
 import "./SignIn.scss";
 import loginImage from "../../assets/images/sign-in.png";
-import { downloadURL } from "../../api";
+import { downloadURL, imageURL } from "../../api";
 
 const height = window.innerHeight - 30 + "px";
 
@@ -46,6 +46,7 @@ const SignIn = () => {
             ARG_EMPID: data,
             OUT_CURSOR: "",
         }
+        
         fetchDownload(dataConfig);
     }
 
@@ -64,7 +65,7 @@ const SignIn = () => {
                 if(result.length > 0){
                     // Store
                     sessionStorage.setItem("userData", JSON.stringify(result[0]));
-                    navigate("/");
+                    fetchDownloadImg();
                 }else{
                     handleOpenWarn();
                 }
@@ -73,6 +74,42 @@ const SignIn = () => {
             setOpenInfo(true);
         });
     }
+
+    const fetchDownloadImg = async () => {
+        fetch(imageURL, {
+            method: 'POST',
+            mode: 'cors',
+            dataType: "json",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "ARG_EMPID" : data,
+                "OUT_CURSOR" : ""
+              }),
+            signal: Timeout(5).signal,
+        }).then((response) => {
+            response.json().then(async(result) => {
+                let imgData = await arrayBufferToBase64(result[0][0].data);
+
+                if(imgData !== "" && imgData !== null){
+                    sessionStorage.setItem("userImg", imgData);
+                    navigate("/");
+                }
+            })  
+        }).catch(error => {
+            setOpenInfo(true);
+        });
+    }
+
+    const arrayBufferToBase64 = (buffer) => {
+        var base64Flag = 'data:image/jpeg;base64,';
+        var binary = '';
+        var bytes = [].slice.call(new Uint8Array(buffer));
+        bytes.forEach((b) => binary += String.fromCharCode(b));
+        
+        return base64Flag + window.btoa(binary);
+    };
 
     return (
         <>

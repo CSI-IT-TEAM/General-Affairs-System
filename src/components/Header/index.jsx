@@ -8,12 +8,16 @@ const Header = () => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
 
+    /////// Check user Thumb
+    const userImage = (sessionStorage.getItem('userImg') === null || sessionStorage.getItem('userImg').length === 0) ? avatarImage : sessionStorage.getItem('userImg');
+
     const handleToggle = () => {
         setOpen(open => !open);
     }
 
     const handleLogOut = () => {
         sessionStorage.removeItem('userData');
+        sessionStorage.removeItem('userImg');
         navigate("/signin");
     }
 
@@ -41,7 +45,7 @@ const Header = () => {
                     <Box onClick={() => handleToggle()}>
                         <Avatar
                             alt="avatar"
-                            src={avatarImage}
+                            src={userImage}
                             className="s-avatar"
                         />
                     </Box>
