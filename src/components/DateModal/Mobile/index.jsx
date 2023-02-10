@@ -10,7 +10,7 @@ const DateModalMobile = ({ title, placeholder, name, handleEvent, cValue, isVali
 
     return (
         <>
-            <Stack marginBottom={2} direction="row" alignItems="center" className="b-text-input">
+            <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className="b-text-input">
                 <Typography variant="h6" className="b-text-input__title b-italic">
                     {title} <span>(*)</span>
                 </Typography>

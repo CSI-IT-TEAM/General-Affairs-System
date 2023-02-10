@@ -278,7 +278,11 @@ const FormCar = () => {
                         _result = false;
                         handleSetValidate(property, false);
                     }else{
-                        let _isValidate = isCombackDate_Validate(getDateTimeFormat(data["GO_DATE"] + " " + data["GO_TIME"]),getDateTimeFormat(data["COMEBACK_DATE"] + " " + data["COMEBACK_TIME"]));
+
+                        let _depart = getDateTimeFormat(data["GO_DATE"] + " " + data["GO_TIME"]);
+                        let _comeback = getDateTimeFormat(data["COMEBACK_DATE"] + " " + data["COMEBACK_TIME"]);
+                        let _isValidate = isCombackDate_Validate(_depart,_comeback);
+                        
                         if(_isValidate){
                             handleSetValidate(property, true);
                         }else{
@@ -330,7 +334,8 @@ const FormCar = () => {
                             <FormTitle order='1' title='Personal Information' />
                             <FormDefaultInfo data={data} />
                             <FormTitle order='2' title='Request Information' />
-                            <Stack direction="row" alignItems="center" className="b-text-select b-spec">
+
+                            <Stack direction={{xs: "column", sm: "row"}} alignItems="center" className="b-text-select b-spec">
                                 <Typography variant="h6" className="b-text-input__title b-italic">
                                     Reason <span>(*)</span>
                                 </Typography>
@@ -478,7 +483,7 @@ const FormCar = () => {
                                 </Grid>
                             </Grid>
 
-                            <Stack marginBottom={2} direction="row" alignItems="center" className="b-text-input mt-10">
+                            <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className="b-text-input mt-10">
                                 <Typography variant="h6" className="b-text-input__title b-italic">
                                     Passengers List
                                 </Typography>

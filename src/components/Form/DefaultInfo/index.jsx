@@ -11,7 +11,8 @@ const FormDefaultInfo = ({data}) => {
                         placeholder="" 
                         value={data.PLANT_NM} 
                         disable={true} 
-                        inputProp={{ inputMode: 'text' }} />
+                        inputProp={{ inputMode: 'text' }}
+                        isDefault={true} />
                 </Grid>
                 <Grid item xs={12} md={6} xl={8}>
                     <TextInput 
@@ -19,7 +20,8 @@ const FormDefaultInfo = ({data}) => {
                         placeholder="" 
                         value={data.DEPT_NM} 
                         disable={true} 
-                        inputProp={{ inputMode: 'text' }} />
+                        inputProp={{ inputMode: 'text' }}
+                        isDefault={true} />
                 </Grid>
             </Grid>
             <Grid container spacing={2}>
@@ -29,7 +31,8 @@ const FormDefaultInfo = ({data}) => {
                         placeholder="" 
                         value={data.REQ_EMP} 
                         disable={true} 
-                        inputProp={{ inputMode: 'numeric', pattern: '[0-9]*' }} />
+                        inputProp={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                        isDefault={true} />
                 </Grid>
                 <Grid item xs={12} md={6} xl={8}>
                     <TextInput 
@@ -37,7 +40,8 @@ const FormDefaultInfo = ({data}) => {
                         placeholder="" 
                         value={data.REQ_EMP_NM} 
                         disable={true} 
-                        inputProp={{ inputMode: 'text' }} />
+                        inputProp={{ inputMode: 'text' }}
+                        isDefault={true} />
                 </Grid>
             </Grid>
         </>

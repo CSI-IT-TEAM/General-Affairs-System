@@ -1,9 +1,21 @@
 import { Typography, Box, Container, Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import avatarImage from "../../assets/images/avatar.png";
+import ModalLogout from "../Modal/Logout";
 
 const Header = () => {
     const navigate = useNavigate();
+    const [open, setOpen] = useState(false);
+
+    const handleToggle = () => {
+        setOpen(open => !open);
+    }
+
+    const handleLogOut = () => {
+        sessionStorage.removeItem('userData');
+        navigate("/signin");
+    }
 
     const handleNavigate = () => {
         navigate("/");
@@ -26,13 +38,16 @@ const Header = () => {
                             </Typography>
                         </span>
                     </Box>
-                    <Avatar
-                        alt="avatar"
-                        src={avatarImage}
-                        className="s-avatar"
-                    />
+                    <Box onClick={() => handleToggle()}>
+                        <Avatar
+                            alt="avatar"
+                            src={avatarImage}
+                            className="s-avatar"
+                        />
+                    </Box>
                 </Container>
             </Box>
+            <ModalLogout open={open} handleClose={handleToggle} handleLogOut={handleLogOut} />
         </>
     );
 };

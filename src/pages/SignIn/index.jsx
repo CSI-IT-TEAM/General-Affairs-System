@@ -80,7 +80,7 @@ const SignIn = () => {
                 className="s-layout"
                 sx={{
                     width: "100%",
-                    height: height,
+                    minHeight: height,
                 }}
             >
                 <Typography variant="h5" component="div" className="s-logo">

@@ -1,8 +1,14 @@
-const isCombackDate_Validate = (value1, value2) => {
-    const x = new Date(value1);
-    const y = new Date(value2);
+import moment from 'moment';
+moment().format();
 
-    return x <= y ? true : false;
+const isCombackDate_Validate = (value1, value2) => {
+
+    const format = "YYYY-MM-DD HH:mm:ss";
+
+    let dateTime1 = moment(value1).format(format);
+    let dateTime2 = moment(value2).format(format);
+
+    return dateTime1 <= dateTime2 ? true : false;
 }
 
-export {isCombackDate_Validate}
+export { isCombackDate_Validate }
