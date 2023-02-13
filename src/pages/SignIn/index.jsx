@@ -90,11 +90,14 @@ const SignIn = () => {
             signal: Timeout(5).signal,
         }).then((response) => {
             response.json().then(async(result) => {
-                let imgData = await arrayBufferToBase64(result[0][0].data);
 
-                if(imgData !== "" && imgData !== null){
-                    sessionStorage.setItem("userImg", imgData);
-                    navigate("/");
+                if(result.length > 0){
+                    let imgData = await arrayBufferToBase64(result[0].PHOTO.data);
+    
+                    if(imgData !== "" && imgData !== null){
+                        sessionStorage.setItem("userImg", imgData);
+                        navigate("/");
+                    }
                 }
             })  
         }).catch(error => {
