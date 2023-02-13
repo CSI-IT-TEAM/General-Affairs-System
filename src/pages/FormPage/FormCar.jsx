@@ -19,7 +19,7 @@ import { getDate, formatDate, formatHMS, getDateFormat, getDateTimeFormat, forma
 import getDevice from '../../function/getDevice';
 import { isCombackDate_Validate } from '../../function/getValidate';
 import { getLastName } from '../../function/getLastName';
-import { uploadURL } from '../../api';
+import { uploadURL, emailURL } from '../../api';
 
 import "./Form.scss";
 
@@ -226,6 +226,29 @@ const FormCar = () => {
             body: JSON.stringify(dataConfig),
             signal: Timeout(5).signal,
         }).then((response) => {
+
+            fetchEmail();
+            
+        }).catch(error => {
+            setType('connect-failed');
+            setOpenInfo(true);
+        });
+    }
+
+    const fetchEmail = async () => {
+        fetch(emailURL, {
+            method: 'POST',
+            mode: 'cors',
+            dataType: "json",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ARG_TYPE: "V_CAR",
+            }),
+            signal: Timeout(5).signal,
+        }).then((response) => {
+
             if(response.status === 200){
                 setType('upload-success');
                 setOpenInfo(true);
@@ -237,6 +260,7 @@ const FormCar = () => {
             }else{
                 handleOpenWarn();
             }
+            
         }).catch(error => {
             setType('connect-failed');
             setOpenInfo(true);
