@@ -19,7 +19,7 @@ import { getDate, formatDate, formatHMS, getDateFormat, getDateTimeFormat, forma
 import getDevice from '../../function/getDevice';
 import { isCombackDate_Validate } from '../../function/getValidate';
 import { getLastName } from '../../function/getLastName';
-import { uploadURL, emailURL } from '../../api';
+import { uploadURL } from '../../api';
 
 import "./Form.scss";
 
@@ -58,6 +58,7 @@ const FormCar = () => {
                 "DEPT_NM": empData.DEPT_NM,           
                 "REQ_EMP": empData.EMPID,           
                 "REQ_EMP_NM": empData.EMP_NM, 
+                "EMAIL_ADDRESS": empData.EMAIL, 
                 "CREATOR": getLastName(empData.EMP_NM),
                 "CREATE_PROGRAM_ID": "GA_SYSTEM_REQUEST",
             }
@@ -197,6 +198,7 @@ const FormCar = () => {
                 ARG_DEPT_NM       : data.DEPT_NM,
                 ARG_REQ_EMP       : data.REQ_EMP,
                 ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
+                ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
                 ARG_GO_DATE       : data.GO_DATE,
                 ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
                 ARG_COMEBACK_DATE : data.COMEBACK_DATE,
@@ -224,28 +226,6 @@ const FormCar = () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(dataConfig),
-            signal: Timeout(5).signal,
-        }).then((response) => {
-
-            fetchEmail();
-            
-        }).catch(error => {
-            setType('connect-failed');
-            setOpenInfo(true);
-        });
-    }
-
-    const fetchEmail = async () => {
-        fetch(emailURL, {
-            method: 'POST',
-            mode: 'cors',
-            dataType: "json",
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ARG_TYPE: "V_CAR",
-            }),
             signal: Timeout(5).signal,
         }).then((response) => {
 

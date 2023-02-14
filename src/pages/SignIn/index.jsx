@@ -64,8 +64,12 @@ const SignIn = () => {
             response.json().then(async(result) => {
                 if(result.length > 0){
                     // Store
-                    sessionStorage.setItem("userData", JSON.stringify(result[0]));
-                    fetchDownloadImg();
+                    if(result[0].EMAIL === null || result[0].EMAIL === undefined || result[0].EMAIL === ""){
+                        handleOpenWarn();
+                    }else{
+                        sessionStorage.setItem("userData", JSON.stringify(result[0]));
+                        fetchDownloadImg();
+                    }
                 }else{
                     handleOpenWarn();
                 }

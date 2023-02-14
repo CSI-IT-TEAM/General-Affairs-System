@@ -6,6 +6,7 @@ const reqCarData = {
     "DEPT_NM": "",           
     "REQ_EMP": "",           
     "REQ_EMP_NM": "", 
+    "EMAIL_ADDRESS": "",
     "GO_DATE": "",  
     "GO_DATE_FULL": "",        
     "GO_TIME": "",    
