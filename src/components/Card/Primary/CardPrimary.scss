@@ -1,4 +1,5 @@
 @import "../../../styles/color.scss";
+@import "../../../styles/mixin.scss";
 
 .b-card{
     display: block;
@@ -22,9 +23,7 @@
         border-radius: 10px;
         margin-bottom: 40px;
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        @include flex(center, center);
 
         @media screen and (max-width: 479px) {
             height: 110px;
