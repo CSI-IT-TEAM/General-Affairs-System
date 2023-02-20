@@ -1,5 +1,8 @@
 import { Box, Container, Grid, TextField, Stack, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import i18next from "i18next";
 
 import TextInput from '../../components/TextInput';
 import SelectModal from '../../components/SelectModal';
@@ -17,13 +20,23 @@ import { reqCarData, reqCarValidate } from '../../data';
 import { removeVietnamese, removeNewLine } from '../../function/getFormat';
 import { getDate, formatDate, formatHMS, getDateFormat, getDateTimeFormat, formatHMS_00 } from '../../function/getDate';
 import getDevice from '../../function/getDevice';
-import { isCombackDate_Validate } from '../../function/getValidate';
+import { isCombackDate_Validate, timeDifference } from '../../function/getValidate';
 import { getLastName } from '../../function/getLastName';
 import { uploadURL } from '../../api';
 
 import "./Form.scss";
 
 const FormCar = () => {
+    const navigate = useNavigate();
+
+    /////// Translate Lang
+    const { t } = useTranslation();
+    const langCookie = i18next.language;
+    const [lang, setLang] = useState(langCookie);
+
+    useEffect(() => {
+        setLang(i18next.language);
+    },[langCookie]);
 
     const [type, setType] = useState('connect-failed');
 
@@ -47,22 +60,25 @@ const FormCar = () => {
     /////// Handle Default Data
     const handleDefault = async() => {
         const empData = JSON.parse(sessionStorage.getItem('userData'));
-
-        setData(prevData => {
-            return {
-                ...prevData,
-                "REQ_DATE": getDate(),
-                "PLANT_CD": empData.PLANT_CD,    
-                "PLANT_NM": empData.PLANT_NM, 
-                "DEPT_CD": empData.DEPT,      
-                "DEPT_NM": empData.DEPT_NM,           
-                "REQ_EMP": empData.EMPID,           
-                "REQ_EMP_NM": empData.EMP_NM, 
-                "EMAIL_ADDRESS": empData.EMAIL, 
-                "CREATOR": getLastName(empData.EMP_NM),
-                "CREATE_PROGRAM_ID": "GA_SYSTEM_REQUEST",
-            }
-        });
+        if(empData != null) {
+            setData(prevData => {
+                return {
+                    ...prevData,
+                    "REQ_DATE": getDate(),
+                    "PLANT_CD": empData.PLANT_CD,    
+                    "PLANT_NM": empData.PLANT_NM, 
+                    "DEPT_CD": empData.DEPT,      
+                    "DEPT_NM": empData.DEPT_NM,           
+                    "REQ_EMP": empData.EMPID,           
+                    "REQ_EMP_NM": empData.EMP_NM, 
+                    "EMAIL_ADDRESS": empData.EMAIL, 
+                    "CREATOR": getLastName(empData.EMP_NM),
+                    "CREATE_PROGRAM_ID": "GA_SYSTEM_REQUEST",
+                }
+            });
+        }else{
+            navigate("/signin");
+        }
     }
 
     useEffect(() => {
@@ -190,30 +206,32 @@ const FormCar = () => {
     //////// Handle Upload Data
     const handleSubmit = () => {
         if(handleVaidate()){
-            const _uploadData = {
-                ARG_TYPE: "SAVE",    
-                ARG_REQ_DATE      : data.REQ_DATE,
-                ARG_PLANT_CD      : data.PLANT_CD,
-                ARG_DEPT_CD       : data.DEPT_CD,
-                ARG_DEPT_NM       : data.DEPT_NM,
-                ARG_REQ_EMP       : data.REQ_EMP,
-                ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
-                ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
-                ARG_GO_DATE       : data.GO_DATE,
-                ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
-                ARG_COMEBACK_DATE : data.COMEBACK_DATE,
-                ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
-                ARG_DEPART        : removeVietnamese(data.DEPART.trim()),
-                ARG_ARRIVAL       : data.ARRIVAL,
-                ARG_MAN_QTY       : data.MAN_QTY,
-                ARG_MAN_LIST      : removeVietnamese(removeNewLine(data.MAN_LIST)),
-                ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
-                ARG_SUB_REASON_CD : data.SUB_REASON_CD,
-                ARG_CREATOR       : data.CREATOR,
-                ARG_CREATE_PC     : "ADMIN",
-                ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
+            if(handleValidateDepart()){
+                const _uploadData = {
+                    ARG_TYPE: "SAVE",    
+                    ARG_REQ_DATE      : data.REQ_DATE,
+                    ARG_PLANT_CD      : data.PLANT_CD,
+                    ARG_DEPT_CD       : data.DEPT_CD,
+                    ARG_DEPT_NM       : data.DEPT_NM,
+                    ARG_REQ_EMP       : data.REQ_EMP,
+                    ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
+                    ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
+                    ARG_GO_DATE       : data.GO_DATE,
+                    ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
+                    ARG_COMEBACK_DATE : data.COMEBACK_DATE,
+                    ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
+                    ARG_DEPART        : removeVietnamese(data.DEPART.trim()),
+                    ARG_ARRIVAL       : data.ARRIVAL,
+                    ARG_MAN_QTY       : data.MAN_QTY,
+                    ARG_MAN_LIST      : removeVietnamese(removeNewLine(data.MAN_LIST)),
+                    ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
+                    ARG_SUB_REASON_CD : data.SUB_REASON_CD,
+                    ARG_CREATOR       : data.CREATOR,
+                    ARG_CREATE_PC     : "ADMIN",
+                    ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
+                }
+                fetchUpload(_uploadData);
             }
-            fetchUpload(_uploadData);
         }
     }
 
@@ -273,7 +291,7 @@ const FormCar = () => {
                             handleSetValidate(property, true);
                         }else{
                             _result = false;
-                            handleSetValidate(property, false, "Comback Date must equal or greater than Depart Date");
+                            handleSetValidate(property, false, "Comback Date must equal or greater than Depart Date", "Ngày về phải lớn hơn hoặc bằng Ngày xuất phát");
                         }
                     }
                     break;
@@ -291,7 +309,7 @@ const FormCar = () => {
                             handleSetValidate(property, true);
                         }else{
                             _result = false;
-                            handleSetValidate(property, false, "Comback Time must equal or greater than Depart Time");
+                            handleSetValidate(property, false, "Comback Time must equal or greater than Depart Time", "Giờ về phải lớn hơn hoặc bằng Giờ xuất phát");
                         }
                     }
                     break;
@@ -316,53 +334,72 @@ const FormCar = () => {
         return _result;
     }
 
-    const handleSetValidate = (name, value, message="") => {
+    const handleSetValidate = (name, value, message="", messageVN="") => {
         setValidate(prevData => {
             return {
                 ...prevData,
                 [name]: {
                     validate: value,
                     message: message !== "" ? message : validate[name].message,
+                    messageVN: messageVN !== "" ? messageVN : validate[name].messageVN,
                 }
             }
         });
+    }
+
+    const handleValidateDepart = () => {
+        if(data["GO_DATE"] === '' || data["GO_TIME"] === '') return false;
+        let _result = true;
+
+        let _depart = getDateTimeFormat(data["GO_DATE"] + " " + data["GO_TIME"]);
+        let _isValidate = timeDifference(_depart);
+
+        if(_isValidate){
+            handleSetValidate("GO_DATE", true);
+            handleSetValidate("GO_TIME", true);
+        }else{
+            _result = false;
+            handleSetValidate("GO_DATE", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
+            handleSetValidate("GO_TIME", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
+        }
+
+        return _result;
     }
 
     return (
         <>
             <Box className="s-form">
                 <Container>
-                    <h3 className="s-form-title">Request <span>Vehicle</span></h3>
+                    <h3 className="s-form-title">{t('request')} <span>{t('vehicle')}</span></h3>
                     <Box className="s-form-content">
                         <form>
-                            <FormTitle order='1' title='Personal Information' />
+                            <FormTitle order='1' title={t('title_first')} />
                             <FormDefaultInfo data={data} />
-                            <FormTitle order='2' title='Request Information' />
-
+                            <FormTitle order='2' title={t('title_second')} />
                             <Stack direction={{xs: "column", sm: "row"}} alignItems="center" className="b-text-select b-spec">
                                 <Typography variant="h6" className="b-text-input__title b-italic">
-                                    Reason <span>(*)</span>
+                                    {t('frm_reason')} <span>(*)</span>
                                 </Typography>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={4} xl={3} >
                                         <SelectModal 
                                             name="MAIN_REASON_CD"
                                             data={_mainReason}
-                                            placeholder="Select Your Reason" 
+                                            placeholder={t('frm_reason_placeholder')}
                                             cValue={data.MAIN_REASON_CD}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.MAIN_REASON_CD.validate}
-                                            message={validate.MAIN_REASON_CD.message} />
+                                            message={lang === "en" ? validate.MAIN_REASON_CD.message : validate.MAIN_REASON_CD.messageVN} />
                                     </Grid>
                                     <Grid item xs={12} md={8} xl={9} >
                                         <SelectModal 
                                             name="SUB_REASON_CD"
                                             data={reason}
-                                            placeholder="Reason Detail" 
+                                            placeholder={t('frm_reason_detail_placeholder')}
                                             cValue={data.SUB_REASON_CD}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.SUB_REASON_CD.validate}
-                                            message={validate.SUB_REASON_CD.message} />
+                                            message={lang === "en" ? validate.SUB_REASON_CD.message : validate.SUB_REASON_CD.messageVN } />
                                     </Grid>
                                 </Grid>
                             </Stack>
@@ -371,44 +408,44 @@ const FormCar = () => {
                                 <Grid item xs={12} md={6}>
                                     {getDevice() ? 
                                         <DateModalMobile 
-                                            title="Depart Date"
-                                            placeholder="Select Depart Date" 
+                                            title={t('frm_depart_date')}
+                                            placeholder={t('frm_depart_date_placeholder')}
                                             name="GO_DATE"
                                             cValue={data.GO_DATE_FULL}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.GO_DATE.validate}
-                                            message={validate.GO_DATE.message} />
+                                            message={lang === "en" ? validate.GO_DATE.message : validate.GO_DATE.messageVN } />
                                         :
                                         <DateModal 
-                                            title="Depart Date" 
-                                            placeholder="Select Depart Date" 
+                                            title={t('frm_depart_date')}
+                                            placeholder={t('frm_depart_date_placeholder')}
                                             name="GO_DATE" 
                                             cValue={data.GO_DATE}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.GO_DATE.validate}
-                                            message={validate.GO_DATE.message} />
+                                            message={lang === "en" ? validate.GO_DATE.message : validate.GO_DATE.messageVN} />
                                 
                                     }
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     {getDevice() ?
                                         <TimeModalMobile 
-                                            title="Depart Time" 
-                                            placeholder="Select Depart Time" 
+                                            title={t('frm_depart_time')}
+                                            placeholder={t('frm_depart_time_placeholder')}
                                             name="GO_TIME"
                                             cValue={data.GO_TIME_FULL}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.GO_TIME.validate}
-                                            message={validate.GO_TIME.message} />
+                                            message={lang === "en" ? validate.GO_TIME.message : validate.GO_TIME.messageVN } />
                                         :
                                         <TimeModal 
-                                            title="Depart Time" 
-                                            placeholder="Select Depart Time" 
+                                            title={t('frm_depart_time')} 
+                                            placeholder={t('frm_depart_time_placeholder')}
                                             name="GO_TIME"
                                             cValue={data.GO_TIME_FULL}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.GO_TIME.validate}
-                                            message={validate.GO_TIME.message} />
+                                            message={lang === "en" ? validate.GO_TIME.message : validate.GO_TIME.messageVN } />
                                     }
                                 </Grid>
                             </Grid>
@@ -417,43 +454,43 @@ const FormCar = () => {
                                 <Grid item xs={12} md={6}>
                                     {getDevice() ?
                                         <DateModalMobile
-                                            title="Comeback Date" 
-                                            placeholder="Select Comeback Date" 
+                                            title={t('frm_cb_date')} 
+                                            placeholder={t('frm_cb_date_placeholder')}
                                             name="COMEBACK_DATE" 
                                             cValue={data.COMEBACK_DATE_FULL}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.COMEBACK_DATE.validate}
-                                            message={validate.COMEBACK_DATE.message} />
+                                            message={lang === "en" ? validate.COMEBACK_DATE.message : validate.COMEBACK_DATE.messageVN } />
                                         :
                                         <DateModal 
-                                            title="Comeback Date" 
-                                            placeholder="Select Comeback Date" 
+                                            title={t('frm_cb_date')} 
+                                            placeholder={t('frm_cb_date_placeholder')}
                                             name="COMEBACK_DATE" 
                                             cValue={data.COMEBACK_DATE}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.COMEBACK_DATE.validate}
-                                            message={validate.COMEBACK_DATE.message} /> 
+                                            message={lang === "en" ? validate.COMEBACK_DATE.message : validate.COMEBACK_DATE.messageVN } /> 
                                     }
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     {getDevice() ?
                                         <TimeModalMobile
-                                            title="Comeback Time" 
-                                            placeholder="Select Comeback Time"
+                                            title={t('frm_cb_time')} 
+                                            placeholder={t('frm_cb_time_placeholder')}
                                             name="COMEBACK_TIME" 
                                             cValue={data.COMEBACK_TIME_FULL}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.COMEBACK_TIME.validate}
-                                            message={validate.COMEBACK_TIME.message} />
+                                            message={lang === "en" ? validate.COMEBACK_TIME.message : validate.COMEBACK_TIME.messageVN } />
                                         :
                                         <TimeModal 
-                                            title="Comeback Time" 
-                                            placeholder="Select Comeback Time" 
+                                            title={t('frm_cb_time')} 
+                                            placeholder={t('frm_cb_time_placeholder')}
                                             name="COMEBACK_TIME" 
                                             cValue={data.COMEBACK_TIME_FULL}
                                             handleEvent={handleChangeSub}
                                             isValidate={validate.COMEBACK_TIME.validate}
-                                            message={validate.COMEBACK_TIME.message} />
+                                            message={lang === "en" ? validate.COMEBACK_TIME.message : validate.COMEBACK_TIME.messageVN } />
                                     }
                                 </Grid>
                             </Grid>
@@ -461,8 +498,8 @@ const FormCar = () => {
                             <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
                                     <TextInput 
-                                        title="Pick up" 
-                                        placeholder="Type place to pick up" 
+                                        title={t('frm_pickup')} 
+                                        placeholder={t('frm_pickup_placeholder')}
                                         value={data.DEPART}
                                         handleEvent={handleChange}
                                         disable={false} 
@@ -470,12 +507,12 @@ const FormCar = () => {
                                         name="DEPART"
                                         isImportant={true}
                                         isValidate={validate.DEPART.validate}
-                                        message={validate.DEPART.message} />
+                                        message={lang === "en" ? validate.DEPART.message : validate.DEPART.messageVN } />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <TextInput 
-                                        title="Passengers" 
-                                        placeholder="Type number of passengers" 
+                                        title={t('frm_passenger')} 
+                                        placeholder={t('frm_passenger_placeholder')}
                                         value={data.MAN_QTY} 
                                         handleEvent={handleChange}
                                         disable={false} 
@@ -483,19 +520,19 @@ const FormCar = () => {
                                         name="MAN_QTY"
                                         isImportant={true}
                                         isValidate={validate.MAN_QTY.validate}
-                                        message={validate.MAN_QTY.message} />
+                                        message={lang === "en" ? validate.MAN_QTY.message : validate.MAN_QTY.messageVN } />
                                 </Grid>
                             </Grid>
 
                             <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className="b-text-input mt-10">
                                 <Typography variant="h6" className="b-text-input__title b-italic">
-                                    Passengers List
+                                    {t('frm_passenger_list')} 
                                 </Typography>
                                 <TextField
                                     inputProps={{ inputMode: 'text' }}
                                     className="b-text-input__desc"
                                     disabled={false}
-                                    placeholder="Type Passengers Name"
+                                    placeholder={t('frm_passenger_list_placeholder')} 
                                     color="info"
                                     fullWidth
                                     value={data.MAN_LIST}
@@ -507,7 +544,7 @@ const FormCar = () => {
                                 />
                             </Stack>
                             <Box className="s-form-bot">
-                                <ButtonPrimary title="Request Now" handleClick={() => handleSubmit()} />
+                                <ButtonPrimary title={t('btn_request')} handleClick={() => handleSubmit()} />
                             </Box>
                         </form>
                     </Box>

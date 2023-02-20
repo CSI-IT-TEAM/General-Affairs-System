@@ -7,6 +7,7 @@ import ButtonPrimary from "../../components/Button/Primary";
 import { useNavigate } from "react-router-dom";
 import ModalWarning from "../../components/Modal/Warning";
 import ModalInfo from "../../components/Modal/Info";
+import { useTranslation } from "react-i18next";
 
 import "./SignIn.scss";
 import loginImage from "../../assets/images/sign-in.png";
@@ -15,6 +16,9 @@ import { downloadURL, imageURL } from "../../api";
 const height = window.innerHeight - 30 + "px";
 
 const SignIn = () => {
+
+    /////// Translate Lang
+    const { t } = useTranslation();
 
     const navigate = useNavigate();
     const [data, setData] = useState('');
@@ -141,13 +145,13 @@ const SignIn = () => {
                         <form>
                             <Stack marginBottom={2}>
                                 <Typography variant="h5" className="p-label">
-                                    User ID
+                                    {t('frm_user_id')}
                                 </Typography>
                                 <TextField
                                     id="userID"
                                     inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                                     className="b-input"
-                                    placeholder="Type your User ID"
+                                    placeholder={t('frm_user_id_placeholder')}
                                     value={data}
                                     onChange={handleChange}
                                     color="info"
@@ -162,7 +166,7 @@ const SignIn = () => {
                                 />
                             </Stack>
                             <Grid container justifyContent="flex-end" className="s-mid">
-                                <ButtonPrimary title="Login" handleClick={handleSignIn} />
+                                <ButtonPrimary title={t('btn_login')} handleClick={handleSignIn} />
                             </Grid>
                         </form>
                     </Box>

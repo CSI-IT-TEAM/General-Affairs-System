@@ -1,0 +1,58 @@
+{
+    "service": "Dịch Vụ",
+    "provide": "Cung Cấp",
+    "order": "Đặt ngay",
+    "request": "Yêu Cầu",
+    "vehicle": "Xe",
+    "title_first": "Thông tin cá nhân",
+    "title_second": "Thông tin đăng ký",
+
+    "vehicle_title": "Yêu Cầu Xe",
+    "vehicle_desc": "Chọn từ nhiều phương tiện khác nhau để đưa bạn từ A đến B một cách an toàn",
+    "medical_title": "Chi Phí Y Tế",
+    "medical_desc": "Được bảo vệ hàng ngày và chăm sóc sức khỏe của bản thân bạn",
+    "flight_title": "Đặt Vé Máy Bay",
+    "flight_desc": "Đặt và quản lý chuyến bay cho nhân viên và các thành viên gia đình của họ",
+    
+    "warn": "Cảnh Báo!!!",
+    "logout_desc": "Bạn có chắc chắn muốn đăng xuất không?",
+
+    "login_fail_title": "Đăng nhập thất bại!!!",
+    "login_fail_desc": "Mã thẻ đã nhập không hợp lệ",
+    "under_construction": "Dịch vụ đang được xây dựng và phát triển",
+    "upload_fail_title": "Tải lên thất bại!!!",
+    "upload_fail_desc": "Xin vui lòng thử lại sau",
+
+    "frm_fty": "Nhà máy",
+    "frm_depart": "Phòng ban",
+    "frm_user_id": "Mã thẻ",
+    "frm_user_nm": "Tên nhân viên",
+    "frm_reason": "Lý do",
+    "frm_depart_date": "Ngày xuất phát",
+    "frm_depart_time": "Giờ xuất phát",
+    "frm_cb_date": "Ngày về",
+    "frm_cb_time": "Giờ về",
+    "frm_pickup": "Điểm đón",
+    "frm_passenger": "Số hành khách",
+    "frm_passenger_list": "Danh sách hành khách",
+
+    "frm_user_id_placeholder": "Nhập mã thẻ của bạn",
+    "frm_reason_placeholder": "Chọn lý do",
+    "frm_reason_detail_placeholder": "Lý do chi tiết",
+    "frm_depart_date_placeholder": "Chọn ngày khởi hành",
+    "frm_depart_time_placeholder": "Chọn giờ khởi hành",
+    "frm_cb_date_placeholder": "Chọn ngày về",
+    "frm_cb_time_placeholder": "Chọn giờ trở về",
+    "frm_pickup_placeholder": "Nhập điểm đón",
+    "frm_passenger_placeholder": "Nhập số hành khách",
+    "frm_passenger_list_placeholder": "Nhập danh sách hành khách",
+
+    "btn_request": "Đăng Ký Ngay",
+    "btn_yes": "Có",
+    "btn_no": "Không",
+    "btn_login": "Đăng nhập",
+    "btn_goback": "Về trang Đăng nhập",
+
+    "404_title": "Oops! Trang không tìm thấy",
+    "404_desc": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng"
+}

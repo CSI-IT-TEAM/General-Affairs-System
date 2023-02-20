@@ -1,6 +1,7 @@
 import { Box, Container, Grid } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import CardPrimary from '../../components/Card/Primary';
 import ModalWarning from '../../components/Modal/Warning';
@@ -12,6 +13,9 @@ import { downloadURL } from '../../api';
 const width = window.innerWidth;
 
 const HomePage = () => {
+
+    /////// Translate Lang
+    const { t } = useTranslation();
 
     /////// Handle Warning Modal
     const [open, setOpen] = useState(false);
@@ -98,7 +102,7 @@ const HomePage = () => {
         <>
             <Box className='s-home'>
                 <Container>
-                    <h3 className="s-home-title">Services <span>Provided</span></h3>
+                    <h3 className="s-home-title">{t('service')} <span>{t('provide')}</span></h3>
                     <Grid container spacing={colSpacing}>
                         {optionData.map((item, index) => {
                             if (item.id === "001") {
