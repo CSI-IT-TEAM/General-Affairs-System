@@ -34,10 +34,10 @@ const SignIn = () => {
 
     //////// Handle Set Controlled Data
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setData(event.target.value,);
+        setData(event.target.value);
     };
 
-    //////Cancel Fetch API After Timeout
+    ////// Cancel Fetch API After Timeout
     const Timeout = (time) => {
         let controller = new AbortController();
         setTimeout(() => controller.abort(), time * 1000);
@@ -50,10 +50,11 @@ const SignIn = () => {
             ARG_EMPID: data,
             OUT_CURSOR: "",
         }
-        
+
         fetchDownload(dataConfig);
     }
-
+    
+    ////// Download User Info Data
     const fetchDownload = async (dataConfig) => {
         fetch(downloadURL, {
             method: 'POST',
@@ -83,6 +84,7 @@ const SignIn = () => {
         });
     }
 
+    ////// Download User Image
     const fetchDownloadImg = async () => {
         fetch(imageURL, {
             method: 'POST',
@@ -113,6 +115,7 @@ const SignIn = () => {
         });
     }
 
+    //////// Get Image Base-64
     const arrayBufferToBase64 = (buffer) => {
         var base64Flag = 'data:image/jpeg;base64,';
         var binary = '';
@@ -143,7 +146,7 @@ const SignIn = () => {
                             <img src={loginImage} alt="Login" />
                         </Box>
                         <form>
-                            <Stack marginBottom={2}>
+                            <Stack marginBottom={1}>
                                 <Typography variant="h5" className="p-label">
                                     {t('frm_user_id')}
                                 </Typography>
@@ -154,6 +157,7 @@ const SignIn = () => {
                                     placeholder={t('frm_user_id_placeholder')}
                                     value={data}
                                     onChange={handleChange}
+                                    name="USER_ID"
                                     color="info"
                                     InputProps={{
                                         startAdornment: (
@@ -165,7 +169,7 @@ const SignIn = () => {
                                     fullWidth
                                 />
                             </Stack>
-                            <Grid container justifyContent="flex-end" className="s-mid">
+                            <Grid justifyContent="flex-end" className="s-mid">
                                 <ButtonPrimary title={t('btn_login')} handleClick={handleSignIn} />
                             </Grid>
                         </form>

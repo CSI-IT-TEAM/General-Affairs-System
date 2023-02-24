@@ -1,7 +1,7 @@
 @import "../../styles/color.scss";
 @import "../../styles/mixin.scss";
 
-.s-form{
+.s-form {
     padding: 40px 0;
     padding-top: 120px;
     background-image: url("../../assets/images/bg-02.png");
@@ -44,7 +44,7 @@
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
         padding: 30px 50px 40px;
 
-        @media screen and (max-width: 767px) {
+        @media screen and (max-width: 991px) {
             padding: 20px 30px 30px;
         }
 
@@ -82,6 +82,14 @@
                 font-size: 16px !important;
             }
         }
+
+        &__desc{
+
+            &--sub{
+                background-color: $color-bg-white;
+                margin-top: 10px;
+            }
+        }
     
         input{
             padding: 12px 15px !important;
@@ -112,10 +120,14 @@
 
     &-bot{
         max-width: 250px;
-        margin: 40px auto 0;
+        margin: 30px auto 0;
 
         @media screen and (max-width: 767px) {
             margin-top: 30px;
+        }
+
+        @media screen and (max-width: 479px) {
+            margin-top: 20px;
         }
     }
 
@@ -174,6 +186,29 @@
             .b-text-input__title{
                 margin-top: 20px;
             }
+        }
+    }
+
+    @media screen and (max-width: 479px) {
+
+        .b-spec{
+
+            .b-text-input__title{
+                margin-top: 10px;
+            }
+        }
+    }
+
+    .MuiSelect-select{
+        font-weight: 500 !important;
+        color: $color-input !important;
+    }
+
+    &-grid{
+        margin-top: 0 !important;
+
+        &__item{
+            padding-top: 0px !important;
         }
     }
 }

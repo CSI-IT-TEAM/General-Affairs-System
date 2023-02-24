@@ -6,6 +6,7 @@
     "vehicle": "Xe",
     "title_first": "Thông tin cá nhân",
     "title_second": "Thông tin đăng ký",
+    "reset_password": "Đặt lại mật khẩu",
 
     "vehicle_title": "Yêu Cầu Xe",
     "vehicle_desc": "Chọn từ nhiều phương tiện khác nhau để đưa bạn từ A đến B một cách an toàn",
@@ -18,7 +19,7 @@
     "logout_desc": "Bạn có chắc chắn muốn đăng xuất không?",
 
     "login_fail_title": "Đăng nhập thất bại!!!",
-    "login_fail_desc": "Mã thẻ đã nhập không hợp lệ",
+    "login_fail_desc": "Mã thẻ hoặc mật khẩu đã nhập không hợp lệ",
     "under_construction": "Dịch vụ đang được xây dựng và phát triển",
     "upload_fail_title": "Tải lên thất bại!!!",
     "upload_fail_desc": "Xin vui lòng thử lại sau",
@@ -27,6 +28,8 @@
     "frm_depart": "Phòng ban",
     "frm_user_id": "Mã thẻ",
     "frm_user_nm": "Tên nhân viên",
+    "frm_password": "Mật khẩu",
+    "frm_confirm_password": "Xác nhận mật khẩu",
     "frm_reason": "Lý do",
     "frm_depart_date": "Ngày xuất phát",
     "frm_depart_time": "Giờ xuất phát",
@@ -37,22 +40,28 @@
     "frm_passenger_list": "Danh sách hành khách",
 
     "frm_user_id_placeholder": "Nhập mã thẻ của bạn",
+    "frm_password_placeholder": "Nhập mật khẩu của bạn",
     "frm_reason_placeholder": "Chọn lý do",
     "frm_reason_detail_placeholder": "Lý do chi tiết",
     "frm_depart_date_placeholder": "Chọn ngày khởi hành",
     "frm_depart_time_placeholder": "Chọn giờ khởi hành",
     "frm_cb_date_placeholder": "Chọn ngày về",
     "frm_cb_time_placeholder": "Chọn giờ trở về",
-    "frm_pickup_placeholder": "Nhập điểm đón",
-    "frm_passenger_placeholder": "Nhập số hành khách",
+    "frm_pickup_placeholder": "Chọn điểm đón",
+    "frm_passenger_placeholder": "Chọn số hành khách",
     "frm_passenger_list_placeholder": "Nhập danh sách hành khách",
+    "frm_new_password_placeholder": "Nhập mật khẩu mới",
+    "frm_confirm_password_placeholder": "Xác nhận mật khẩu mới",
 
     "btn_request": "Đăng Ký Ngay",
     "btn_yes": "Có",
     "btn_no": "Không",
     "btn_login": "Đăng nhập",
     "btn_goback": "Về trang Đăng nhập",
+    "btn_reset": "Đặt lại ngay",
 
     "404_title": "Oops! Trang không tìm thấy",
-    "404_desc": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng"
+    "404_desc": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng",
+
+    "frm_required": "Trường dữ liệu không được rỗng"
 }

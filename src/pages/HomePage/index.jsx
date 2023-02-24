@@ -54,8 +54,10 @@ const HomePage = () => {
                     // Store
                     if(type === "MAIN_REASON"){
                         sessionStorage.setItem("mainReason", JSON.stringify(result));
-                    }else{
+                    }else if(type === "SUB_REASON"){
                         sessionStorage.setItem("subReason", JSON.stringify(result));
+                    }else if(type === "DEPART"){
+                        sessionStorage.setItem("departList", JSON.stringify(result));
                     }
                 }
             })  
@@ -74,8 +76,10 @@ const HomePage = () => {
         }else{
             sessionStorage.removeItem('mainReason');
             sessionStorage.removeItem('subReason');
+            sessionStorage.removeItem('departList');
             handleReason("MAIN_REASON");
             handleReason("SUB_REASON");
+            handleReason("DEPART");
         }
     }
 

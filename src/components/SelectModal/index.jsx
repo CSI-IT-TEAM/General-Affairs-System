@@ -28,9 +28,19 @@ const SelectModal = ({ name, data, placeholder, cValue, handleEvent, isValidate,
                                 <MenuItem key={item.MAIN_REASON_CD} value={item.MAIN_REASON_CD}>{item.MAIN_REASON_NM}</MenuItem>
                             );
                         }
-                        else{
+                        else if(name === "SUB_REASON_CD"){
                             return (
                                 <MenuItem key={item.SUB_REASON_CD} value={item.SUB_REASON_CD}>{item.SUB_REASON_NM}</MenuItem>
+                            );
+                        }
+                        else if(name === "DEPART_CD"){
+                            return (
+                                <MenuItem key={item.DEPART_CD} value={item.DEPART_CD}>{item.DEPART_NM}</MenuItem>
+                            );
+                        }
+                        else{
+                            return (
+                                <MenuItem key={item.ID} value={item.VALUE}>{item.VALUE}</MenuItem>
                             );
                         }
                     })}

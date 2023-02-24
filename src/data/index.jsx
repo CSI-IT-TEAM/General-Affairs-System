@@ -4,5 +4,6 @@ import reqCarValidate from "./requesrCarValidate";
 import warningData from "./warningData";
 import infoData from "./infoData";
 import langData from "./langData";
+import passengerNum from "./passengerNum";
 
-export { optionData, reqCarData, reqCarValidate, warningData, infoData, langData };
+export { optionData, reqCarData, reqCarValidate, warningData, infoData, langData, passengerNum };

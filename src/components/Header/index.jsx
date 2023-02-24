@@ -11,11 +11,13 @@ import ModalLogout from "../Modal/Logout";
 import { langData } from "../../data";
 
 const Header = () => {
+
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
 
     ///// Set Default language
-    const [lang, setLang] = useState(i18next.language);
+    const i18_Value = (i18next.language !== null && i18next.language !== undefined && i18next.language !== "") ? i18next.language : "en"; 
+    const [lang, setLang] = useState(i18_Value);
     const handleChange = (event: SelectChangeEvent) => {
         i18next.changeLanguage(event.target.value);
         setLang(event.target.value);
@@ -41,15 +43,15 @@ const Header = () => {
         navigate("/signin");
     }
 
-    const handleNavigate = () => {
-        navigate("/");
+    const handleNavigate = (url) => {
+        navigate(url);
     }
 
     return (
         <>
             <Box className="s-header">
                 <Container className="d-flex">
-                    <Box className="s-header-text" onClick={() => handleNavigate()}>
+                    <Box className="s-header-text" onClick={() => handleNavigate("/")}>
                         <Typography variant="h5" component="div" className="s-header-logo">
                             CSG
                         </Typography>
@@ -62,7 +64,7 @@ const Header = () => {
                             </Typography>
                         </span>
                     </Box>
-                    <Box className="d-flex">
+                    <Box className="d-flex p-relative">
                         <Box className="s-language d-flex">
                             <Box className="s-language__thumb">
                                 <img src={langImage} alt="Language" />
@@ -84,9 +86,8 @@ const Header = () => {
                             alt="avatar"
                             src={userImage}
                             className="s-avatar"
-                            onClick={() => handleToggle()}
+                            onClick={handleToggle}
                         />
-                        
                     </Box>
                 </Container>
             </Box>

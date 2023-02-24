@@ -59,8 +59,8 @@ input {
     width: 100% !important;
 }
 
-.dx-texteditor-buttons-container{
-    background-color: $color-bg-white;
+.dx-dropdowneditor-icon, .dx-dropdowneditor-button{
+    background-color: $color-bg-white !important;
 }
 
 @font-face {
@@ -298,6 +298,10 @@ body {
             min-width: auto;
             margin-right: 10px;
 
+            @media screen and (max-width: 479px) {
+                margin: 0 5px 0 8px;
+            }
+
             .MuiInput-underline:before{
                 display: none;
             }
@@ -341,6 +345,10 @@ body {
             font-size: 14px !important;
         }
     }
+}
+
+.p-relative{
+    position: relative;
 }
 
 .d-flex{

@@ -29,11 +29,16 @@ const reqCarValidate = {
         message: 'The comback time field is required',
         messageVN: 'Dữ liệu không được rỗng',
     },
-    "DEPART": {
+    "DEPART_CD": {
         validate: true,
         message: 'The pick up field is required',
         messageVN: 'Dữ liệu không được rỗng',
     },           
+    "DEPART_NM": {
+        validate: true,
+        message: 'The depart name field is required',
+        messageVN: 'Dữ liệu không được rỗng',
+    },     
     "MAN_QTY": {
         validate: true,
         message: 'The passengers field must be greater than 0',

@@ -6,6 +6,7 @@
     "vehicle": "Vehicle",
     "title_first": "Personal Information",
     "title_second": "Request Information",
+    "reset_password": "Reset Password",
 
     "vehicle_title": "Request Vehicle",
     "vehicle_desc": "Choose from a variety of vehicles to take you from A to B safely",
@@ -18,7 +19,7 @@
     "logout_desc": "Are you sure you want to logout?",
 
     "login_fail_title": "Login Failed!!!",
-    "login_fail_desc": "The User ID entered is incorrect",
+    "login_fail_desc": "User ID or Password entered is invalid",
     "under_construction": "Services is under construction",
     "upload_fail_title": "Upload Failed!!!",
     "upload_fail_desc": "Please try again later",
@@ -27,6 +28,8 @@
     "frm_depart": "Department",
     "frm_user_id": "User ID",
     "frm_user_nm": "User Name",
+    "frm_password": "Password",
+    "frm_confirm_password": "Confirm Password",
     "frm_reason": "Reason",
     "frm_depart_date": "Depart Date",
     "frm_depart_time": "Depart Time",
@@ -37,22 +40,28 @@
     "frm_passenger_list": "Passenger List",
 
     "frm_user_id_placeholder": "Type your User ID",
+    "frm_password_placeholder": "Type your Password",
     "frm_reason_placeholder": "Select Your Reason",
     "frm_reason_detail_placeholder": "Reason Detail",
     "frm_depart_date_placeholder": "Select Depart Date",
     "frm_depart_time_placeholder": "Select Depart Time",
     "frm_cb_date_placeholder": "Select Comeback Date",
     "frm_cb_time_placeholder": "Select Comeback Time",
-    "frm_pickup_placeholder": "Type place to pick up",
-    "frm_passenger_placeholder": "Type number of passengers",
+    "frm_pickup_placeholder": "Select pick up place",
+    "frm_passenger_placeholder": "Number of passengers",
     "frm_passenger_list_placeholder": "Type Passengers Name",
+    "frm_new_password_placeholder": "Create new password",
+    "frm_confirm_password_placeholder": "Confirm new password",
 
     "btn_request": "Request Now",
     "btn_yes": "Yes",
     "btn_no": "No",
     "btn_login": "Login",
     "btn_goback": "Go to Login Page",
+    "btn_reset": "Reset now",
 
     "404_title": "Oops! Page not found",
-    "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable"
+    "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable",
+
+    "frm_required": "The text field is required"
 }
