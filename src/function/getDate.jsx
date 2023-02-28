@@ -38,4 +38,18 @@ const formatHMS_00 = (value) => {
     return value.slice(0, -2) + "00";
 }
 
-export { getDate, getDateFormat, getDateTimeFormat, formatDate, formatHMS, formatHMS_00 }
+const getDateTime = () => {
+    let date = new Date();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+    let ymd = date.getFullYear().toString() + ((month > 9 ? '' : '0') + month).toString() + ((day > 9 ? '' : '0') + day).toString();
+
+    let hours = (date.getHours() < 10 ? '0' : '') + date.getHours();
+    let minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+    let seconds = (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+    let hms = hours + minutes + seconds;
+
+    return ymd + ' ' + hms;
+}
+
+export { getDate, getDateTime, getDateFormat, getDateTimeFormat, formatDate, formatHMS, formatHMS_00 }

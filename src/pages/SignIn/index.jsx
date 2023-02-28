@@ -21,7 +21,8 @@ const SignIn = () => {
     const { t } = useTranslation();
 
     const navigate = useNavigate();
-    const [data, setData] = useState('');
+    const lastLogin = localStorage.getItem("lastLogin") === null ? "" : localStorage.getItem("lastLogin");
+    const [data, setData] = useState(lastLogin);
 
     /////// Handle Warning Modal
     const [openWarn, setOpenWarn] = useState(false);
@@ -73,6 +74,7 @@ const SignIn = () => {
                         handleOpenWarn();
                     }else{
                         sessionStorage.setItem("userData", JSON.stringify(result[0]));
+                        localStorage.setItem("lastLogin", data);
                         fetchDownloadImg();
                     }
                 }else{

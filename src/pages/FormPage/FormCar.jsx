@@ -20,7 +20,7 @@ import FormDefaultInfo from '../../components/Form/DefaultInfo';
 
 import { reqCarData, reqCarValidate, passengerNum } from '../../data';
 import { removeVietnamese, formatPassengerList } from '../../function/getFormat';
-import { getDate, formatDate, formatHMS, getDateFormat, getDateTimeFormat, formatHMS_00 } from '../../function/getDate';
+import { getDate, getDateTime, formatDate, formatHMS, getDateFormat, getDateTimeFormat, formatHMS_00 } from '../../function/getDate';
 import getDevice from '../../function/getDevice';
 import { isCombackDate_Validate, timeDifference } from '../../function/getValidate';
 import { getLastName } from '../../function/getLastName';
@@ -30,6 +30,7 @@ import "./Form.scss";
 
 const FormCar = () => {
     const navigate = useNavigate();
+    const _specificTime = " 140000";
 
     /////// Open Text Field for Pick Up: ETC
     const [openPickUp, setOpenPickUp] = useState(false);
@@ -141,6 +142,19 @@ const FormCar = () => {
                     }
                 });
 
+                /////// If Depart Date is Today && Current Time >= 14:00 PM => Invalidate
+                const _currentDateTime = getDateTime();
+                let _specificDateTime = getDate() + _specificTime;
+                let _checkValidate = isCombackDate_Validate(_currentDateTime, _specificDateTime);
+
+                if(_result === getDate() && !_checkValidate){
+                    handleSetValidate("GO_DATE", false, "The depart date must start from tomorrow", "Ngày xuất phát phải từ ngày mai trở đi");
+                    break;
+                }else{
+                    handleSetValidate("GO_DATE", true);
+                }
+
+                /////// If Depart Date > Current Time
                 let _depart = getDateTimeFormat(_result + " " + data["GO_TIME"]);
                 let _isValidate = timeDifference(_depart);
 
@@ -148,9 +162,9 @@ const FormCar = () => {
                     handleSetValidate("GO_DATE", true);
                     handleSetValidate("GO_TIME", true);
                 }else{
-                    _result = false;
-                    handleSetValidate("GO_DATE", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
-                    handleSetValidate("GO_TIME", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
+                    handleSetValidate("GO_DATE", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+                    handleSetValidate("GO_TIME", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+                    break;
                 }
 
                 break;
@@ -168,7 +182,6 @@ const FormCar = () => {
                 if(_isValidate){
                     handleSetValidate(name, true);
                 }else{
-                    _result = false;
                     handleSetValidate(name, false, "Comback Date must equal or greater than Depart Date", "Ngày về phải lớn hơn hoặc bằng Ngày xuất phát");
                 }
 
@@ -183,6 +196,19 @@ const FormCar = () => {
                     }
                 });
 
+                /////// If Depart Date is Today && Current Time >= 14:00 PM => Invalidate
+                const _currentDateTime = getDateTime();
+                let _specificDateTime = getDate() + _specificTime;
+                let _checkValidate = isCombackDate_Validate(_currentDateTime, _specificDateTime);
+
+                if(data["GO_DATE"] === getDate() && !_checkValidate){
+                    handleSetValidate("GO_DATE", false, "The depart date must start from tomorrow", "Ngày xuất phát phải từ ngày mai trở đi");
+                    break;
+                }else{
+                    handleSetValidate("GO_DATE", true);
+                }
+
+                /////// If Depart Date Time > Current Date Time
                 let _depart = getDateTimeFormat(data["GO_DATE"] + " " + _result);
                 let _isValidate = timeDifference(_depart);
 
@@ -190,9 +216,8 @@ const FormCar = () => {
                     handleSetValidate("GO_DATE", true);
                     handleSetValidate("GO_TIME", true);
                 }else{
-                    _result = false;
-                    handleSetValidate("GO_DATE", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
-                    handleSetValidate("GO_TIME", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
+                    handleSetValidate("GO_DATE", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+                    handleSetValidate("GO_TIME", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
                 }
 
                 break;
@@ -213,7 +238,6 @@ const FormCar = () => {
                 if(_isValidate){
                     handleSetValidate(name, true);
                 }else{
-                    _result = false;
                     handleSetValidate(name, false, "Comback Time must equal or greater than Depart Time", "Giờ về phải lớn hơn hoặc bằng Giờ xuất phát");
                 }
 
@@ -338,32 +362,34 @@ const FormCar = () => {
     const handleSubmit = () => {
         if(handleVaidate()){
             if(handleValidateDepart()){
-                const _uploadData = {
-                    ARG_TYPE: "SAVE",    
-                    ARG_REQ_DATE      : data.REQ_DATE,
-                    ARG_PLANT_CD      : data.PLANT_CD,
-                    ARG_DEPT_CD       : data.DEPT_CD,
-                    ARG_DEPT_NM       : data.DEPT_NM,
-                    ARG_REQ_EMP       : data.REQ_EMP,
-                    ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
-                    ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
-                    ARG_GO_DATE       : data.GO_DATE,
-                    ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
-                    ARG_COMEBACK_DATE : data.COMEBACK_DATE,
-                    ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
-                    ARG_DEPART_CD     : data.DEPART_CD,
-                    ARG_DEPART_NM     : removeVietnamese(data.DEPART_NM.trim()),
-                    ARG_ARRIVAL       : data.ARRIVAL,
-                    ARG_MAN_QTY       : data.MAN_QTY,
-                    ARG_MAN_LIST      : formatPassengerList(passengerList),
-                    ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
-                    ARG_SUB_REASON_CD : data.SUB_REASON_CD,
-                    ARG_CREATOR       : data.CREATOR,
-                    ARG_CREATE_PC     : "ADMIN",
-                    ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
+                if(handleDepartSpecific()){
+                    const _uploadData = {
+                        ARG_TYPE: "SAVE",    
+                        ARG_REQ_DATE      : data.REQ_DATE,
+                        ARG_PLANT_CD      : data.PLANT_CD,
+                        ARG_DEPT_CD       : data.DEPT_CD,
+                        ARG_DEPT_NM       : data.DEPT_NM,
+                        ARG_REQ_EMP       : data.REQ_EMP,
+                        ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
+                        ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
+                        ARG_GO_DATE       : data.GO_DATE,
+                        ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
+                        ARG_COMEBACK_DATE : data.COMEBACK_DATE,
+                        ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
+                        ARG_DEPART_CD     : data.DEPART_CD,
+                        ARG_DEPART_NM     : removeVietnamese(data.DEPART_NM.trim()),
+                        ARG_ARRIVAL       : data.ARRIVAL,
+                        ARG_MAN_QTY       : data.MAN_QTY,
+                        ARG_MAN_LIST      : formatPassengerList(passengerList),
+                        ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
+                        ARG_SUB_REASON_CD : data.SUB_REASON_CD,
+                        ARG_CREATOR       : data.CREATOR,
+                        ARG_CREATE_PC     : "ADMIN",
+                        ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
+                    }
+                    
+                    fetchUpload(_uploadData);
                 }
-
-                fetchUpload(_uploadData);
             }
         }
     }
@@ -500,8 +526,27 @@ const FormCar = () => {
             handleSetValidate("GO_TIME", true);
         }else{
             _result = false;
-            handleSetValidate("GO_DATE", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
-            handleSetValidate("GO_TIME", false, "The return date and time must be 3 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại");
+            handleSetValidate("GO_DATE", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+            handleSetValidate("GO_TIME", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+        }
+
+        return _result;
+    }
+
+    const handleDepartSpecific = () => {
+        if(data["GO_DATE"] === '') return false;
+        let _result = true;
+
+        /////// If Depart Date is Today && Current Time >= 14:00 PM => Invalidate
+        const _currentDateTime = getDateTime();
+        let _specificDateTime = getDate() + _specificTime;
+        let _checkValidate = isCombackDate_Validate(_currentDateTime, _specificDateTime);
+
+        if(data["GO_DATE"] === getDate() && !_checkValidate){
+            _result = false;
+            handleSetValidate("GO_DATE", false, "The depart date must start from tomorrow", "Ngày xuất phát phải từ ngày mai trở đi");
+        }else{
+            handleSetValidate("GO_DATE", true);
         }
 
         return _result;

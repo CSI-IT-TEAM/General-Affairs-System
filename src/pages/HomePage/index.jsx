@@ -37,8 +37,7 @@ const HomePage = () => {
         fetchDownload(type, dataConfig);
     }
 
-    ///// Hello World
-
+    ///// Handle Download Data
     const fetchDownload = async (type, dataConfig) => {
         fetch(downloadURL, {
             method: 'POST',
