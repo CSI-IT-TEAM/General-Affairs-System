@@ -1,4 +1,4 @@
-import { Box, Container, Grid, TextField, Stack, Typography } from '@mui/material';
+import { Box, Container, Grid, TextField, Stack, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -31,6 +31,32 @@ import "./Form.scss";
 const FormCar = () => {
     const navigate = useNavigate();
     const _specificTime = " 140000";
+
+    /////// Handle Checkbox
+    const [isInclude, setIsInclude] = useState(false);
+
+    const handleIsInclude = () => {
+        setIsInclude(isInclude => !isInclude);
+
+        if(passengerList !== null && passengerList.length > 0){
+            const empData = JSON.parse(sessionStorage.getItem('userData'));
+
+            const _result = passengerList.map((item) => {
+                if(item.id === "passenger_1"){
+                    return {
+                        id: item.id,
+                        name: !isInclude ? empData.EMP_NM : "",
+                        validate: !isInclude ? true : false,
+                    }
+                }
+                else{
+                    return item;
+                }
+            });
+    
+            setPassengerList(prevData => _result);
+        }
+    }
 
     /////// Open Text Field for Pick Up: ETC
     const [openPickUp, setOpenPickUp] = useState(false);
@@ -69,6 +95,7 @@ const FormCar = () => {
     const handleDefault = async() => {
         const empData = JSON.parse(sessionStorage.getItem('userData'));
         setOpenPickUp(false);
+        setIsInclude(false);
         setPassengerList([]);
 
         if(empData != null) {
@@ -299,18 +326,33 @@ const FormCar = () => {
             case "MAN_QTY":
 
                 setPassengerList(prevData => []);
+                const empData = JSON.parse(sessionStorage.getItem('userData'));
 
                 for(let iCount = 1; iCount <= _result; iCount++){
-                    setPassengerList(prevData => {
-                        return [
-                            ...prevData,
-                            {
-                                id: "passenger_" + iCount,
-                                name: "",
-                                validate: false,
-                            }
-                        ]
-                    })
+                    if(iCount === 1 && isInclude){
+                        setPassengerList(prevData => {
+                            return [
+                                ...prevData,
+                                {
+                                    id: "passenger_" + iCount,
+                                    name: empData.EMP_NM,
+                                    validate: true,
+                                }
+                            ]
+                        })
+                    }
+                    else{
+                        setPassengerList(prevData => {
+                            return [
+                                ...prevData,
+                                {
+                                    id: "passenger_" + iCount,
+                                    name: "",
+                                    validate: false,
+                                }
+                            ]
+                        })
+                    }
                 }
 
                 setData(prevData => {
@@ -728,7 +770,10 @@ const FormCar = () => {
                                         <Typography variant="h6" className="b-text-input__title b-italic">
                                             {t('frm_passenger')} <span>(*)</span>
                                         </Typography>
-                                        <Stack sx={{width:"100%"}}>
+                                        <Stack sx={{width:"100%"}} 
+                                            direction="row"
+                                            justifyContent="center"
+                                            alignItems="center">
                                             <SelectModal 
                                                 name="MAN_QTY"
                                                 data={passengerNum}
@@ -737,6 +782,7 @@ const FormCar = () => {
                                                 handleEvent={handleChangeSub}
                                                 isValidate={validate.MAN_QTY.validate}
                                                 message={lang === "en" ? validate.MAN_QTY.message : validate.MAN_QTY.messageVN} />
+                                            <FormControlLabel control={<Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 28} }} onChange={handleIsInclude} />} label={t('frm_include')} />
                                         </Stack>
                                     </Stack>
                                 </Grid>

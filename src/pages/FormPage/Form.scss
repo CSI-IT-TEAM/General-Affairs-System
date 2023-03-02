@@ -71,6 +71,7 @@
             color: $color-text-gray;
             font-size: 17px !important;
             min-width: 170px;
+            max-width: 170px;
 
             @media screen and (max-width: 991px) {
                 min-width: 160px;
@@ -79,6 +80,7 @@
 
             @media screen and (max-width: 479px) {
                 min-width: 120px;
+                max-width: unset;
                 font-size: 16px !important;
             }
         }
@@ -94,6 +96,10 @@
         input{
             padding: 12px 15px !important;
             background-color: $color-bg-white;
+
+            @media screen and (max-width: 767px) {
+                max-height: 43px;
+            }
 
             @media screen and (max-width: 479px) {
                 padding: 10px !important;
@@ -209,6 +215,23 @@
 
         &__item{
             padding-top: 0px !important;
+        }
+    }
+
+    .MuiFormControlLabel-root{
+        margin: 0;
+        min-width: 140px;
+
+        .MuiCheckbox-root{
+            padding-right: 3px;
+            padding-bottom: 0;
+            padding-top: 0;
+            color: $color-blue;
+        }
+        
+        span{
+            color: $color-text-gray;
+            font-weight: 500;
         }
     }
 }

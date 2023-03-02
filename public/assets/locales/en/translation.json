@@ -38,6 +38,7 @@
     "frm_pickup": "Pick Up",
     "frm_passenger": "Passengers",
     "frm_passenger_list": "Passenger List",
+    "frm_include": "Include me",
 
     "frm_user_id_placeholder": "Type your User ID",
     "frm_password_placeholder": "Type your Password",
