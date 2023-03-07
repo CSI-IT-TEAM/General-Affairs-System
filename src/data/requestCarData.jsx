@@ -22,6 +22,7 @@ const reqCarData = {
     "MAN_LIST": "",
     "MAIN_REASON_CD": "",
     "SUB_REASON_CD": "",
+    "DROP_OFF_CD": "",
     "CREATOR": "",
     "CREATE_PC": "",
     "CREATE_PROGRAM_ID": "",

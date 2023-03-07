@@ -208,6 +208,7 @@
     .MuiSelect-select{
         font-weight: 500 !important;
         color: $color-input !important;
+        padding: 13px 25px 12px 15px  !important;
     }
 
     &-grid{
@@ -215,6 +216,15 @@
 
         &__item{
             padding-top: 0px !important;
+        }
+
+        .s-form-grid__item--first{
+            margin-bottom: 10px;
+
+            @media screen and (max-width: 768px) {
+                margin-bottom: 0;
+                padding-top: 0 !important;
+            }
         }
     }
 

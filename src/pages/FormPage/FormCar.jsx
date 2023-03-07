@@ -19,7 +19,7 @@ import ModalInfo from '../../components/Modal/Info';
 import FormDefaultInfo from '../../components/Form/DefaultInfo';
 
 import { reqCarData, reqCarValidate, passengerNum } from '../../data';
-import { removeVietnamese, formatPassengerList } from '../../function/getFormat';
+import { removeVietnamese, formatPassengerList, getMainPassenger } from '../../function/getFormat';
 import { getDate, getDateTime, formatDate, formatHMS, getDateFormat, getDateTimeFormat, formatHMS_00 } from '../../function/getDate';
 import getDevice from '../../function/getDevice';
 import { isCombackDate_Validate, timeDifference } from '../../function/getValidate';
@@ -30,7 +30,7 @@ import "./Form.scss";
 
 const FormCar = () => {
     const navigate = useNavigate();
-    const _specificTime = " 140000";
+    const _specificTime = " 160000";
 
     /////// Handle Checkbox
     const [isInclude, setIsInclude] = useState(false);
@@ -87,9 +87,73 @@ const FormCar = () => {
     const [openInfo, setOpenInfo] = useState(false);
     const handleCloseInfo = () => setOpenInfo(false);
 
+    ////// List Data From Session
     let _mainReason = JSON.parse(sessionStorage.getItem('mainReason'));
     let _subReason = JSON.parse(sessionStorage.getItem('subReason'));
     let _departList = JSON.parse(sessionStorage.getItem('departList'));
+    let _dropOffList = JSON.parse(sessionStorage.getItem('dropOffList'));
+    let _deptEmpList = JSON.parse(sessionStorage.getItem('deptEmpList'));
+
+    ////// Search EMP ID
+    const [empID, setEmpID] = useState('');
+
+    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setEmpID(event.target.value);
+
+        if(event.target.value === ""){
+            const _result = passengerList.map((item) => {
+                if(item.id === "passenger_1"){
+                    return {
+                        id: item.id,
+                        name: "",
+                        validate: false,
+                    }
+                }
+                else{
+                    return item;
+                }
+            });
+    
+            setPassengerList(prevData => _result);
+        }
+        else {
+            if(_deptEmpList !== null && _deptEmpList.length > 0){
+                let _searchResult = _deptEmpList.filter((item) => item.EMPID.includes(event.target.value));
+
+                if(_searchResult !== null && _searchResult !== "" && _searchResult.length > 0){
+                    const _result = passengerList.map((item) => {
+                        if(item.id === "passenger_1"){
+                            return {
+                                id: item.id,
+                                name: _searchResult[0].EMP_NM,
+                                validate: true,
+                            }
+                        }
+                        else{
+                            return item;
+                        }
+                    });
+            
+                    setPassengerList(prevData => _result);
+                }else{
+                    const _result = passengerList.map((item) => {
+                        if(item.id === "passenger_1"){
+                            return {
+                                id: item.id,
+                                name: "",
+                                validate: false,
+                            }
+                        }
+                        else{
+                            return item;
+                        }
+                    });
+            
+                    setPassengerList(prevData => _result);
+                }
+            }
+        }
+    } 
     
     /////// Handle Default Data
     const handleDefault = async() => {
@@ -97,6 +161,7 @@ const FormCar = () => {
         setOpenPickUp(false);
         setIsInclude(false);
         setPassengerList([]);
+        setEmpID('');
 
         if(empData != null) {
             setData(prevData => {
@@ -189,8 +254,8 @@ const FormCar = () => {
                     handleSetValidate("GO_DATE", true);
                     handleSetValidate("GO_TIME", true);
                 }else{
-                    handleSetValidate("GO_DATE", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
-                    handleSetValidate("GO_TIME", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+                    handleSetValidate("GO_DATE", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
+                    handleSetValidate("GO_TIME", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
                     break;
                 }
 
@@ -243,8 +308,8 @@ const FormCar = () => {
                     handleSetValidate("GO_DATE", true);
                     handleSetValidate("GO_TIME", true);
                 }else{
-                    handleSetValidate("GO_DATE", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
-                    handleSetValidate("GO_TIME", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+                    handleSetValidate("GO_DATE", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
+                    handleSetValidate("GO_TIME", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
                 }
 
                 break;
@@ -281,6 +346,12 @@ const FormCar = () => {
                 });
                 setReason(prevData => []);
                 setReason(prevData => _subReason.filter(val => val.MAIN_REASON_CD === _result));
+
+                if(_result === ''){
+                    handleSetValidate(name, false);
+                }else{
+                    handleSetValidate(name, true);
+                }
               
                 break;
             }
@@ -294,6 +365,12 @@ const FormCar = () => {
                         "ARRIVAL": data[0].SUB_REASON_NM,
                     }
                 });
+
+                if(_result === ''){
+                    handleSetValidate(name, false);
+                }else{
+                    handleSetValidate(name, true);
+                }
               
                 break;
             }
@@ -319,6 +396,12 @@ const FormCar = () => {
                             "DEPART_NM": "",
                         }
                     });
+                }
+
+                if(_result === ''){
+                    handleSetValidate(name, false);
+                }else{
+                    handleSetValidate(name, true);
                 }
               
                 break;
@@ -362,7 +445,30 @@ const FormCar = () => {
                     }
                 });
 
+                if(_result === ''){
+                    handleSetValidate(name, false);
+                }else{
+                    handleSetValidate(name, true);
+                }
+
                 break;
+
+            case "DROP_OFF_CD":
+                setData(prevData => {
+                    return {
+                        ...prevData,
+                        [name]: _result,
+                    }
+                });
+
+                if(_result === ''){
+                    handleSetValidate(name, false);
+                }else{
+                    handleSetValidate(name, true);
+                }
+
+                break;
+            
             default: {
                 setData(prevData => {
                     return {
@@ -425,11 +531,13 @@ const FormCar = () => {
                         ARG_MAN_LIST      : formatPassengerList(passengerList),
                         ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
                         ARG_SUB_REASON_CD : data.SUB_REASON_CD,
+                        ARG_DROP_OFF_CD   : data.DROP_OFF_CD,
+                        ARG_PASSENGERS    : getMainPassenger(passengerList),
                         ARG_CREATOR       : data.CREATOR,
                         ARG_CREATE_PC     : "ADMIN",
                         ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
                     }
-                    
+                    //console.log(_uploadData)
                     fetchUpload(_uploadData);
                 }
             }
@@ -475,6 +583,7 @@ const FormCar = () => {
                 case "MAIN_REASON_CD": case "SUB_REASON_CD":
                 case "GO_DATE": case "GO_TIME":
                 case "DEPART_CD": case "DEPART_NM":
+                case "DROP_OFF_CD":
                     if(data[property] === ''){
                         _result = false;
                         handleSetValidate(property, false);
@@ -568,8 +677,8 @@ const FormCar = () => {
             handleSetValidate("GO_TIME", true);
         }else{
             _result = false;
-            handleSetValidate("GO_DATE", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
-            handleSetValidate("GO_TIME", false, "The return date and time must be greater than the present time", "Ngày giờ xuất phát phải lớn hơn so với hiện tại");
+            handleSetValidate("GO_DATE", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
+            handleSetValidate("GO_TIME", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
         }
 
         return _result;
@@ -768,6 +877,25 @@ const FormCar = () => {
                                 <Grid item xs={12} md={6}>
                                     <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className='b-text-input'>
                                         <Typography variant="h6" className="b-text-input__title b-italic">
+                                            {t('frm_dropOff')} <span>(*)</span>
+                                        </Typography>
+                                        <Stack sx={{width:"100%"}}>
+                                            <SelectModal 
+                                                name="DROP_OFF_CD"
+                                                data={_dropOffList}
+                                                placeholder={t('frm_dropOff_placeholder')}
+                                                cValue={data.DROP_OFF_CD}
+                                                handleEvent={handleChangeSub}
+                                                isValidate={validate.DROP_OFF_CD.validate}
+                                                message={lang === "en" ? validate.DROP_OFF_CD.message : validate.DROP_OFF_CD.messageVN} />
+                                        </Stack>
+                                    </Stack>
+                                </Grid>
+                            </Grid>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={6}>
+                                    <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className='b-text-input'>
+                                        <Typography variant="h6" className="b-text-input__title b-italic">
                                             {t('frm_passenger')} <span>(*)</span>
                                         </Typography>
                                         <Stack sx={{width:"100%"}} 
@@ -782,38 +910,73 @@ const FormCar = () => {
                                                 handleEvent={handleChangeSub}
                                                 isValidate={validate.MAN_QTY.validate}
                                                 message={lang === "en" ? validate.MAN_QTY.message : validate.MAN_QTY.messageVN} />
-                                            <FormControlLabel control={<Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 28} }} onChange={handleIsInclude} />} label={t('frm_include')} />
+                                            <FormControlLabel control={<Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 28} }} onChange={handleIsInclude} />} label={t('frm_include_me')} />
                                         </Stack>
                                     </Stack>
                                 </Grid>
                             </Grid>
 
-                            {data.MAN_QTY !== "" && 
+                            {data.MAN_QTY !== "" && passengerList !== null && passengerList.length > 0 && 
                                 <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className="b-text-input mt-10">
                                     <Typography variant="h6" className="b-text-input__title b-italic">
                                          {t('frm_passenger_list')} <span>(*)</span>
                                      </Typography>
                                     <Grid container spacing={2} className="s-form-grid">
                                         {passengerList.map((item, index) => {
-                                            return (
-                                                <Grid item xs={12} md={6} className="s-form-grid__item" key={item.id}>
-                                                    <Stack direction={{xs: "column"}} alignItems={{xs: "normal"}} className='b-text-input'>
-                                                        <TextField
-                                                            name={item.id}
-                                                            className="b-text-input__desc"
-                                                            disabled={false}
-                                                            placeholder={`Passenger ${index + 1}`}
-                                                            color="info"
-                                                            fullWidth
-                                                            value={item.name}
-                                                            onChange={handleChangePassenger}
-                                                        />
-                                                        {!item.validate && <Typography className='b-validate'>
-                                                            <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
-                                                        </Typography>}
-                                                    </Stack>
-                                                </Grid>
-                                            );
+                                            if(!isInclude && index === 0){
+                                                return (
+                                                    <Grid item xs={12} className="s-form-grid__item s-form-grid__item--first" key={index}>
+                                                        <Grid container spacing={2}>
+                                                            <Grid item xs={12} md={4} xl={3} >
+                                                                <TextField
+                                                                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                                                    className="b-text-input__desc"
+                                                                    disabled={false}
+                                                                    placeholder={t('frm_pass_placeholder')}
+                                                                    color="info"
+                                                                    fullWidth
+                                                                    value={empID}
+                                                                    onChange={handleSearch}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} md={8} xl={9} >
+                                                                <TextField
+                                                                    name={item.id}
+                                                                    className="b-text-input__desc"
+                                                                    disabled={true}
+                                                                    placeholder={`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
+                                                                    color="info"
+                                                                    fullWidth
+                                                                    value={item.name}
+                                                                />
+                                                                {!item.validate && <Typography className='b-validate'>
+                                                                    <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
+                                                                </Typography>}
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Grid>
+                                                )
+                                            }else{
+                                                return (
+                                                    <Grid item xs={12} md={6} className="s-form-grid__item" key={item.id}>
+                                                        <Stack direction={{xs: "column"}} alignItems={{xs: "normal"}} className='b-text-input'>
+                                                            <TextField
+                                                                name={item.id}
+                                                                className="b-text-input__desc"
+                                                                disabled={index === 0 ? true : false}
+                                                                placeholder={`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
+                                                                color="info"
+                                                                fullWidth
+                                                                value={item.name}
+                                                                onChange={handleChangePassenger}
+                                                            />
+                                                            {!item.validate && <Typography className='b-validate'>
+                                                                <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
+                                                            </Typography>}
+                                                        </Stack>
+                                                    </Grid>
+                                                );
+                                            }
                                         })}
                                     </Grid>
                                 </Stack>

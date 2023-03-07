@@ -28,10 +28,10 @@ const HomePage = () => {
     const userIsActive = (sessionStorage.getItem('userData') === null || sessionStorage.getItem('userData').length === 0) ? true : false;
     const navigate = useNavigate();
 
-    const handleReason = async(type) => {
+    const handleReason = async(type, empid = "") => {
         const dataConfig = {
             ARG_TYPE: type,
-            ARG_EMPID: "",
+            ARG_EMPID: empid,
             OUT_CURSOR: "",
         }
         fetchDownload(type, dataConfig);
@@ -57,6 +57,10 @@ const HomePage = () => {
                         sessionStorage.setItem("subReason", JSON.stringify(result));
                     }else if(type === "DEPART"){
                         sessionStorage.setItem("departList", JSON.stringify(result));
+                    }else if(type === "DROP_OFF"){
+                        sessionStorage.setItem("dropOffList", JSON.stringify(result));
+                    }else if(type === "DEPT_EMP"){
+                        sessionStorage.setItem("deptEmpList", JSON.stringify(result));
                     }
                 }
             })  
@@ -73,12 +77,19 @@ const HomePage = () => {
         if (userIsActive) {
             navigate("/signin");
         }else{
+            const empData = JSON.parse(sessionStorage.getItem('userData'));
+
             sessionStorage.removeItem('mainReason');
             sessionStorage.removeItem('subReason');
             sessionStorage.removeItem('departList');
+            sessionStorage.removeItem('dropOffList');
+            sessionStorage.removeItem('deptEmpList');
+
             handleReason("MAIN_REASON");
             handleReason("SUB_REASON");
             handleReason("DEPART");
+            handleReason("DROP_OFF");
+            handleReason("DEPT_EMP", empData.DEPT);
         }
     }
 

@@ -43,4 +43,20 @@ const formatPassengerList = (data) => {
     return _result;
 }
 
-export { removeVietnamese, removeNewLine, formatPassengerList };
+const getMainPassenger = (data) => {
+
+    const _list = data.map((item) => {
+        return removeVietnamese(removeNewLine(item.name));
+    });
+
+    let _result = "";
+    for(let iCount = 0; iCount < _list.length; iCount++){
+        if(iCount === 0){
+            _result = _list[iCount];
+            break;
+        }
+    }
+    return _result;
+}
+
+export { removeVietnamese, removeNewLine, formatPassengerList, getMainPassenger };
