@@ -59,4 +59,20 @@ const getMainPassenger = (data) => {
     return _result;
 }
 
-export { removeVietnamese, removeNewLine, formatPassengerList, getMainPassenger };
+const formatPassengerDropOffList = (data) => {
+    const _list = data.map((item) => {
+        return removeVietnamese(removeNewLine(item.dropOff));
+    });
+
+    let _result = "";
+    for(let iCount = 0; iCount < _list.length; iCount++){
+        if(iCount === _list.length - 1){
+            _result += _list[iCount];
+        }else{
+            _result += _list[iCount] + "@";
+        }
+    }
+    return _result;
+}
+
+export { removeVietnamese, removeNewLine, formatPassengerList, getMainPassenger, formatPassengerDropOffList };

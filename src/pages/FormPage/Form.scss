@@ -36,6 +36,17 @@
         }
     }
 
+    &-sub{
+        display: none !important;
+        margin-bottom: 5px;
+        gap: 3px;
+        color:  $color-main;
+
+        @media screen and (max-width: 479px) {
+            display: flex !important;
+        }
+    }
+
     &-content{
         border-radius: 10px;
         background-color: $color-white;
@@ -82,6 +93,16 @@
                 min-width: 120px;
                 max-width: unset;
                 font-size: 16px !important;
+            }
+        }
+
+        &__sub{
+            color: $color-text-gray;
+
+            @media screen and (max-width: 479px) {
+                font-size: 16px !important;
+                margin-bottom: 0 !important;
+                margin-left: 5px;
             }
         }
 
@@ -226,11 +247,19 @@
                 padding-top: 0 !important;
             }
         }
+
+        .s-form-grid__item--second{
+            padding-left: 16px;
+        }
     }
 
     .MuiFormControlLabel-root{
         margin: 0;
         min-width: 140px;
+
+        @media screen and (max-width: 479px) {
+            margin-top: 10px;
+        }
 
         .MuiCheckbox-root{
             padding-right: 3px;

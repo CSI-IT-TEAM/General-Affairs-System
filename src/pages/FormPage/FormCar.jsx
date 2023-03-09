@@ -2,6 +2,7 @@ import { Box, Container, Grid, TextField, Stack, Typography, Checkbox, FormContr
 import InputAdornment from '@mui/material/InputAdornment';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +20,7 @@ import ModalInfo from '../../components/Modal/Info';
 import FormDefaultInfo from '../../components/Form/DefaultInfo';
 
 import { reqCarData, reqCarValidate, passengerNum } from '../../data';
-import { removeVietnamese, formatPassengerList, getMainPassenger } from '../../function/getFormat';
+import { removeVietnamese, formatPassengerList, getMainPassenger, formatPassengerDropOffList } from '../../function/getFormat';
 import { getDate, getDateTime, formatDate, formatHMS, getDateFormat, getDateTimeFormat, formatHMS_00 } from '../../function/getDate';
 import getDevice from '../../function/getDevice';
 import { isCombackDate_Validate, timeDifference } from '../../function/getValidate';
@@ -47,6 +48,8 @@ const FormCar = () => {
                         id: item.id,
                         name: !isInclude ? empData.EMP_NM : "",
                         validate: !isInclude ? true : false,
+                        dropOff: "",
+                        validDropOff: false,
                     }
                 }
                 else{
@@ -107,6 +110,8 @@ const FormCar = () => {
                         id: item.id,
                         name: "",
                         validate: false,
+                        dropOff: item.dropOff,
+                        validDropOff: item.validDropOff,
                     }
                 }
                 else{
@@ -127,6 +132,8 @@ const FormCar = () => {
                                 id: item.id,
                                 name: _searchResult[0].EMP_NM,
                                 validate: true,
+                                dropOff: item.dropOff,
+                                validDropOff: item.validDropOff,
                             }
                         }
                         else{
@@ -142,6 +149,8 @@ const FormCar = () => {
                                 id: item.id,
                                 name: "",
                                 validate: false,
+                                dropOff: item.dropOff,
+                                validDropOff: item.validDropOff,
                             }
                         }
                         else{
@@ -420,6 +429,8 @@ const FormCar = () => {
                                     id: "passenger_" + iCount,
                                     name: empData.EMP_NM,
                                     validate: true,
+                                    dropOff: "",
+                                    validDropOff: false,
                                 }
                             ]
                         })
@@ -432,28 +443,14 @@ const FormCar = () => {
                                     id: "passenger_" + iCount,
                                     name: "",
                                     validate: false,
+                                    dropOff: "",
+                                    validDropOff: false,
                                 }
                             ]
                         })
                     }
                 }
 
-                setData(prevData => {
-                    return {
-                        ...prevData,
-                        [name]: _result,
-                    }
-                });
-
-                if(_result === ''){
-                    handleSetValidate(name, false);
-                }else{
-                    handleSetValidate(name, true);
-                }
-
-                break;
-
-            case "DROP_OFF_CD":
                 setData(prevData => {
                     return {
                         ...prevData,
@@ -482,13 +479,37 @@ const FormCar = () => {
         }
     }
 
-    const handleChangePassenger = (event: React.ChangeEvent<HTMLInputElement>) => {
+    ///// Handle Passenger Name
+    const handlePassengerName = (event: React.ChangeEvent<HTMLInputElement>) => {
         const _result = passengerList.map((item) => {
             if(item.id === event.target.name){
                 return {
                     id: item.id,
                     name: event.target.value,
                     validate: event.target.value === "" ? false : true,
+                    dropOff: item.dropOff,
+                    validDropOff: item.validDropOff,
+                }
+            }
+            else{
+                return item;
+            }
+        });
+
+        setPassengerList(prevData => _result);
+    }
+
+    ///// Handle Passenger Drop-off Place
+    const handlePassengerDropOff = (name, value) => {
+
+        const _result = passengerList.map((item) => {
+            if(name.indexOf(item.id) > - 1){
+                return {
+                    id: item.id,
+                    name: item.name,
+                    validate: item.validate,
+                    dropOff: value,
+                    validDropOff: true,
                 }
             }
             else{
@@ -531,7 +552,8 @@ const FormCar = () => {
                         ARG_MAN_LIST      : formatPassengerList(passengerList),
                         ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
                         ARG_SUB_REASON_CD : data.SUB_REASON_CD,
-                        ARG_DROP_OFF_CD   : data.DROP_OFF_CD,
+                        ARG_DROP_OFF_CD   : passengerList[0].dropOff,
+                        ARG_DROP_OFF_LIST : formatPassengerDropOffList(passengerList),
                         ARG_PASSENGERS    : getMainPassenger(passengerList),
                         ARG_CREATOR       : data.CREATOR,
                         ARG_CREATE_PC     : "ADMIN",
@@ -583,7 +605,6 @@ const FormCar = () => {
                 case "MAIN_REASON_CD": case "SUB_REASON_CD":
                 case "GO_DATE": case "GO_TIME":
                 case "DEPART_CD": case "DEPART_NM":
-                case "DROP_OFF_CD":
                     if(data[property] === ''){
                         _result = false;
                         handleSetValidate(property, false);
@@ -644,6 +665,9 @@ const FormCar = () => {
         ////// Validate Passenger List
         for(let iCount = 0; iCount < passengerList.length; iCount++){
             if(passengerList[iCount].validate === false){
+                _result = false;
+                break;
+            } else if(passengerList[iCount].validDropOff === false){
                 _result = false;
                 break;
             }
@@ -877,31 +901,13 @@ const FormCar = () => {
                                 <Grid item xs={12} md={6}>
                                     <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className='b-text-input'>
                                         <Typography variant="h6" className="b-text-input__title b-italic">
-                                            {t('frm_dropOff')} <span>(*)</span>
-                                        </Typography>
-                                        <Stack sx={{width:"100%"}}>
-                                            <SelectModal 
-                                                name="DROP_OFF_CD"
-                                                data={_dropOffList}
-                                                placeholder={t('frm_dropOff_placeholder')}
-                                                cValue={data.DROP_OFF_CD}
-                                                handleEvent={handleChangeSub}
-                                                isValidate={validate.DROP_OFF_CD.validate}
-                                                message={lang === "en" ? validate.DROP_OFF_CD.message : validate.DROP_OFF_CD.messageVN} />
-                                        </Stack>
-                                    </Stack>
-                                </Grid>
-                            </Grid>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6}>
-                                    <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className='b-text-input'>
-                                        <Typography variant="h6" className="b-text-input__title b-italic">
                                             {t('frm_passenger')} <span>(*)</span>
                                         </Typography>
                                         <Stack sx={{width:"100%"}} 
-                                            direction="row"
+                                            direction={{xs: "column", sm: "row"}}
                                             justifyContent="center"
-                                            alignItems="center">
+                                            alignItems={{xs: "flex-start", sm: "center"}}
+                                            >
                                             <SelectModal 
                                                 name="MAN_QTY"
                                                 data={passengerNum}
@@ -928,6 +934,16 @@ const FormCar = () => {
                                                     <Grid item xs={12} className="s-form-grid__item s-form-grid__item--first" key={index}>
                                                         <Grid container spacing={2}>
                                                             <Grid item xs={12} md={4} xl={3} >
+                                                                <Stack sx={{width:"100%"}} 
+                                                                    direction="row"
+                                                                    alignItems="center"
+                                                                    className="s-form-sub"
+                                                                    >
+                                                                    <SquareRoundedIcon sx={{fontSize: 12}} />
+                                                                    <Typography variant="h6" className="b-text-input__sub b-italic">
+                                                                        {`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
+                                                                    </Typography>
+                                                                </Stack>
                                                                 <TextField
                                                                     inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                                                                     className="b-text-input__desc"
@@ -939,7 +955,7 @@ const FormCar = () => {
                                                                     onChange={handleSearch}
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={12} md={8} xl={9} >
+                                                            <Grid item xs={12} md={4} xl={4} >
                                                                 <TextField
                                                                     name={item.id}
                                                                     className="b-text-input__desc"
@@ -953,27 +969,65 @@ const FormCar = () => {
                                                                     <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
                                                                 </Typography>}
                                                             </Grid>
+                                                            <Grid item xs={12} md={4} xl={5}>
+                                                                <Stack sx={{width:"100%"}}>
+                                                                    <SelectModal 
+                                                                        name={item.id + "_DROP_OFF_CD"}
+                                                                        data={_dropOffList}
+                                                                        placeholder={t('frm_dropOff_placeholder')}
+                                                                        cValue={item.dropOff}
+                                                                        handleEvent={handlePassengerDropOff}
+                                                                        isValidate={item.validDropOff}
+                                                                        message={t('frm_required')}
+                                                                        />
+                                                                </Stack>
+                                                            </Grid>
                                                         </Grid>
                                                     </Grid>
                                                 )
                                             }else{
                                                 return (
-                                                    <Grid item xs={12} md={6} className="s-form-grid__item" key={item.id}>
-                                                        <Stack direction={{xs: "column"}} alignItems={{xs: "normal"}} className='b-text-input'>
-                                                            <TextField
-                                                                name={item.id}
-                                                                className="b-text-input__desc"
-                                                                disabled={index === 0 ? true : false}
-                                                                placeholder={`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
-                                                                color="info"
-                                                                fullWidth
-                                                                value={item.name}
-                                                                onChange={handleChangePassenger}
-                                                            />
-                                                            {!item.validate && <Typography className='b-validate'>
-                                                                <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
-                                                            </Typography>}
-                                                        </Stack>
+                                                    <Grid container spacing={2} key={item.id} className="s-form-grid__item s-form-grid__item--second">
+                                                        <Grid item xs={12} md={6}>
+                                                            <Stack direction={{xs: "column"}} alignItems={{xs: "normal"}} className='b-text-input'>
+                                                                <Stack sx={{width:"100%"}} 
+                                                                    direction="row"
+                                                                    alignItems="center"
+                                                                    className="s-form-sub"
+                                                                    >
+                                                                    <SquareRoundedIcon sx={{fontSize: 12}} />
+                                                                    <Typography variant="h6" className="b-text-input__sub b-italic">
+                                                                        {`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
+                                                                    </Typography>
+                                                                </Stack>
+                                                                <TextField
+                                                                    name={item.id}
+                                                                    className="b-text-input__desc"
+                                                                    disabled={index === 0 ? true : false}
+                                                                    placeholder={`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
+                                                                    color="info"
+                                                                    fullWidth
+                                                                    value={item.name}
+                                                                    onChange={handlePassengerName}
+                                                                />
+                                                                {!item.validate && <Typography className='b-validate'>
+                                                                    <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
+                                                                </Typography>}
+                                                            </Stack>
+                                                        </Grid>
+                                                        <Grid item xs={12} md={6}>
+                                                            <Stack sx={{width:"100%"}}>
+                                                                <SelectModal 
+                                                                    name={item.id + "_DROP_OFF_CD"}
+                                                                    data={_dropOffList}
+                                                                    placeholder={t('frm_dropOff_placeholder')}
+                                                                    cValue={item.dropOff}
+                                                                    handleEvent={handlePassengerDropOff}
+                                                                    isValidate={item.validDropOff}
+                                                                    message={t('frm_required')}
+                                                                    />
+                                                            </Stack>
+                                                        </Grid>
                                                     </Grid>
                                                 );
                                             }

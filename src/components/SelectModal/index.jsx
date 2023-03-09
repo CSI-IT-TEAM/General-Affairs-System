@@ -39,7 +39,7 @@ const SelectModal = ({ name, data, placeholder, cValue, handleEvent, isValidate,
                                     <MenuItem key={item.DEPART_CD} value={item.DEPART_CD}>{item.DEPART_NM}</MenuItem>
                                 );
                             }
-                            else if(name === "DROP_OFF_CD"){
+                            else if(name.indexOf("DROP_OFF_CD") > -1){
                                 return (
                                     <MenuItem key={item.DROP_OFF_CD} value={item.DROP_OFF_CD}>{item.DROP_OFF_NM}</MenuItem>
                                 );

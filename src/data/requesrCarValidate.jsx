@@ -44,11 +44,6 @@ const reqCarValidate = {
         message: 'The passengers field must be greater than 0',
         messageVN: 'Dữ liệu phải lớn hơn 0',
     },
-    "DROP_OFF_CD": {
-        validate: true,
-        message: 'The drop off field is required',
-        messageVN: 'Dữ liệu không được rỗng',
-    }, 
 }
 
 export default reqCarValidate;
