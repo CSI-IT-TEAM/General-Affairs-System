@@ -1,23 +1,13 @@
 import { Box, Container, Grid, TextField, Stack, Typography, Checkbox, FormControlLabel } from '@mui/material';
-import InputAdornment from '@mui/material/InputAdornment';
-import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import i18next from "i18next";
-
-import SelectModal from '../../components/SelectModal';
-import DateModal from '../../components/DateModal/Desktop';
-import DateModalMobile from '../../components/DateModal/Mobile';
-import TimeModal from '../../components/TimeModal/Desktop';
-import TimeModalMobile from '../../components/TimeModal/Mobile';
-import ButtonPrimary from '../../components/Button/Primary';
-import FormTitle from '../../components/Title/Form';
-import ModalWarning from '../../components/Modal/Warning';
-import ModalInfo from '../../components/Modal/Info';
-import FormDefaultInfo from '../../components/Form/DefaultInfo';
+import { SelectModal, DateModal, DateModalMobile, TimeModal, TimeModalMobile, ButtonPrimary, FormTitle, ModalWarning, ModalInfo, FormDefaultInfo } from '../../components';
+import InputAdornment from '@mui/material/InputAdornment';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 
 import { reqCarData, reqCarValidate, passengerNum } from '../../data';
 import { removeVietnamese, formatPassengerList, getMainPassenger, formatPassengerDropOffList } from '../../function/getFormat';
@@ -107,11 +97,9 @@ const FormCar = () => {
             const _result = passengerList.map((item) => {
                 if(item.id === "passenger_1"){
                     return {
-                        id: item.id,
+                        ...item,
                         name: "",
                         validate: false,
-                        dropOff: item.dropOff,
-                        validDropOff: item.validDropOff,
                     }
                 }
                 else{
@@ -129,11 +117,9 @@ const FormCar = () => {
                     const _result = passengerList.map((item) => {
                         if(item.id === "passenger_1"){
                             return {
-                                id: item.id,
+                                ...item,
                                 name: _searchResult[0].EMP_NM,
                                 validate: true,
-                                dropOff: item.dropOff,
-                                validDropOff: item.validDropOff,
                             }
                         }
                         else{
@@ -146,11 +132,9 @@ const FormCar = () => {
                     const _result = passengerList.map((item) => {
                         if(item.id === "passenger_1"){
                             return {
-                                id: item.id,
+                                ...item,
                                 name: "",
                                 validate: false,
-                                dropOff: item.dropOff,
-                                validDropOff: item.validDropOff,
                             }
                         }
                         else{
@@ -484,11 +468,9 @@ const FormCar = () => {
         const _result = passengerList.map((item) => {
             if(item.id === event.target.name){
                 return {
-                    id: item.id,
+                    ...item,
                     name: event.target.value,
                     validate: event.target.value === "" ? false : true,
-                    dropOff: item.dropOff,
-                    validDropOff: item.validDropOff,
                 }
             }
             else{
@@ -505,9 +487,7 @@ const FormCar = () => {
         const _result = passengerList.map((item) => {
             if(name.indexOf(item.id) > - 1){
                 return {
-                    id: item.id,
-                    name: item.name,
-                    validate: item.validate,
+                    ...item,
                     dropOff: value,
                     validDropOff: true,
                 }
@@ -531,37 +511,35 @@ const FormCar = () => {
     const handleSubmit = () => {
         if(handleVaidate()){
             if(handleValidateDepart()){
-                if(handleDepartSpecific()){
-                    const _uploadData = {
-                        ARG_TYPE: "SAVE",    
-                        ARG_REQ_DATE      : data.REQ_DATE,
-                        ARG_PLANT_CD      : data.PLANT_CD,
-                        ARG_DEPT_CD       : data.DEPT_CD,
-                        ARG_DEPT_NM       : data.DEPT_NM,
-                        ARG_REQ_EMP       : data.REQ_EMP,
-                        ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
-                        ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
-                        ARG_GO_DATE       : data.GO_DATE,
-                        ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
-                        ARG_COMEBACK_DATE : data.COMEBACK_DATE,
-                        ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
-                        ARG_DEPART_CD     : data.DEPART_CD,
-                        ARG_DEPART_NM     : removeVietnamese(data.DEPART_NM.trim()),
-                        ARG_ARRIVAL       : data.ARRIVAL,
-                        ARG_MAN_QTY       : data.MAN_QTY,
-                        ARG_MAN_LIST      : formatPassengerList(passengerList),
-                        ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
-                        ARG_SUB_REASON_CD : data.SUB_REASON_CD,
-                        ARG_DROP_OFF_CD   : passengerList[0].dropOff,
-                        ARG_DROP_OFF_LIST : formatPassengerDropOffList(passengerList),
-                        ARG_PASSENGERS    : getMainPassenger(passengerList),
-                        ARG_CREATOR       : data.CREATOR,
-                        ARG_CREATE_PC     : "ADMIN",
-                        ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
-                    }
-                    //console.log(_uploadData)
-                    fetchUpload(_uploadData);
+                const _uploadData = {
+                    ARG_TYPE: "SAVE",    
+                    ARG_REQ_DATE      : data.REQ_DATE,
+                    ARG_PLANT_CD      : data.PLANT_CD,
+                    ARG_DEPT_CD       : data.DEPT_CD,
+                    ARG_DEPT_NM       : data.DEPT_NM,
+                    ARG_REQ_EMP       : data.REQ_EMP,
+                    ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
+                    ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
+                    ARG_GO_DATE       : data.GO_DATE,
+                    ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
+                    ARG_COMEBACK_DATE : data.COMEBACK_DATE,
+                    ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
+                    ARG_DEPART_CD     : data.DEPART_CD,
+                    ARG_DEPART_NM     : removeVietnamese(data.DEPART_NM.trim()),
+                    ARG_ARRIVAL       : data.ARRIVAL,
+                    ARG_MAN_QTY       : data.MAN_QTY,
+                    ARG_MAN_LIST      : formatPassengerList(passengerList),
+                    ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
+                    ARG_SUB_REASON_CD : data.SUB_REASON_CD,
+                    ARG_DROP_OFF_CD   : passengerList[0].dropOff,
+                    ARG_DROP_OFF_LIST : formatPassengerDropOffList(passengerList),
+                    ARG_PASSENGERS    : getMainPassenger(passengerList),
+                    ARG_CREATOR       : data.CREATOR,
+                    ARG_CREATE_PC     : "ADMIN",
+                    ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
                 }
+                //console.log(_uploadData)
+                fetchUpload(_uploadData);
             }
         }
     }
@@ -631,7 +609,6 @@ const FormCar = () => {
                         _result = false;
                         handleSetValidate(property, false);
                     }else{
-    
                         let _depart = getDateTimeFormat(data["GO_DATE"] + " " + data["GO_TIME"]);
                         let _comeback = getDateTimeFormat(data["COMEBACK_DATE"] + " " + data["COMEBACK_TIME"]);
                         let _isValidate = isCombackDate_Validate(_depart,_comeback);
@@ -664,10 +641,7 @@ const FormCar = () => {
 
         ////// Validate Passenger List
         for(let iCount = 0; iCount < passengerList.length; iCount++){
-            if(passengerList[iCount].validate === false){
-                _result = false;
-                break;
-            } else if(passengerList[iCount].validDropOff === false){
+            if(passengerList[iCount].validate === false || passengerList[iCount].validDropOff === false){
                 _result = false;
                 break;
             }
@@ -676,6 +650,7 @@ const FormCar = () => {
         return _result;
     }
 
+    /////// Handle Validate Data
     const handleSetValidate = (name, value, message = "", messageVN = "") => {
         setValidate(prevData => {
             return {
@@ -704,13 +679,6 @@ const FormCar = () => {
             handleSetValidate("GO_DATE", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
             handleSetValidate("GO_TIME", false, "The return date and time must be 2 hours greater than the present time", "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại");
         }
-
-        return _result;
-    }
-
-    const handleDepartSpecific = () => {
-        if(data["GO_DATE"] === '') return false;
-        let _result = true;
 
         /////// If Depart Date is Today && Current Time >= 14:00 PM => Invalidate
         const _currentDateTime = getDateTime();

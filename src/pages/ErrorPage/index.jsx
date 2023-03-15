@@ -1,8 +1,8 @@
 import { Box, Container, Typography } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ButtonRound } from '../../components';
 
-import ButtonRound from "../../components/Button/Round";
 import warningImage from "../../assets/images/icons/warning.png";
 import "./ErrorPage.scss";
 

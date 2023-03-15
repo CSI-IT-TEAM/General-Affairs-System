@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import CardPrimary from '../../components/Card/Primary';
-import ModalWarning from '../../components/Modal/Warning';
+import { CardPrimary, ModalWarning } from '../../components';
 
 import "./HomePage.scss";
 import { optionData } from '../../data';

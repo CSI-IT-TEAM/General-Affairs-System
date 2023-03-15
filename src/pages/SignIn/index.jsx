@@ -1,15 +1,14 @@
 import * as React from "react";
 import { useState } from "react";
 import { TextField, Typography, Box, Stack, Grid } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import InputAdornment from "@mui/material/InputAdornment";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import ButtonPrimary from "../../components/Button/Primary";
-import { useNavigate } from "react-router-dom";
-import ModalWarning from "../../components/Modal/Warning";
-import ModalInfo from "../../components/Modal/Info";
-import { useTranslation } from "react-i18next";
+import { ButtonPrimary, ModalWarning, ModalInfo } from "../../components";
 
 import "./SignIn.scss";
+
 import loginImage from "../../assets/images/sign-in.png";
 import { downloadURL, imageURL } from "../../api";
 
