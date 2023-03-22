@@ -11,6 +11,8 @@ import TimeModal from "./TimeModal/Desktop";
 import TimeModalMobile from "./TimeModal/Mobile";
 import FormTitle from "./Title/Form";
 import FormDefaultInfo from "./Form/DefaultInfo";
+import PassengerInfo from "./Form/PassengerInfo";
+import MainPassengerInfo from "./Form/PassengerInfo/Main";
 
 export { 
     CardPrimary, 
@@ -24,5 +26,7 @@ export {
     TimeModal, 
     TimeModalMobile, 
     FormTitle, 
-    FormDefaultInfo
+    FormDefaultInfo,
+    PassengerInfo,
+    MainPassengerInfo
 }

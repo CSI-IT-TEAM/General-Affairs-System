@@ -3,15 +3,13 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import i18next from "i18next";
-import { SelectModal, DateModal, DateModalMobile, TimeModal, TimeModalMobile, ButtonPrimary, FormTitle, ModalWarning, ModalInfo, FormDefaultInfo } from '../../components';
+import { SelectModal, DateModal, DateModalMobile, TimeModal, TimeModalMobile, ButtonPrimary, FormTitle, ModalWarning, ModalInfo, FormDefaultInfo, PassengerInfo, MainPassengerInfo } from '../../components';
 import InputAdornment from '@mui/material/InputAdornment';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 
-import { reqCarData, reqCarValidate, passengerNum } from '../../data';
-import { removeVietnamese, formatPassengerList, getMainPassenger, formatPassengerDropOffList } from '../../function/getFormat';
-import { getDate, getDateTime, formatDate, formatHMS, getDateFormat, getDateTimeFormat, formatHMS_00 } from '../../function/getDate';
+import { reqCarData, reqCarValidate, passengerNum, uploadCarData } from '../../data';
+import { getDate, getDateTime, formatDate, formatHMS, getDateFormat, getDateTimeFormat } from '../../function/getDate';
 import getDevice from '../../function/getDevice';
 import { isCombackDate_Validate, timeDifference } from '../../function/getValidate';
 import { getLastName } from '../../function/getLastName';
@@ -25,31 +23,6 @@ const FormCar = () => {
 
     /////// Handle Checkbox
     const [isInclude, setIsInclude] = useState(false);
-
-    const handleIsInclude = () => {
-        setIsInclude(isInclude => !isInclude);
-
-        if(passengerList !== null && passengerList.length > 0){
-            const empData = JSON.parse(sessionStorage.getItem('userData'));
-
-            const _result = passengerList.map((item) => {
-                if(item.id === "passenger_1"){
-                    return {
-                        id: item.id,
-                        name: !isInclude ? empData.EMP_NM : "",
-                        validate: !isInclude ? true : false,
-                        dropOff: "",
-                        validDropOff: false,
-                    }
-                }
-                else{
-                    return item;
-                }
-            });
-    
-            setPassengerList(prevData => _result);
-        }
-    }
 
     /////// Open Text Field for Pick Up: ETC
     const [openPickUp, setOpenPickUp] = useState(false);
@@ -90,67 +63,61 @@ const FormCar = () => {
     ////// Search EMP ID
     const [empID, setEmpID] = useState('');
 
+    const handlePassengerList = (value) => {
+        const _result = passengerList.map((item) => {
+            if(item.id === "passenger_1"){
+                return {
+                    ...item,
+                    name: value,
+                    validate: value === "" ? false : true,
+                }
+            }
+            else{
+                return item;
+            }
+        });
+
+        setPassengerList(prevData => _result);
+    }
+
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmpID(event.target.value);
 
         if(event.target.value === ""){
-            const _result = passengerList.map((item) => {
-                if(item.id === "passenger_1"){
-                    return {
-                        ...item,
-                        name: "",
-                        validate: false,
-                    }
-                }
-                else{
-                    return item;
-                }
-            });
-    
-            setPassengerList(prevData => _result);
+            handlePassengerList("");
         }
         else {
             if(_deptEmpList !== null && _deptEmpList.length > 0){
                 let _searchResult = _deptEmpList.filter((item) => item.EMPID.includes(event.target.value));
 
                 if(_searchResult !== null && _searchResult !== "" && _searchResult.length > 0){
-                    const _result = passengerList.map((item) => {
-                        if(item.id === "passenger_1"){
-                            return {
-                                ...item,
-                                name: _searchResult[0].EMP_NM,
-                                validate: true,
-                            }
-                        }
-                        else{
-                            return item;
-                        }
-                    });
-            
-                    setPassengerList(prevData => _result);
+                    handlePassengerList(_searchResult[0].EMP_NM);
                 }else{
-                    const _result = passengerList.map((item) => {
-                        if(item.id === "passenger_1"){
-                            return {
-                                ...item,
-                                name: "",
-                                validate: false,
-                            }
-                        }
-                        else{
-                            return item;
-                        }
-                    });
-            
-                    setPassengerList(prevData => _result);
+                    handlePassengerList("");
                 }
             }
         }
     } 
+
+    ////// Handle Include Myself Event
+    const handleIsInclude = () => {
+        setIsInclude(isInclude => !isInclude);
+
+        if(passengerList !== null && passengerList.length > 0){
+            const empData = JSON.parse(sessionStorage.getItem('userData'));
+
+            if(!isInclude) {
+                handlePassengerList(empData.EMP_NM);
+            }else{
+                handlePassengerList("");
+            }
+        }
+    }
     
     /////// Handle Default Data
     const handleDefault = async() => {
         const empData = JSON.parse(sessionStorage.getItem('userData'));
+
         setOpenPickUp(false);
         setIsInclude(false);
         setPassengerList([]);
@@ -402,39 +369,20 @@ const FormCar = () => {
             case "MAN_QTY":
 
                 setPassengerList(prevData => []);
+                let _arrList = [];
                 const empData = JSON.parse(sessionStorage.getItem('userData'));
 
                 for(let iCount = 1; iCount <= _result; iCount++){
-                    if(iCount === 1 && isInclude){
-                        setPassengerList(prevData => {
-                            return [
-                                ...prevData,
-                                {
-                                    id: "passenger_" + iCount,
-                                    name: empData.EMP_NM,
-                                    validate: true,
-                                    dropOff: "",
-                                    validDropOff: false,
-                                }
-                            ]
-                        })
-                    }
-                    else{
-                        setPassengerList(prevData => {
-                            return [
-                                ...prevData,
-                                {
-                                    id: "passenger_" + iCount,
-                                    name: "",
-                                    validate: false,
-                                    dropOff: "",
-                                    validDropOff: false,
-                                }
-                            ]
-                        })
-                    }
+                    _arrList.push({
+                        id: "passenger_" + iCount,
+                        name: iCount === 1 && isInclude ? empData.EMP_NM : "",
+                        validate: iCount === 1 && isInclude ? true : false,
+                        dropOff: "",
+                        validDropOff: false,
+                    });
                 }
 
+                setPassengerList(prevData => _arrList);
                 setData(prevData => {
                     return {
                         ...prevData,
@@ -508,36 +456,10 @@ const FormCar = () => {
     };
 
     //////// Handle Upload Data
-    const handleSubmit = () => {
+    const handleSubmit = async() => {
         if(handleVaidate()){
             if(handleValidateDepart()){
-                const _uploadData = {
-                    ARG_TYPE: "SAVE",    
-                    ARG_REQ_DATE      : data.REQ_DATE,
-                    ARG_PLANT_CD      : data.PLANT_CD,
-                    ARG_DEPT_CD       : data.DEPT_CD,
-                    ARG_DEPT_NM       : data.DEPT_NM,
-                    ARG_REQ_EMP       : data.REQ_EMP,
-                    ARG_REQ_EMP_NM    : data.REQ_EMP_NM,
-                    ARG_EMAIL_ADDRESS : data.EMAIL_ADDRESS,
-                    ARG_GO_DATE       : data.GO_DATE,
-                    ARG_GO_TIME       : formatHMS_00(data.GO_TIME),
-                    ARG_COMEBACK_DATE : data.COMEBACK_DATE,
-                    ARG_COMEBACK_TIME : formatHMS_00(data.COMEBACK_TIME),
-                    ARG_DEPART_CD     : data.DEPART_CD,
-                    ARG_DEPART_NM     : removeVietnamese(data.DEPART_NM.trim()),
-                    ARG_ARRIVAL       : data.ARRIVAL,
-                    ARG_MAN_QTY       : data.MAN_QTY,
-                    ARG_MAN_LIST      : formatPassengerList(passengerList),
-                    ARG_MAIN_REASON_CD: data.MAIN_REASON_CD,
-                    ARG_SUB_REASON_CD : data.SUB_REASON_CD,
-                    ARG_DROP_OFF_CD   : passengerList[0].dropOff,
-                    ARG_DROP_OFF_LIST : formatPassengerDropOffList(passengerList),
-                    ARG_PASSENGERS    : getMainPassenger(passengerList),
-                    ARG_CREATOR       : data.CREATOR,
-                    ARG_CREATE_PC     : "ADMIN",
-                    ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
-                }
+                const _uploadData = await uploadCarData(data, passengerList) 
                 //console.log(_uploadData)
                 fetchUpload(_uploadData);
             }
@@ -899,128 +821,27 @@ const FormCar = () => {
                                         {passengerList.map((item, index) => {
                                             if(!isInclude && index === 0){
                                                 return (
-                                                    <Grid item xs={12} className="s-form-grid__item s-form-grid__item--first" key={index}>
-                                                        <Grid container spacing={2}>
-                                                            <Grid item xs={12} md={4} xl={3} >
-                                                                <Stack sx={{width:"100%"}} 
-                                                                    direction="row"
-                                                                    alignItems="center"
-                                                                    className="s-form-sub"
-                                                                    >
-                                                                    <SquareRoundedIcon sx={{fontSize: 12}} />
-                                                                    <Typography variant="h6" className="b-text-input__sub b-italic">
-                                                                        {`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
-                                                                    </Typography>
-                                                                </Stack>
-                                                                <TextField
-                                                                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                                                                    className="b-text-input__desc"
-                                                                    disabled={false}
-                                                                    placeholder={t('frm_pass_placeholder')}
-                                                                    color="info"
-                                                                    fullWidth
-                                                                    value={empID}
-                                                                    onChange={handleSearch}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={12} md={4} xl={4} >
-                                                                <TextField
-                                                                    name={item.id}
-                                                                    className="b-text-input__desc"
-                                                                    disabled={true}
-                                                                    placeholder={`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
-                                                                    color="info"
-                                                                    fullWidth
-                                                                    value={item.name}
-                                                                />
-                                                                {!item.validate && <Typography className='b-validate'>
-                                                                    <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
-                                                                </Typography>}
-                                                            </Grid>
-                                                            <Grid item xs={12} md={4} xl={5}>
-                                                                <Stack sx={{width:"100%"}}>
-                                                                    <SelectModal 
-                                                                        name={item.id + "_DROP_OFF_CD"}
-                                                                        data={_dropOffList}
-                                                                        placeholder={t('frm_dropOff_placeholder')}
-                                                                        cValue={item.dropOff}
-                                                                        handleEvent={handlePassengerDropOff}
-                                                                        isValidate={item.validDropOff}
-                                                                        message={t('frm_required')}
-                                                                        />
-                                                                </Stack>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
+                                                    <MainPassengerInfo key={index} 
+                                                        item={item} 
+                                                        index={index} 
+                                                        empID={empID}
+                                                        dropOffList={_dropOffList}
+                                                        handleName={handleSearch} 
+                                                        handleDropOff={handlePassengerDropOff} />
                                                 )
                                             }else{
                                                 return (
-                                                    <Grid container spacing={2} key={item.id} className="s-form-grid__item s-form-grid__item--second">
-                                                        <Grid item xs={12} md={6}>
-                                                            <Stack direction={{xs: "column"}} alignItems={{xs: "normal"}} className='b-text-input'>
-                                                                <Stack sx={{width:"100%"}} 
-                                                                    direction="row"
-                                                                    alignItems="center"
-                                                                    className="s-form-sub"
-                                                                    >
-                                                                    <SquareRoundedIcon sx={{fontSize: 12}} />
-                                                                    <Typography variant="h6" className="b-text-input__sub b-italic">
-                                                                        {`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
-                                                                    </Typography>
-                                                                </Stack>
-                                                                <TextField
-                                                                    name={item.id}
-                                                                    className="b-text-input__desc"
-                                                                    disabled={index === 0 ? true : false}
-                                                                    placeholder={`${t('frm_txt_passenger_placeholder')} ${index + 1}`}
-                                                                    color="info"
-                                                                    fullWidth
-                                                                    value={item.name}
-                                                                    onChange={handlePassengerName}
-                                                                />
-                                                                {!item.validate && <Typography className='b-validate'>
-                                                                    <HighlightOffIcon sx={{width: '17px', height: '17px'}} />{t('frm_required')}
-                                                                </Typography>}
-                                                            </Stack>
-                                                        </Grid>
-                                                        <Grid item xs={12} md={6}>
-                                                            <Stack sx={{width:"100%"}}>
-                                                                <SelectModal 
-                                                                    name={item.id + "_DROP_OFF_CD"}
-                                                                    data={_dropOffList}
-                                                                    placeholder={t('frm_dropOff_placeholder')}
-                                                                    cValue={item.dropOff}
-                                                                    handleEvent={handlePassengerDropOff}
-                                                                    isValidate={item.validDropOff}
-                                                                    message={t('frm_required')}
-                                                                    />
-                                                            </Stack>
-                                                        </Grid>
-                                                    </Grid>
+                                                    <PassengerInfo key={item.id} 
+                                                        item={item} 
+                                                        index={index} 
+                                                        dropOffList={_dropOffList}
+                                                        handleName={handlePassengerName} 
+                                                        handleDropOff={handlePassengerDropOff} />
                                                 );
                                             }
                                         })}
                                     </Grid>
                                 </Stack>
-                                // <Stack marginBottom={2} direction={{xs: "column", sm: "row"}} alignItems={{xs: "normal", sm: "center"}} className="b-text-input mt-10">
-                                //     <Typography variant="h6" className="b-text-input__title b-italic">
-                                //         {t('frm_passenger_list')} 
-                                //     </Typography>
-                                //     <TextField
-                                //         inputProps={{ inputMode: 'text' }}
-                                //         className="b-text-input__desc"
-                                //         disabled={false}
-                                //         placeholder={t('frm_passenger_list_placeholder')} 
-                                //         color="info"
-                                //         fullWidth
-                                //         value={data.MAN_LIST}
-                                //         onChange={handleChange}
-                                //         multiline
-                                //         rows={4}
-                                //         name="MAN_LIST"
-                                //         sx={{ backgroundColor: "#f8f6f7" }}
-                                //     />
-                                // </Stack> 
                             }
                             <Box className="s-form-bot">
                                 <ButtonPrimary title={t('btn_request')} handleClick={handleSubmit} />

@@ -12,10 +12,12 @@ import 'devextreme/dist/css/dx.light.css';
 const router = createBrowserRouter([
     {
         path: "/signin",
+        errorElement: <ErrorPage />,
         element: <SignIn />,
     },
     {
         path: "/",
+        errorElement: <ErrorPage />,
         element: (
             <Layout>
                 <HomePage />
@@ -24,6 +26,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/request/car",
+        errorElement: <ErrorPage />,
         element: (
             <Layout>
                 <FormCar />

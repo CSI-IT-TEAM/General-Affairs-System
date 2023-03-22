@@ -5,5 +5,6 @@ import warningData from "./warningData";
 import infoData from "./infoData";
 import langData from "./langData";
 import passengerNum from "./passengerNum";
+import uploadCarData from "./uploadCarData";
 
-export { optionData, reqCarData, reqCarValidate, warningData, infoData, langData, passengerNum };
+export { optionData, reqCarData, reqCarValidate, warningData, infoData, langData, passengerNum, uploadCarData };
