@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import i18next from "i18next";
-import { SelectModal, DateModal, DateModalMobile, TimeModal, TimeModalMobile, ButtonPrimary, FormTitle, ModalWarning, ModalInfo, FormDefaultInfo, PassengerInfo, MainPassengerInfo } from '../../components';
+import { SelectModal, ButtonPrimary, FormTitle, ModalWarning, ModalInfo, FormDefaultInfo, PassengerInfo, MainPassengerInfo, ResponsiveDateTime } from '../../components';
 import InputAdornment from '@mui/material/InputAdornment';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -657,92 +657,55 @@ const FormCar = () => {
 
                             <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
-                                    {getDevice() ? 
-                                        <DateModalMobile 
-                                            title={t('frm_depart_date')}
-                                            placeholder={t('frm_depart_date_placeholder')}
-                                            name="GO_DATE"
-                                            cValue={data.GO_DATE_FULL}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.GO_DATE.validate}
-                                            message={lang === "en" ? validate.GO_DATE.message : validate.GO_DATE.messageVN } />
-                                        :
-                                        <DateModal 
-                                            title={t('frm_depart_date')}
-                                            placeholder={t('frm_depart_date_placeholder')}
-                                            name="GO_DATE" 
-                                            cValue={data.GO_DATE}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.GO_DATE.validate}
-                                            message={lang === "en" ? validate.GO_DATE.message : validate.GO_DATE.messageVN} />
-                                
-                                    }
+                                    <ResponsiveDateTime 
+                                        type="DATE"
+                                        title={t('frm_depart_date')}
+                                        placeholder={t('frm_depart_date_placeholder')}
+                                        name="GO_DATE"
+                                        cValue={getDevice() ? data.GO_DATE_FULL : data.GO_DATE}
+                                        handleChange={handleChangeSub}
+                                        isValidate={validate.GO_DATE.validate}
+                                        validMessage={lang === "en" ? validate.GO_DATE.message : validate.GO_DATE.messageVN }
+                                        />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    {getDevice() ?
-                                        <TimeModalMobile 
-                                            title={t('frm_depart_time')}
-                                            placeholder={t('frm_depart_time_placeholder')}
-                                            name="GO_TIME"
-                                            cValue={data.GO_TIME_FULL}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.GO_TIME.validate}
-                                            message={lang === "en" ? validate.GO_TIME.message : validate.GO_TIME.messageVN } />
-                                        :
-                                        <TimeModal 
-                                            title={t('frm_depart_time')} 
-                                            placeholder={t('frm_depart_time_placeholder')}
-                                            name="GO_TIME"
-                                            cValue={data.GO_TIME_FULL}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.GO_TIME.validate}
-                                            message={lang === "en" ? validate.GO_TIME.message : validate.GO_TIME.messageVN } />
-                                    }
+                                    <ResponsiveDateTime 
+                                        type="TIME"
+                                        title={t('frm_depart_time')}
+                                        placeholder={t('frm_depart_time_placeholder')}
+                                        name="GO_TIME"
+                                        cValue={data.GO_TIME_FULL}
+                                        handleChange={handleChangeSub}
+                                        isValidate={validate.GO_TIME.validate}
+                                        validMessage={lang === "en" ? validate.GO_TIME.message : validate.GO_TIME.messageVN } 
+                                        />
                                 </Grid>
                             </Grid>
 
                             <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
-                                    {getDevice() ?
-                                        <DateModalMobile
-                                            title={t('frm_cb_date')} 
-                                            placeholder={t('frm_cb_date_placeholder')}
-                                            name="COMEBACK_DATE" 
-                                            cValue={data.COMEBACK_DATE_FULL}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.COMEBACK_DATE.validate}
-                                            message={lang === "en" ? validate.COMEBACK_DATE.message : validate.COMEBACK_DATE.messageVN } />
-                                        :
-                                        <DateModal 
-                                            title={t('frm_cb_date')} 
-                                            placeholder={t('frm_cb_date_placeholder')}
-                                            name="COMEBACK_DATE" 
-                                            cValue={data.COMEBACK_DATE}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.COMEBACK_DATE.validate}
-                                            message={lang === "en" ? validate.COMEBACK_DATE.message : validate.COMEBACK_DATE.messageVN } /> 
-                                    }
+                                    <ResponsiveDateTime 
+                                        type="DATE"
+                                        title={t('frm_cb_date')} 
+                                        placeholder={t('frm_cb_date_placeholder')}
+                                        name="COMEBACK_DATE" 
+                                        cValue={getDevice() ? data.COMEBACK_DATE_FULL : data.COMEBACK_DATE}
+                                        handleChange={handleChangeSub}
+                                        isValidate={validate.COMEBACK_DATE.validate}
+                                        validMessage={lang === "en" ? validate.COMEBACK_DATE.message : validate.COMEBACK_DATE.messageVN } 
+                                        />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    {getDevice() ?
-                                        <TimeModalMobile
-                                            title={t('frm_cb_time')} 
-                                            placeholder={t('frm_cb_time_placeholder')}
-                                            name="COMEBACK_TIME" 
-                                            cValue={data.COMEBACK_TIME_FULL}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.COMEBACK_TIME.validate}
-                                            message={lang === "en" ? validate.COMEBACK_TIME.message : validate.COMEBACK_TIME.messageVN } />
-                                        :
-                                        <TimeModal 
-                                            title={t('frm_cb_time')} 
-                                            placeholder={t('frm_cb_time_placeholder')}
-                                            name="COMEBACK_TIME" 
-                                            cValue={data.COMEBACK_TIME_FULL}
-                                            handleEvent={handleChangeSub}
-                                            isValidate={validate.COMEBACK_TIME.validate}
-                                            message={lang === "en" ? validate.COMEBACK_TIME.message : validate.COMEBACK_TIME.messageVN } />
-                                    }
+                                    <ResponsiveDateTime 
+                                        type="TIME"
+                                        title={t('frm_cb_time')} 
+                                        placeholder={t('frm_cb_time_placeholder')}
+                                        name="COMEBACK_TIME" 
+                                        cValue={data.COMEBACK_TIME_FULL}
+                                        handleChange={handleChangeSub}
+                                        isValidate={validate.COMEBACK_TIME.validate}
+                                        validMessage={lang === "en" ? validate.COMEBACK_TIME.message : validate.COMEBACK_TIME.messageVN } 
+                                        />
                                 </Grid>
                             </Grid>
 
@@ -774,9 +737,9 @@ const FormCar = () => {
                                                         onChange={handleChange}
                                                         InputProps={{
                                                             endAdornment: (
-                                                            <InputAdornment position="end">
-                                                                <PlaceOutlinedIcon />
-                                                            </InputAdornment>
+                                                                <InputAdornment position="end">
+                                                                    <PlaceOutlinedIcon />
+                                                                </InputAdornment>
                                                             ),
                                                         }}
                                                     />
@@ -829,7 +792,8 @@ const FormCar = () => {
                                                         handleName={handleSearch} 
                                                         handleDropOff={handlePassengerDropOff} />
                                                 )
-                                            }else{
+                                            }
+                                            else{
                                                 return (
                                                     <PassengerInfo key={item.id} 
                                                         item={item} 

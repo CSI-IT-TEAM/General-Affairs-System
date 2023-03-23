@@ -13,6 +13,7 @@ import FormTitle from "./Title/Form";
 import FormDefaultInfo from "./Form/DefaultInfo";
 import PassengerInfo from "./Form/PassengerInfo";
 import MainPassengerInfo from "./Form/PassengerInfo/Main";
+import ResponsiveDateTime from "./ResponsiveDateTime";
 
 export { 
     CardPrimary, 
@@ -28,5 +29,6 @@ export {
     FormTitle, 
     FormDefaultInfo,
     PassengerInfo,
-    MainPassengerInfo
+    MainPassengerInfo,
+    ResponsiveDateTime
 }
