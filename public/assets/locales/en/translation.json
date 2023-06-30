@@ -40,6 +40,9 @@
     "frm_passenger": "Passengers",
     "frm_passenger_list": "Passenger List",
     "frm_include_me": "Include me",
+    "frm_passengers_list": "Passengers List",
+    "frm_korea_list": "Korea",
+    "frm_vietnam_list": "VietNam",
 
     "frm_user_id_placeholder": "Type your User ID",
     "frm_password_placeholder": "Type your Password",
