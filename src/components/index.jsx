@@ -7,6 +7,7 @@ import CardPrimary from "./Card/Primary";
 import SelectModal from "./SelectModal";
 import PassengersSelect from "./SelectModal/PassengersSelect";
 import DepartmentSelect from "./SelectModal/DepartmentSelect";
+import DropOffSelect from "./SelectModal/DropOffSelect";
 import DateModal from "./DateModal/Desktop";
 import DateModalMobile from "./DateModal/Mobile";
 import TimeModal from "./TimeModal/Desktop";
@@ -27,6 +28,7 @@ export {
   SelectModal,
   PassengersSelect,
   DepartmentSelect,
+  DropOffSelect,
   DateModal,
   DateModalMobile,
   TimeModal,

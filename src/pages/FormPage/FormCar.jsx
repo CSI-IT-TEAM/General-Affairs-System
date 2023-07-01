@@ -573,21 +573,25 @@ const FormCar = () => {
     setPassengerList((prevData) => _result);
   };
 
-  ///// Handle Passenger Drop-off Place
-  const handlePassengerDropOff = (name, value) => {
-    const _result = passengerList.map((item) => {
-      if (name.indexOf(item.id) > -1) {
-        return {
-          ...item,
-          dropOff: value,
-          validDropOff: true,
-        };
-      } else {
-        return item;
-      }
-    });
+  ///// Handle Passenger Drop-off Place huỳnh
+  // const handlePassengerDropOff = (name, value) => {
+  //   const _result = passengerList.map((item) => {
+  //     if (name.indexOf(item.id) > -1) {
+  //       return {
+  //         ...item,
+  //         dropOff: value,
+  //         validDropOff: true,
+  //       };
+  //     } else {
+  //       return item;
+  //     }
+  //   });
 
-    setPassengerList((prevData) => _result);
+  //   setPassengerList((prevData) => _result);
+  // };
+  ///// Handle Passenger Drop-off Place PHUOC EDIT
+  const handlePassengerDropOff = (name, value) => {
+    console.log(name + ": " + value);
   };
 
   //////Cancel Fetch API After Timeout
@@ -1080,6 +1084,7 @@ const FormCar = () => {
                       <KoreaPassengerInfo
                         empName={empName}
                         expList={_EXPList}
+                        dropOffList={_dropOffList}
                         handleName={handleSearch}
                         handlePassengerSelect={handlePassengerSelect}
                         handleDropOff={handlePassengerDropOff}

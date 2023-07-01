@@ -1,3 +1,4 @@
+import React from "react";
 import { Grid, TextField, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import SelectModal from "../../../../SelectModal";
@@ -5,10 +6,12 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import PassengersSelect from "../../../../SelectModal/PassengersSelect";
 import DepartmentSelect from "../../../../SelectModal/DepartmentSelect";
+import DropOffSelect from "../../../../SelectModal/DropOffSelect";
 //Include Me!
 const KoreaPassengerInfo = ({
   empName,
   expList,
+  dropOffList,
   handleDropOff,
   handlePassengerSelect,
 }) => {
@@ -41,21 +44,17 @@ const KoreaPassengerInfo = ({
           />
         </Grid>
         <Grid item xs={12} md={4} xl={4}>
-          <PassengersSelect handleEvent={handlePassengerSelect} expList={expList} />
+          <PassengersSelect
+            handleEvent={handlePassengerSelect}
+            expList={expList}
+          />
         </Grid>
-        {/* <Grid item xs={12} md={4} xl={5}>
-          <Stack sx={{ width: "100%" }}>
-            <SelectModal
-              name={"DROP_OFF_CD"}
-              data={dropOffList}
-              placeholder={t("frm_dropOff_placeholder")}
-              cValue={""}
-              handleEvent={handleDropOff}
-              isValidate={true}
-              message={t("frm_required")}
-            />
-          </Stack>
-        </Grid> */}
+        <Grid item xs={12} md={4} xl={5}>
+          <DropOffSelect
+            handleEvent={handleDropOff}
+            DropOffList={dropOffList}
+          />
+        </Grid>
       </Grid>
     </Grid>
   );
