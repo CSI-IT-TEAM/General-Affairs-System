@@ -59,6 +59,7 @@
     "frm_new_password_placeholder": "Create new password",
     "frm_confirm_password_placeholder": "Confirm new password",
     "frm_pass_placeholder": "Type Passenger ID",
+    "frm_number_passenger_placeholder": "Number of Passenger",
     "frm_txt_passenger_placeholder": "Passenger",
 
     "btn_request": "Request Now",
@@ -69,6 +70,7 @@
     "btn_reset": "Reset now",
 
     "404_title": "Oops! Page not found",
+    "no_passengers_error": "Oops! Please checking Passengers List Again!",
     "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable",
 
     "frm_required": "The text field is required"

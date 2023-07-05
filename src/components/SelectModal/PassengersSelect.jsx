@@ -21,7 +21,7 @@ const MenuProps = {
 
 const names = ["Mr.Shim", "Mr.Nguyên", "Mr.Hoàng", "Mr.Điền", "Mr.Phước"];
 
-const PassengersSelect = ({ handleEvent, expList, }) => {
+const PassengersSelect = ({ cValue, handleEvent, expList }) => {
   const [personName, setPersonName] = React.useState([]);
   const handleClearClick = () => {
     setPersonName([]);
@@ -35,7 +35,6 @@ const PassengersSelect = ({ handleEvent, expList, }) => {
       typeof value === "string" ? value.split(",") : value
     );
     handleEvent(event.target.value);
-    console.log(obj.key.replace(/[^0-9\s]/g, ""));
   };
 
   return (
@@ -48,7 +47,7 @@ const PassengersSelect = ({ handleEvent, expList, }) => {
           labelId="demo-multiple-checkbox-label"
           id="demo-multiple-checkbox"
           multiple
-          value={personName}
+          value={cValue}
           onChange={handleChange}
           input={<OutlinedInput label="Korean Passengers" />}
           //   renderValue={(selected) => selected.join(", ")}
@@ -79,13 +78,12 @@ const PassengersSelect = ({ handleEvent, expList, }) => {
           {expList !== null &&
             expList.map((item) => (
               <MenuItem key={item.EMPID} value={item.EMPID}>
-                <Checkbox checked={personName.indexOf(item.EMPID) > -1} />
+                <Checkbox checked={cValue.indexOf(item.EMPID) > -1} />
                 <ListItemText primary={item.NAME} />
               </MenuItem>
             ))}
         </Select>
       </FormControl>
-      
     </div>
   );
 };

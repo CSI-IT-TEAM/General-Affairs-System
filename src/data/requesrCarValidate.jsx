@@ -39,11 +39,11 @@ const reqCarValidate = {
         message: 'The depart name field is required',
         messageVN: 'Dữ liệu không được rỗng',
     },     
-    "MAN_QTY": {
-        validate: true,
-        message: 'The passengers field must be greater than 0',
-        messageVN: 'Dữ liệu phải lớn hơn 0',
-    },
+    // "MAN_QTY": {
+    //     validate: true,
+    //     message: 'The passengers field must be greater than 0',
+    //     messageVN: 'Dữ liệu phải lớn hơn 0',
+    // },
 }
 
 export default reqCarValidate;

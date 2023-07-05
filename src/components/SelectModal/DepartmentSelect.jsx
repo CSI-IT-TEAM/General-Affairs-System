@@ -7,6 +7,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import PersonIcon from "@mui/icons-material/Person";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import { InputAdornment, TextField, Typography } from "@mui/material";
 
 const ITEM_HEIGHT = 48;
@@ -22,9 +24,15 @@ const MenuProps = {
 
 const names = ["IT", "HR", "Modern", "PCC", "RSM"];
 
-const DepartmentSelect = ({ handleEvent, PassengerChange }) => {
+const DepartmentSelect = ({
+  cValue,
+  tValue,
+  DeptList,
+  handleEvent,
+  PassengerChange,
+}) => {
   const [deptName, setDeptName] = React.useState([]);
-  const [PassengerCount, setPassengerCount] = React.useState(null);
+  const [PassengerCount, setPassengerCount] = React.useState(1);
   const handleChange = (event) => {
     const {
       target: { value },
@@ -37,8 +45,13 @@ const DepartmentSelect = ({ handleEvent, PassengerChange }) => {
   };
 
   const handlePassengerChange = (event) => {
-    setPassengerCount(event.target.value);
-    PassengerChange(event.target.value);
+    if (event.target.value < 1) {
+      setPassengerCount(1);
+      PassengerChange(1);
+    } else {
+      setPassengerCount(event.target.value);
+      PassengerChange(event.target.value);
+    }
   };
 
   return (
@@ -48,33 +61,34 @@ const DepartmentSelect = ({ handleEvent, PassengerChange }) => {
         <Select
           labelId="demo-multiple-checkbox-label"
           id="demo-multiple-checkbox"
-          value={deptName}
+          value={cValue}
           onChange={handleChange}
           input={<OutlinedInput label="Department" />}
-          renderValue={(selected) => selected.join(", ")}
+          // renderValue={(selected) => selected.join(", ")}
           MenuProps={MenuProps}
         >
-          {names.map((name) => (
-            <MenuItem key={name} value={name}>
-              <ListItemText primary={name} />
+          {DeptList.map((item) => (
+            <MenuItem key={item.DEPT_CD} value={item.DEPT_NM}>
+              <ListItemText primary={item.DEPT_NM} />
             </MenuItem>
           ))}
         </Select>
 
-        {deptName.length > 0 && (
+        {cValue && (
           <TextField
+            type="number"
             name="PASSSENGER_COUNT"
             className="b-text-input__desc b-text-input__desc--sub"
             disabled={false}
             placeholder="Number of passengers"
             color="info"
-            fullWidth 
-            value={PassengerCount}
+            fullWidth
+            value={tValue}
             onChange={handlePassengerChange}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <PlaceOutlinedIcon />
+                  <PeopleAltIcon />
                 </InputAdornment>
               ),
             }}

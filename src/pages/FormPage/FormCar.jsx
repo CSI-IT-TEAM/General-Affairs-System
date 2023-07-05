@@ -14,6 +14,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Divider,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,6 +34,7 @@ import {
 import InputAdornment from "@mui/material/InputAdornment";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 
 import {
   reqCarData,
@@ -83,14 +85,15 @@ const FormCar = () => {
 
   const [type, setType] = useState("connect-failed");
 
-  const [Dropoff, setDropoff] = useState("");
-
   /////// Request Data
   const [data, setData] = useState(reqCarData);
   const [validate, setValidate] = useState(reqCarValidate);
   const [reason, setReason] = useState(null);
   const [passengerList, setPassengerList] = useState([]);
-
+  const [passengerSelectList, setpassengerSelectList] = useState([]);
+  const [PassengerCount, setPassengerCount] = useState(1);
+  const [PassengerDeptCount, setPassengerDeptCount] = useState(1);
+  const [DeptName, setDeptName] = useState("");
   /////// Handle Warning Modal
   const [openWarn, setOpenWarn] = useState(false);
   const handleOpenWarn = () => setOpenWarn(true);
@@ -107,10 +110,67 @@ const FormCar = () => {
   let _dropOffList = JSON.parse(sessionStorage.getItem("dropOffList"));
   let _deptEmpList = JSON.parse(sessionStorage.getItem("deptEmpList"));
   let _EXPList = JSON.parse(sessionStorage.getItem("EXPList"));
+  let _DEPTList = JSON.parse(sessionStorage.getItem("DeptList"));
 
   ////// Search EMP ID
   const [empID, setEmpID] = useState("");
   const [empName, setempName] = useState("");
+
+  async function CalcPassengers() {
+    try {
+      var PassengerCounts = 0;
+      const empData = JSON.parse(sessionStorage.getItem("userData"));
+      var _arrList = [];
+      if (isInclude) {
+        console.log("Bao gồm tôi");
+        _arrList.push({
+          id: empData.EMPID,
+          name: empData.EMP_NM,
+          validate: true,
+          dropOff: "",
+          validDropOff: true,
+        });
+      }
+
+      //If selected Korea, then add Korean Passengers
+      if (passengerSelectList !== null && passengerSelectList.length > 0) {
+        for (var i = 0; i < passengerSelectList.length; i++) {
+          var EMPID = passengerSelectList[i];
+          var EXPs = _EXPList.filter((item) => item.EMPID === EMPID);
+          if (EXPs.length > 0) {
+            _arrList.push({
+              id: EMPID,
+              name: EXPs[0].NAME,
+              validate: true,
+              dropOff: "",
+              validDropOff: true,
+            });
+          }
+        }
+      }
+      //if selected dept then add dept to the list
+      if (DeptName) {
+        _arrList.push({
+          id: DeptName,
+          name: DeptName + "-" + PassengerDeptCount,
+          validate: true,
+          dropOff: "",
+          validDropOff: true,
+        });
+      }
+
+      PassengerCounts =
+        parseInt(passengerSelectList.length) +
+        parseInt(DeptName === "" ? 0 : PassengerDeptCount) +
+        (isInclude ? 1 : 0);
+      console.log(PassengerCounts);
+    } catch (e) {
+      console.log(e.message);
+      return [];
+    }
+
+    return [_arrList, PassengerCounts];
+  }
 
   const handlePassengerList = (value) => {
     const _result = passengerList.map((item) => {
@@ -127,23 +187,33 @@ const FormCar = () => {
 
     setPassengerList((prevData) => _result);
   };
+  ///PassengerKorean List Select
   const handlePassengerSelect = (
     event: React.SelectChangeEvent<HTMLInputElement>
   ) => {
-    //typeof value === "string" ? value.split(",") : value
-    console.log(event);
+    setpassengerSelectList(event);
   };
+  //Passenger IN Dept Select
   const handleDeptSelect = (
     event: React.SelectChangeEvent<HTMLInputElement>
   ) => {
     //typeof value === "string" ? value.split(",") : value
     console.log(event);
+    setDeptName(event);
   };
 
+  //Number Of Passenger in Dept
   const HandlePassengerChange = (
     value: React.ChangeEvent<HTMLInputElement>
   ) => {
     console.log(value);
+
+    setPassengerDeptCount(value);
+    setData((prevData) => {
+      return {
+        ...prevData,
+      };
+    });
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,7 +256,15 @@ const FormCar = () => {
     //   }
     // }
   };
-
+  //   for(let iCount = 1; iCount <= _result; iCount++){
+  //     _arrList.push({
+  //         id: "passenger_" + iCount,
+  //         name: iCount === 1 && isInclude ? empData.EMP_NM : "",
+  //         validate: iCount === 1 && isInclude ? true : false,
+  //         dropOff: "",
+  //         validDropOff: false,
+  //     });
+  // }
   ////// Handle Include Myself Event
   const handleIsInclude = () => {
     setIsInclude((isInclude) => !isInclude);
@@ -202,6 +280,14 @@ const FormCar = () => {
   const handleRadPassList = (event) => {
     console.log(event.target.value);
     setPassengerNameList(event.target.value);
+    //setPassengerList([]);
+    // setData((prevData) => {
+    //   return {
+    //     ...prevData,
+    //     ["PASSENGERS_LIST_RD"]: event.target.value,
+    //     ["PASSENGERS_COUNT"]: 0,
+    //   };
+    // });
   };
 
   /////// Handle Default Data
@@ -270,6 +356,8 @@ const FormCar = () => {
         break;
       }
       default: {
+        console.log(name);
+        console.log(value);
         _result = value;
         break;
       }
@@ -512,36 +600,36 @@ const FormCar = () => {
 
         break;
       }
-      case "MAN_QTY":
-        setPassengerList((prevData) => []);
-        let _arrList = [];
-        const empData = JSON.parse(sessionStorage.getItem("userData"));
+      //case "MAN_QTY":
+      // setPassengerList((prevData) => []);
+      // let _arrList = [];
+      // const empData = JSON.parse(sessionStorage.getItem("userData"));
 
-        for (let iCount = 1; iCount <= _result; iCount++) {
-          _arrList.push({
-            id: "passenger_" + iCount,
-            name: iCount === 1 && isInclude ? empData.EMP_NM : "",
-            validate: iCount === 1 && isInclude ? true : false,
-            dropOff: "",
-            validDropOff: false,
-          });
-        }
+      // for (let iCount = 1; iCount <= _result; iCount++) {
+      //   _arrList.push({
+      //     id: "passenger_" + iCount,
+      //     name: iCount === 1 && isInclude ? empData.EMP_NM : "",
+      //     validate: iCount === 1 && isInclude ? true : false,
+      //     dropOff: "",
+      //     validDropOff: false,
+      //   });
+      // }
 
-        setPassengerList((prevData) => _arrList);
-        setData((prevData) => {
-          return {
-            ...prevData,
-            [name]: _result,
-          };
-        });
+      // setPassengerList((prevData) => _arrList);
+      // setData((prevData) => {
+      //   return {
+      //     ...prevData,
+      //     [name]: _result,
+      //   };
+      // });
 
-        if (_result === "") {
-          handleSetValidate(name, false);
-        } else {
-          handleSetValidate(name, true);
-        }
-
-        break;
+      // if (_result === "") {
+      //   handleSetValidate(name, false);
+      // } else {
+      //   handleSetValidate(name, true);
+      // }
+      // handleSetValidate(name, true);
+      //break;
 
       default: {
         setData((prevData) => {
@@ -603,11 +691,28 @@ const FormCar = () => {
 
   //////// Handle Upload Data
   const handleSubmit = async () => {
+    // await CalcPassengers().then(async (result) => {
+    //   if (result !== null && result.length > 0) {
+    //     await uploadCarData(data, result[0], result[1]).then((uploadData) => {
+    //       console.log(uploadData);
+    //     });
+    //   }
+    // });
+
     if (handleVaidate()) {
       if (handleValidateDepart()) {
-        const _uploadData = await uploadCarData(data, passengerList);
-        //console.log(_uploadData)
-        fetchUpload(_uploadData);
+        await CalcPassengers().then(async (result) => {
+          if (result !== null && result.length > 0 && result[1] > 0) {
+            await uploadCarData(data, result[0], result[1]).then(
+              (uploadData) => {
+                console.log(uploadData);
+                fetchUpload(uploadData);
+              }
+            );
+          } else {
+            alert(t("no_passengers_error"));
+          }
+        });
       }
     }
   };
@@ -645,7 +750,6 @@ const FormCar = () => {
   /////// Handle Validate Form Data
   const handleVaidate = () => {
     let _result = true;
-
     for (const property in data) {
       switch (property) {
         case "MAIN_REASON_CD":
@@ -656,6 +760,7 @@ const FormCar = () => {
         case "DEPART_NM":
           if (data[property] === "") {
             _result = false;
+
             handleSetValidate(property, false);
           } else {
             handleSetValidate(property, true);
@@ -664,6 +769,7 @@ const FormCar = () => {
         case "COMEBACK_DATE":
           if (data[property] === "") {
             _result = false;
+
             handleSetValidate(property, false);
           } else {
             let _isValidate = isCombackDate_Validate(
@@ -709,35 +815,37 @@ const FormCar = () => {
             }
           }
           break;
-        case "MAN_QTY":
-          if (data[property] === "" || isNaN(data[property])) {
-            _result = false;
-            handleSetValidate(property, false);
-          } else {
-            if (Number(data[property]) < 0) {
-              _result = false;
-              handleSetValidate(property, false);
-            } else {
-              handleSetValidate(property, true);
-            }
-          }
-          break;
+        // case "MAN_QTY":
+        //   if (data[property] === "" || isNaN(data[property])) {
+        //     _result = false;
+        //     handleSetValidate(property, false);
+        //   } else {
+        //     if (Number(data[property]) < 0) {
+        //       _result = false;
+        //       handleSetValidate(property, false);
+        //     } else {
+        //       handleSetValidate(property, true);
+        //     }
+        //   }
+        //   break;
         default:
           break;
       }
     }
+    console.log(passengerList);
 
     ////// Validate Passenger List
-    for (let iCount = 0; iCount < passengerList.length; iCount++) {
-      if (
-        passengerList[iCount].validate === false ||
-        passengerList[iCount].validDropOff === false
-      ) {
-        _result = false;
-        break;
-      }
-    }
+    // for (let iCount = 0; iCount < passengerList.length; iCount++) {
+    //   if (
+    //     passengerList[iCount].validate === false ||
+    //     passengerList[iCount].validDropOff === false
+    //   ) {
+    //     _result = false;
+    //     break;
+    //   }
+    // }
 
+    console.log(_result);
     return _result;
   };
 
@@ -1035,7 +1143,42 @@ const FormCar = () => {
                       label={t("frm_include_me")}
                     />
                     {/* </Stack> */}
+                    {isInclude && (
+                      <Grid item xs={12} md={4} xl={3}>
+                        <Stack
+                          sx={{ width: "100%" }}
+                          direction="row"
+                          alignItems="center"
+                          className="s-form-sub"
+                        >
+                          <SquareRoundedIcon sx={{ fontSize: 12 }} />
+                          <Typography
+                            variant="h6"
+                            className="b-text-input__sub b-italic"
+                          >
+                            {`${t("frm_txt_passenger_placeholder")}`}
+                          </Typography>
+                        </Stack>
+                        <TextField
+                          inputProps={{
+                            inputMode: "numeric",
+                            pattern: "[0-9]*",
+                          }}
+                          className="b-text-input__desc"
+                          disabled={true}
+                          placeholder={t("frm_pass_placeholder")}
+                          color="info"
+                          fullWidth
+                          value={empName}
+                        />
+                      </Grid>
+                    )}
                   </Stack>
+                  <Divider
+                    sx={{
+                      height: "10px ",
+                    }}
+                  />
                   <FormControl>
                     <FormLabel id="demo-row-radio-buttons-group-label">
                       {t("frm_passengers_list")}
@@ -1043,12 +1186,13 @@ const FormCar = () => {
                     <RadioGroup
                       row
                       aria-labelledby="demo-row-radio-buttons-group-label"
-                      name="row-radio-buttons-group"
+                      name="PASSENGERS_LIST_RD"
                       value={PassengerNameList}
                       onChange={handleRadPassList}
                     >
                       <FormControlLabel
                         color="success"
+                        name="KOREA"
                         value="Korea"
                         control={<Radio />}
                         label={t("frm_korea_list")}
@@ -1056,6 +1200,7 @@ const FormCar = () => {
                       <FormControlLabel
                         color="secondary"
                         value="VietNam"
+                        name="VIETNAM"
                         control={<Radio />}
                         label={t("frm_vietnam_list")}
                       />
@@ -1072,43 +1217,34 @@ const FormCar = () => {
                 alignItems={{ xs: "normal", sm: "center" }}
                 className="b-text-input mt-10"
               >
-                <Typography
+                {/* <Typography
                   variant="h6"
                   className="b-text-input__title b-italic"
                 >
-                  {t("frm_passenger_list")} <span>(*)</span>
-                </Typography>
-                <Grid container spacing={2} className="s-form-grid">
-                  {isInclude ? (
-                    PassengerNameList === "Korea" ? (
-                      <KoreaPassengerInfo
-                        empName={empName}
-                        expList={_EXPList}
-                        dropOffList={_dropOffList}
-                        handleName={handleSearch}
-                        handlePassengerSelect={handlePassengerSelect}
-                        handleDropOff={handlePassengerDropOff}
-                      />
-                    ) : (
-                      <VietnamPassengerInfo
-                        empName={empName}
-                        dropOffList={_dropOffList}
-                        handleName={handleSearch}
-                        handleDropOff={handlePassengerDropOff}
-                        deptNameHandleSelect={handleDeptSelect}
-                        _PassengerChange={HandlePassengerChange}
-                      />
-                    )
-                  ) : (
-                    <Typography
-                      sx={{
-                        ml: 2,
-                      }}
-                    >
-                      Comming soon...
-                    </Typography>
-                  )}
+                  {t("frm_passenger_list")}
+                </Typography> */}
 
+                <Grid container spacing={2} className="s-form-grid">
+                  {PassengerNameList === "Korea" ? (
+                    <KoreaPassengerInfo
+                      cValue={passengerSelectList}
+                      expList={_EXPList}
+                      handleName={handleSearch}
+                      handlePassengerSelect={handlePassengerSelect}
+                    />
+                  ) : (
+                    <VietnamPassengerInfo
+                      cValue={DeptName}
+                      tValue={PassengerDeptCount}
+                      DeptList={_DEPTList}
+                      empName={empName}
+                      dropOffList={_dropOffList}
+                      handleName={handleSearch}
+                      handleDropOff={handlePassengerDropOff}
+                      deptNameHandleSelect={handleDeptSelect}
+                      _PassengerChange={HandlePassengerChange}
+                    />
+                  )}
                   {/* {passengerList.map((item, index) => { */}
                   {/* // if (!isInclude && index === 0) {
                         //   return (
@@ -1135,7 +1271,6 @@ const FormCar = () => {
                         //   );
                         // }
                      // })} */}
-
                   {/* <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-autowidth-label">
                       Age

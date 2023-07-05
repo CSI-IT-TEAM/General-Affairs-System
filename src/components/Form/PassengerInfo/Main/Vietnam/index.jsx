@@ -1,3 +1,4 @@
+import React from "react";
 import { Grid, TextField, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import SelectModal from "../../../../SelectModal";
@@ -6,49 +7,24 @@ import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import DepartmentSelect from "../../../../SelectModal/DepartmentSelect";
 //Include Me!
 const VietnamPassengerInfo = ({
-  item,
-  index,
-  empName,
-  dropOffList,
-  handleDropOff,
+  cValue,
+  tValue,
+  DeptList,
   deptNameHandleSelect,
   _PassengerChange,
 }) => {
   /////// Translate Lang
   const { t } = useTranslation();
+  const [NumberOfPassenger, setNumberOfPassenger] = React.useState("");
 
   return (
-    <Grid
-      item
-      xs={12}
-      className="s-form-grid__item s-form-grid__item--first"
-      key={index}
-    >
+    <Grid item xs={12} className="s-form-grid__item s-form-grid__item--first">
       <Grid container spacing={2}>
-        <Grid item xs={12} md={4} xl={3}>
-          <Stack
-            sx={{ width: "100%" }}
-            direction="row"
-            alignItems="center"
-            className="s-form-sub"
-          >
-            <SquareRoundedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="h6" className="b-text-input__sub b-italic">
-              {`${t("frm_txt_passenger_placeholder")} ${index + 1}`}
-            </Typography>
-          </Stack>
-          <TextField
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-            className="b-text-input__desc"
-            disabled={true}
-            placeholder={t("frm_pass_placeholder")}
-            color="info"
-            fullWidth
-            value={empName}
-          />
-        </Grid>
         <Grid item xs={12} md={4} xl={4}>
           <DepartmentSelect
+            cValue={cValue}
+            tValue={tValue}
+            DeptList={DeptList}
             handleEvent={deptNameHandleSelect}
             PassengerChange={_PassengerChange}
           />

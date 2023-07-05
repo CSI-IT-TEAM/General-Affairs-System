@@ -55,6 +55,7 @@
     "frm_pickup_placeholder": "Chọn điểm đón",
     "frm_dropOff_placeholder": "Điểm trả khách",
     "frm_passenger_placeholder": "Chọn số hành khách",
+    "frm_number_passenger_placeholder": "Nhập số lượng hành khách",
     "frm_passenger_list_placeholder": "Nhập danh sách hành khách",
     "frm_new_password_placeholder": "Nhập mật khẩu mới",
     "frm_confirm_password_placeholder": "Xác nhận mật khẩu mới",
@@ -69,6 +70,7 @@
     "btn_reset": "Đặt lại ngay",
 
     "404_title": "Oops! Trang không tìm thấy",
+    "no_passengers_error": "Oops! Vui lòng kiểm tra lại danh sách hành khách!",
     "404_desc": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng",
 
     "frm_required": "Trường dữ liệu không được rỗng"

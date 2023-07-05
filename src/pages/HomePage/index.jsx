@@ -65,6 +65,8 @@ const HomePage = () => {
             sessionStorage.setItem("deptEmpList", JSON.stringify(result));
           } else if (type === "EXP") {
             sessionStorage.setItem("EXPList", JSON.stringify(result));
+          }else if (type === "DEPT") {
+            sessionStorage.setItem("DeptList", JSON.stringify(result));
           }
         }
       });
@@ -95,6 +97,7 @@ const HomePage = () => {
       handleReason("DROP_OFF");
       handleReason("DEPT_EMP", empData.DEPT);
       handleReason("EXP");
+      handleReason("DEPT");
     }
   };
 
