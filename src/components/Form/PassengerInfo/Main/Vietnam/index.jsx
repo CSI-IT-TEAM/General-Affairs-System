@@ -18,9 +18,7 @@ const VietnamPassengerInfo = ({
   const [NumberOfPassenger, setNumberOfPassenger] = React.useState("");
 
   return (
-    <Grid item xs={12} className="s-form-grid__item s-form-grid__item--first">
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4} xl={4}>
+   
           <DepartmentSelect
             cValue={cValue}
             tValue={tValue}
@@ -28,22 +26,6 @@ const VietnamPassengerInfo = ({
             handleEvent={deptNameHandleSelect}
             PassengerChange={_PassengerChange}
           />
-        </Grid>
-        {/* <Grid item xs={12} md={4} xl={5}>
-          <Stack sx={{ width: "100%" }}>
-            <SelectModal
-              name={item.id + "_DROP_OFF_CD"}
-              data={dropOffList}
-              placeholder={t("frm_dropOff_placeholder")}
-              cValue={item.dropOff}
-              handleEvent={handleDropOff}
-              isValidate={item.validDropOff}
-              message={t("frm_required")}
-            />
-          </Stack>
-        </Grid> */}
-      </Grid>
-    </Grid>
   );
 };
 

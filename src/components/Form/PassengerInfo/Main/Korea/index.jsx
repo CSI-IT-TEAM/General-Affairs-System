@@ -12,28 +12,18 @@ const KoreaPassengerInfo = ({
   cValue,
   expList,
   handlePassengerSelect,
+  handleClearClick,
 }) => {
   /////// Translate Lang
   const { t } = useTranslation();
 
   return (
-    <Grid item xs={12} className="s-form-grid__item s-form-grid__item--first">
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4} xl={4}>
-          <PassengersSelect
-            cValue={cValue}
-            handleEvent={handlePassengerSelect}
-            expList={expList}
-          />
-        </Grid>
-        {/* <Grid item xs={12} md={4} xl={5}>
-          <DropOffSelect
-            handleEvent={handleDropOff}
-            DropOffList={dropOffList}
-          />
-        </Grid> */}
-      </Grid>
-    </Grid>
+    <PassengersSelect
+      cValue={cValue}
+      handleEvent={handlePassengerSelect}
+      expList={expList}
+      handleClearClick={handleClearClick}
+    />
   );
 };
 

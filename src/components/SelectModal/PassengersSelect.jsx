@@ -21,11 +21,9 @@ const MenuProps = {
 
 const names = ["Mr.Shim", "Mr.Nguyên", "Mr.Hoàng", "Mr.Điền", "Mr.Phước"];
 
-const PassengersSelect = ({ cValue, handleEvent, expList }) => {
+const PassengersSelect = ({ cValue, handleEvent, expList,handleClearClick }) => {
   const [personName, setPersonName] = React.useState([]);
-  const handleClearClick = () => {
-    setPersonName([]);
-  };
+ 
   const handleChange = (event, obj) => {
     const {
       target: { value },

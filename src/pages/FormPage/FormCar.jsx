@@ -171,6 +171,9 @@ const FormCar = () => {
 
     return [_arrList, PassengerCounts];
   }
+  const handleClearClick = () => {
+    setpassengerSelectList([]);
+  };
 
   const handlePassengerList = (value) => {
     const _result = passengerList.map((item) => {
@@ -1101,6 +1104,7 @@ const FormCar = () => {
                     </Stack>
                   </Stack>
                 </Grid>
+
                 <Grid item xs={12} md={6}>
                   <Stack
                     marginBottom={2}
@@ -1108,19 +1112,65 @@ const FormCar = () => {
                     alignItems={{ xs: "normal", sm: "center" }}
                     className="b-text-input"
                   >
-                    {/* <Typography
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
+                          onChange={handleIsInclude}
+                        />
+                      }
+                      label={t("frm_include_me")}
+                    />
+                    <Stack sx={{ width: "100%" }}>
+                      {isInclude && (
+                        <Grid item>
+                          <Stack
+                            sx={{ width: "100%" }}
+                            direction="row"
+                            alignItems="center"
+                            className="s-form-sub"
+                          >
+                            <SquareRoundedIcon sx={{ fontSize: 12 }} />
+                            <Typography
+                              variant="h6"
+                              className="b-text-input__sub b-italic"
+                            >
+                              {`${t("frm_txt_passenger_placeholder")}`}
+                            </Typography>
+                          </Stack>
+                          <TextField
+                            className="b-text-input__desc"
+                            disabled={true}
+                            placeholder={t("frm_pass_placeholder")}
+                            color="info"
+                            fullWidth
+                            value={empName}
+                          />
+                        </Grid>
+                      )}
+                    </Stack>
+                  </Stack>
+                </Grid>
+
+                {/* <Stack
+                    marginBottom={2}
+                    direction={{ xs: "column", sm: "row" }}
+                    alignItems={{ xs: "normal", sm: "center" }}
+                    className="b-text-input"
+                  > */}
+                {/* <Typography
                       variant="h6"
                       className="b-text-input__title b-italic"
                     >
                       {t("frm_passenger")} <span>(*)</span>
                     </Typography> */}
-                    {/* <Stack
+                {/* <Stack
                       sx={{ width: "100%" }}
                       direction={{ xs: "column", sm: "row" }}
                       justifyContent="center"
                       alignItems={{ xs: "flex-start", sm: "center" }}
                     > */}
-                    {/* <SelectModal
+                {/* <SelectModal
                         name="MAN_QTY"
                         data={passengerNum}
                         placeholder={t("frm_passenger_placeholder")}
@@ -1133,7 +1183,7 @@ const FormCar = () => {
                             : validate.MAN_QTY.messageVN
                         }
                       /> */}
-                    <FormControlLabel
+                {/* <FormControlLabel
                       control={
                         <Checkbox
                           sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
@@ -1141,10 +1191,10 @@ const FormCar = () => {
                         />
                       }
                       label={t("frm_include_me")}
-                    />
-                    {/* </Stack> */}
-                    {isInclude && (
-                      <Grid item xs={12} md={4} xl={3}>
+                    /> */}
+                {/* </Stack> */}
+                {/* {isInclude && (
+                      <Grid item xs={12} md={6}>
                         <Stack
                           sx={{ width: "100%" }}
                           direction="row"
@@ -1172,81 +1222,48 @@ const FormCar = () => {
                           value={empName}
                         />
                       </Grid>
-                    )}
+                    )} */}
+                {/* </Stack> */}
+                <Grid item>
+                  <Stack sx={{ width: "100%" }}>
+                    <FormControl>
+                      <Typography
+                        variant="h6"
+                        className="b-text-input__title b-italic"
+                      >
+                        {t("frm_passengers_list")} <span>(*)</span>
+                      </Typography>
+                      {/* <FormLabel id="demo-row-radio-buttons-group-label">
+                        {t("frm_passengers_list")}
+                      </FormLabel> */}
+                      <RadioGroup
+                        row
+                        aria-labelledby="demo-row-radio-buttons-group-label"
+                        name="PASSENGERS_LIST_RD"
+                        value={PassengerNameList}
+                        onChange={handleRadPassList}
+                      >
+                        <FormControlLabel
+                          color="success"
+                          name="KOREA"
+                          value="Korea"
+                          control={<Radio />}
+                          label={t("frm_korea_list")}
+                        />
+                        <FormControlLabel
+                          color="secondary"
+                          value="VietNam"
+                          name="VIETNAM"
+                          control={<Radio />}
+                          label={t("frm_vietnam_list")}
+                        />
+                      </RadioGroup>
+                    </FormControl>
                   </Stack>
-                  <Divider
-                    sx={{
-                      height: "10px ",
-                    }}
-                  />
-                  <FormControl>
-                    <FormLabel id="demo-row-radio-buttons-group-label">
-                      {t("frm_passengers_list")}
-                    </FormLabel>
-                    <RadioGroup
-                      row
-                      aria-labelledby="demo-row-radio-buttons-group-label"
-                      name="PASSENGERS_LIST_RD"
-                      value={PassengerNameList}
-                      onChange={handleRadPassList}
-                    >
-                      <FormControlLabel
-                        color="success"
-                        name="KOREA"
-                        value="Korea"
-                        control={<Radio />}
-                        label={t("frm_korea_list")}
-                      />
-                      <FormControlLabel
-                        color="secondary"
-                        value="VietNam"
-                        name="VIETNAM"
-                        control={<Radio />}
-                        label={t("frm_vietnam_list")}
-                      />
-                    </RadioGroup>
-                  </FormControl>
                 </Grid>
-              </Grid>
 
-              {/* {passengerList !== null &&
-                passengerList.length > 0 && (  */}
-              <Stack
-                marginBottom={2}
-                direction={{ xs: "column", sm: "row" }}
-                alignItems={{ xs: "normal", sm: "center" }}
-                className="b-text-input mt-10"
-              >
-                {/* <Typography
-                  variant="h6"
-                  className="b-text-input__title b-italic"
-                >
-                  {t("frm_passenger_list")}
-                </Typography> */}
-
-                <Grid container spacing={2} className="s-form-grid">
-                  {PassengerNameList === "Korea" ? (
-                    <KoreaPassengerInfo
-                      cValue={passengerSelectList}
-                      expList={_EXPList}
-                      handleName={handleSearch}
-                      handlePassengerSelect={handlePassengerSelect}
-                    />
-                  ) : (
-                    <VietnamPassengerInfo
-                      cValue={DeptName}
-                      tValue={PassengerDeptCount}
-                      DeptList={_DEPTList}
-                      empName={empName}
-                      dropOffList={_dropOffList}
-                      handleName={handleSearch}
-                      handleDropOff={handlePassengerDropOff}
-                      deptNameHandleSelect={handleDeptSelect}
-                      _PassengerChange={HandlePassengerChange}
-                    />
-                  )}
-                  {/* {passengerList.map((item, index) => { */}
-                  {/* // if (!isInclude && index === 0) {
+                {/* {passengerList.map((item, index) => { */}
+                {/* // if (!isInclude && index === 0) {
                         //   return (
                         //     <MainPassengerInfo
                         //       key={index}
@@ -1271,7 +1288,7 @@ const FormCar = () => {
                         //   );
                         // }
                      // })} */}
-                  {/* <FormControl fullWidth>
+                {/* <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-autowidth-label">
                       Age
                     </InputLabel>
@@ -1288,9 +1305,30 @@ const FormCar = () => {
                     
                     </Select>
                   </FormControl> */}
-                </Grid>
-              </Stack>
-              {/* )} */}
+              </Grid>
+              <Box fullWidth>
+                {PassengerNameList === "Korea" ? (
+                  <KoreaPassengerInfo
+                    cValue={passengerSelectList}
+                    expList={_EXPList}
+                    handleName={handleSearch}
+                    handlePassengerSelect={handlePassengerSelect}
+                    handleClearClick={handleClearClick}
+                  />
+                ) : (
+                  <VietnamPassengerInfo
+                    cValue={DeptName}
+                    tValue={PassengerDeptCount}
+                    DeptList={_DEPTList}
+                    empName={empName}
+                    dropOffList={_dropOffList}
+                    handleName={handleSearch}
+                    handleDropOff={handlePassengerDropOff}
+                    deptNameHandleSelect={handleDeptSelect}
+                    _PassengerChange={HandlePassengerChange}
+                  />
+                )}
+              </Box>
               <Box className="s-form-bot">
                 <ButtonPrimary
                   title={t("btn_request")}
