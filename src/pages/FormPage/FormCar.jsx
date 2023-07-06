@@ -149,7 +149,7 @@ const FormCar = () => {
         }
       }
       //if selected dept then add dept to the list
-      if (DeptName) {
+      if (DeptName && PassengerDeptCount !== "") {
         _arrList.push({
           id: DeptName,
           name: DeptName + "-" + PassengerDeptCount,
@@ -161,7 +161,9 @@ const FormCar = () => {
 
       PassengerCounts =
         parseInt(passengerSelectList.length) +
-        parseInt(DeptName === "" ? 0 : PassengerDeptCount) +
+        parseInt(
+          DeptName === "" || PassengerDeptCount === "" ? 0 : PassengerDeptCount
+        ) +
         (isInclude ? 1 : 0);
       console.log(PassengerCounts);
     } catch (e) {
@@ -695,21 +697,27 @@ const FormCar = () => {
   //////// Handle Upload Data
   const handleSubmit = async () => {
     // await CalcPassengers().then(async (result) => {
-    //   if (result !== null && result.length > 0) {
-    //     await uploadCarData(data, result[0], result[1]).then((uploadData) => {
-    //       console.log(uploadData);
-    //     });
+    //   if (result !== null && result.length > 0 && result[1] > 0) {
+    //     await uploadCarData(data, result[0], result[1]).then(
+    //       (uploadData) => {
+    //         console.log(uploadData);
+    //         // fetchUpload(uploadData);
+    //       }
+    //     );
+    //   } else {
+    //     alert(t("no_passengers_error"));
     //   }
     // });
 
     if (handleVaidate()) {
+
       if (handleValidateDepart()) {
         await CalcPassengers().then(async (result) => {
           if (result !== null && result.length > 0 && result[1] > 0) {
             await uploadCarData(data, result[0], result[1]).then(
               (uploadData) => {
                 console.log(uploadData);
-                fetchUpload(uploadData);
+                // fetchUpload(uploadData);
               }
             );
           } else {
@@ -1224,7 +1232,7 @@ const FormCar = () => {
                       </Grid>
                     )} */}
                 {/* </Stack> */}
-                <Grid item>
+                {/* <Grid item>
                   <Stack sx={{ width: "100%" }}>
                     <FormControl>
                       <Typography
@@ -1233,9 +1241,6 @@ const FormCar = () => {
                       >
                         {t("frm_passengers_list")} <span>(*)</span>
                       </Typography>
-                      {/* <FormLabel id="demo-row-radio-buttons-group-label">
-                        {t("frm_passengers_list")}
-                      </FormLabel> */}
                       <RadioGroup
                         row
                         aria-labelledby="demo-row-radio-buttons-group-label"
@@ -1260,7 +1265,7 @@ const FormCar = () => {
                       </RadioGroup>
                     </FormControl>
                   </Stack>
-                </Grid>
+                </Grid> */}
 
                 {/* {passengerList.map((item, index) => { */}
                 {/* // if (!isInclude && index === 0) {
@@ -1306,8 +1311,14 @@ const FormCar = () => {
                     </Select>
                   </FormControl> */}
               </Grid>
-              <Box fullWidth>
-                {PassengerNameList === "Korea" ? (
+              <Grid item>
+                <Stack fullWidth>
+                  <Typography
+                    variant="h6"
+                    className="b-text-input__title b-italic"
+                  >
+                    {t("frm_passengers_korean_list")} <span>(*)</span>
+                  </Typography>
                   <KoreaPassengerInfo
                     cValue={passengerSelectList}
                     expList={_EXPList}
@@ -1315,20 +1326,27 @@ const FormCar = () => {
                     handlePassengerSelect={handlePassengerSelect}
                     handleClearClick={handleClearClick}
                   />
-                ) : (
-                  <VietnamPassengerInfo
-                    cValue={DeptName}
-                    tValue={PassengerDeptCount}
-                    DeptList={_DEPTList}
-                    empName={empName}
-                    dropOffList={_dropOffList}
-                    handleName={handleSearch}
-                    handleDropOff={handlePassengerDropOff}
-                    deptNameHandleSelect={handleDeptSelect}
-                    _PassengerChange={HandlePassengerChange}
-                  />
-                )}
-              </Box>
+                </Stack>
+              </Grid>
+              <Grid item>
+                <Typography
+                  variant="h6"
+                  className="b-text-input__title b-italic"
+                >
+                  {t("frm_passengers_vietnam_list")} <span>(*)</span>
+                </Typography>
+                <VietnamPassengerInfo
+                  cValue={DeptName}
+                  tValue={PassengerDeptCount}
+                  DeptList={_DEPTList}
+                  empName={empName}
+                  dropOffList={_dropOffList}
+                  handleName={handleSearch}
+                  handleDropOff={handlePassengerDropOff}
+                  deptNameHandleSelect={handleDeptSelect}
+                  _PassengerChange={HandlePassengerChange}
+                />
+              </Grid>
               <Box className="s-form-bot">
                 <ButtonPrimary
                   title={t("btn_request")}

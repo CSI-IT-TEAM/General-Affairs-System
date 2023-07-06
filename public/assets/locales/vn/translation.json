@@ -61,7 +61,8 @@
     "frm_confirm_password_placeholder": "Xác nhận mật khẩu mới",
     "frm_pass_placeholder": "Nhập mã thẻ",
     "frm_txt_passenger_placeholder": "Hành khách",
-
+    "frm_passengers_korean_list": "Hành khách Hàn Quốc",
+    "frm_passengers_vietnam_list": "Bộ phận",
     "btn_request": "Đăng Ký Ngay",
     "btn_yes": "Có",
     "btn_no": "Không",

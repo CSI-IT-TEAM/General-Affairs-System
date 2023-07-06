@@ -9,14 +9,14 @@ import Checkbox from "@mui/material/Checkbox";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import { InputAdornment, TextField, Typography } from "@mui/material";
+import { Grid, InputAdornment, TextField, Typography } from "@mui/material";
 
-const ITEM_HEIGHT = 48;
+const ITEM_HEIGHT = 45;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
   PaperProps: {
     style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP,
       width: 250,
     },
   },
@@ -45,9 +45,15 @@ const DepartmentSelect = ({
   };
 
   const handlePassengerChange = (event) => {
+    console.log(event.target.value);
     if (event.target.value < 1) {
-      setPassengerCount(1);
-      PassengerChange(1);
+      if (event.target.value === "") {
+        setPassengerCount(event.target.value);
+        PassengerChange(event.target.value);
+      } else {
+        setPassengerCount(1);
+        PassengerChange(1);
+      }
     } else {
       setPassengerCount(event.target.value);
       PassengerChange(event.target.value);
@@ -57,43 +63,59 @@ const DepartmentSelect = ({
   return (
     <div>
       <FormControl fullWidth>
-        <InputLabel id="demo-multiple-checkbox-label">Department</InputLabel>
-        <Select
-          labelId="demo-multiple-checkbox-label"
-          id="demo-multiple-checkbox"
-          value={cValue}
-          onChange={handleChange}
-          input={<OutlinedInput label="Department" />}
-          // renderValue={(selected) => selected.join(", ")}
-          MenuProps={MenuProps}
-        >
-          {DeptList.map((item) => (
-            <MenuItem key={item.DEPT_CD} value={item.DEPT_NM}>
-              <ListItemText primary={item.DEPT_NM} />
-            </MenuItem>
-          ))}
-        </Select>
+        <Grid container spacing={2}>
+          <Grid item xs={cValue !== "" ? 6 : 12}>
+            <InputLabel id="demo-multiple-checkbox-label">
+              Department
+            </InputLabel>
+            <Select
+              fullWidth
+              labelId="demo-multiple-checkbox-label"
+              id="demo-multiple-checkbox"
+              value={cValue}
+              onChange={handleChange}
+              input={<OutlinedInput label="Department" />}
+              // renderValue={(selected) => selected.join(", ")}
+              MenuProps={MenuProps}
+            >
+              {DeptList.map((item) => (
+                <MenuItem key={item.DEPT_CD} value={item.DEPT_NM}>
+                  <ListItemText primary={item.DEPT_NM} />
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
 
-        {cValue && (
-          <TextField
-            type="number"
-            name="PASSSENGER_COUNT"
-            className="b-text-input__desc b-text-input__desc--sub"
-            disabled={false}
-            placeholder="Number of passengers"
-            color="info"
-            fullWidth
-            value={tValue}
-            onChange={handlePassengerChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <PeopleAltIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
+          {cValue && (
+            <Grid item xs={6}>
+              <TextField
+                name="PASSSENGER_COUNT"
+                type="number"
+                // className="b-text-input__desc"
+                disabled={false}
+                placeholder="Number of passengers"
+                color="info"
+                value={tValue}
+                onChange={handlePassengerChange}
+                inputProps={{ min: 0, style: { textAlign: "center" } }}
+                // InputProps={
+                //   {
+                // startAdornment: (
+                //   <InputAdornment position="start">
+                //     <PeopleAltIcon />
+                //   </InputAdornment>
+                // ),
+                // endAdornment: (
+                //   <InputAdornment position="end">
+                //     <PeopleAltIcon />
+                //   </InputAdornment>
+                // ),
+                // }
+                // }
+              />
+            </Grid>
+          )}
+        </Grid>
       </FormControl>
     </div>
   );

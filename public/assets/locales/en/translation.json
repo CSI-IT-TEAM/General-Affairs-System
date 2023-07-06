@@ -61,7 +61,8 @@
     "frm_pass_placeholder": "Type Passenger ID",
     "frm_number_passenger_placeholder": "Number of Passenger",
     "frm_txt_passenger_placeholder": "Passenger",
-
+"frm_passengers_korean_list": "Korea Passengers",
+"frm_passengers_vietnam_list": "Department",
     "btn_request": "Request Now",
     "btn_yes": "Yes",
     "btn_no": "No",

@@ -6,8 +6,17 @@ import FormControl from "@mui/material/FormControl";
 import ListItemText from "@mui/material/ListItemText";
 import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
-import { Box, Chip, IconButton, Typography } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Chip,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -20,10 +29,16 @@ const MenuProps = {
 };
 
 const names = ["Mr.Shim", "Mr.Nguyên", "Mr.Hoàng", "Mr.Điền", "Mr.Phước"];
-
-const PassengersSelect = ({ cValue, handleEvent, expList,handleClearClick }) => {
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+const PassengersSelect = ({
+  cValue,
+  handleEvent,
+  expList,
+  handleClearClick,
+}) => {
   const [personName, setPersonName] = React.useState([]);
- 
+
   const handleChange = (event, obj) => {
     const {
       target: { value },
@@ -37,10 +52,33 @@ const PassengersSelect = ({ cValue, handleEvent, expList,handleClearClick }) => 
 
   return (
     <div>
+      {/* <Autocomplete
+        multiple
+        id="checkboxes-tags-demo"
+        options={expList}
+        disableCloseOnSelect
+        getOptionLabel={(option) => option.EMPID}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              style={{ marginRight: 8 }}
+              checked={selected}
+            />
+            {expList.find((item) => item.EMPID === selected).NAME}
+          </li>
+        )}
+        style={{ width: 500 }}
+        renderInput={(params) => (
+          <TextField {...params} label="Checkboxes" placeholder="Favorites" />
+        )}
+      /> */}
       <FormControl fullWidth>
         <InputLabel id="demo-multiple-checkbox-label">
           Korean Passengers
         </InputLabel>
+
         <Select
           labelId="demo-multiple-checkbox-label"
           id="demo-multiple-checkbox"
