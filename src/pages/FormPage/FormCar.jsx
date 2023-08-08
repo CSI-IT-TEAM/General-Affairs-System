@@ -716,8 +716,8 @@ const FormCar = () => {
           if (result !== null && result.length > 0 && result[1] > 0) {
             await uploadCarData(data, result[0], result[1]).then(
               (uploadData) => {
-                console.log(uploadData);
-                // fetchUpload(uploadData);
+               // console.log(uploadData);
+                 fetchUpload(uploadData);
               }
             );
           } else {
