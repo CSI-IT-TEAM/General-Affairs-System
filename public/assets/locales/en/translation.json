@@ -74,5 +74,19 @@
     "no_passengers_error": "Oops! Please checking Passengers List Again!",
     "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable",
 
-    "frm_required": "The text field is required"
+    "frm_required": "The text field is required",
+
+    "title_please_change_password": "Please Change Password",
+    "title_please_change_password_text":"If first time login. You must to change your password.",
+    "label_input_new_password": "Please enter new password",
+    "input_new_password_place_holder": "Enter new password",
+
+    "title_password_must_diff_with_empid":"Password must be different from card number",
+    "text_password_must_diff_with_empid": "Password must be different from card number",
+
+    "title_password_change_successfully":"Password has changed sucessfully.",
+    "text_user_can_login_with_new_password":"You can login with new password.",
+
+    "title_wrong_password": "Wrong username or password.",
+    "text_if_first_time_password": "If first time login. You must to change your password."
 }

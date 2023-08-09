@@ -74,5 +74,21 @@
     "no_passengers_error": "Oops! Vui lòng kiểm tra lại danh sách hành khách!",
     "404_desc": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng",
 
-    "frm_required": "Trường dữ liệu không được rỗng"
+    "frm_required": "Trường dữ liệu không được rỗng",
+
+    "title_please_change_password": "Vui lòng thay đổi mật khẩu",
+    "title_please_change_password_text":"Lần đầu tiên đăng nhập, bạn sẽ phải đổi lại mật khẩu của mình.",
+    "label_input_new_password": "Nhập mật khẩu mới",
+    "input_new_password_place_holder": "Nhập mật khẩu mới",
+
+    "title_password_must_diff_with_empid":"Mật khẩu không được trùng số thẻ!",
+    "text_password_must_diff_with_empid": "Mật khẩu mới phải khác với số thẻ!",
+
+    "title_password_change_successfully":"Đổi mật khẩu thành công!",
+    "text_user_can_login_with_new_password":"Bạn có thể đăng nhập với mật khẩu mới!",
+
+    "title_wrong_password": "Sai tài khoản hoặc mật khẩu!",
+    "text_if_first_time_password": "Nếu là lần đầu tiên đăng nhập mật khẩu là số thẻ.!"
+
+
 }
