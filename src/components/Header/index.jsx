@@ -1,9 +1,16 @@
-import { Typography, Box, Container, Avatar } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import {
+  Typography,
+  Box,
+  Container,
+  Avatar,
+  IconButton,
+  Menu,
+} from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import i18next from "i18next";
 
 import avatarImage from "../../assets/images/avatar.png";
@@ -11,89 +18,169 @@ import ModalLogout from "../Modal/Logout";
 import { langData } from "../../data";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [anchorElUser, setAnchorElUser] = useState(null);
 
-    const navigate = useNavigate();
-    const [open, setOpen] = useState(false);
+  const settings = [
+    { title: "Đăng xuất", route: "" },
+    { title: "Đổi mật khẩu", route: "/user/passwordchange" },
+  ];
+  ///// Set Default language
+  const i18_Value =
+    i18next.language !== null &&
+    i18next.language !== undefined &&
+    i18next.language !== ""
+      ? i18next.language
+      : "en";
+  const [lang, setLang] = useState(i18_Value);
+  const handleChange = (event: SelectChangeEvent) => {
+    i18next.changeLanguage(event.target.value);
+    setLang(event.target.value);
+  };
 
-    ///// Set Default language
-    const i18_Value = (i18next.language !== null && i18next.language !== undefined && i18next.language !== "") ? i18next.language : "en"; 
-    const [lang, setLang] = useState(i18_Value);
-    const handleChange = (event: SelectChangeEvent) => {
-        i18next.changeLanguage(event.target.value);
-        setLang(event.target.value);
-    };
-   
-    const getLangImage = () => {
-        const value = langData.filter(item => item.value === lang);
-        return value[0].thumb;
-    }
+  const getLangImage = () => {
+    const value = langData.filter((item) => item.value === lang);
+    return value[0].thumb;
+  };
 
-    const langImage = getLangImage();
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
 
-    /////// Check user Thumb
-    const userImage = (sessionStorage.getItem('userImg') === null || sessionStorage.getItem('userImg').length === 0) ? avatarImage : sessionStorage.getItem('userImg');
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
 
-    const handleToggle = () => {
-        setOpen(open => !open);
-    }
+  const langImage = getLangImage();
 
-    const handleLogOut = () => {
-        sessionStorage.removeItem('userData');
-        sessionStorage.removeItem('userImg');
-        navigate("/signin");
-    }
+  /////// Check user Thumb
+  const userImage =
+    sessionStorage.getItem("userImg") === null ||
+    sessionStorage.getItem("userImg").length === 0
+      ? avatarImage
+      : sessionStorage.getItem("userImg");
 
-    const handleNavigate = (url) => {
-        navigate(url);
-    }
+  const handleToggle = () => {
+    setAnchorElUser(null);
+    setOpen((open) => !open);
+  };
 
-    return (
-        <>
-            <Box className="s-header">
-                <Container className="d-flex">
-                    <Box className="s-header-text" onClick={() => handleNavigate("/")}>
-                        <Typography variant="h5" component="div" className="s-header-logo">
-                            CSG
-                        </Typography>
-                        <span>
-                            <Typography variant="h1" className="s-header-title s-header-title__top">
-                                General Affairs
-                            </Typography>
-                            <Typography variant="h2" className="s-header-title s-header-title__bot">
-                                System
-                            </Typography>
-                        </span>
-                    </Box>
-                    <Box className="d-flex p-relative">
-                        <Box className="s-language d-flex">
-                            <Box className="s-language__thumb">
-                                <img src={langImage} alt="Language" />
-                            </Box>
-                            <FormControl sx={{ m: 1 }} size="small" variant="standard" className="s-language__select">
-                                <Select
-                                    value={lang}
-                                    onChange={handleChange}
-                                >
-                                    {langData.map((item) => {
-                                        return (
-                                            <MenuItem key={item.value} value={item.value} className="s-lang__item">{item.title}</MenuItem>
-                                        );
-                                    })}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        <Avatar
-                            alt="avatar"
-                            src={userImage}
-                            className="s-avatar"
-                            onClick={handleToggle}
-                        />
-                    </Box>
-                </Container>
+  const handleLogOut = () => {
+    sessionStorage.removeItem("userData");
+    sessionStorage.removeItem("userImg");
+    navigate("/signin");
+  };
+
+  const handleNavigate = (url) => {
+    navigate(url);
+  };
+
+  return (
+    <>
+      <Box className="s-header">
+        <Container className="d-flex">
+          <Box className="s-header-text" onClick={() => handleNavigate("/")}>
+            <Typography variant="h5" component="div" className="s-header-logo">
+              CSG
+            </Typography>
+            <span>
+              <Typography
+                variant="h1"
+                className="s-header-title s-header-title__top"
+              >
+                General Affairs
+              </Typography>
+              <Typography
+                variant="h2"
+                className="s-header-title s-header-title__bot"
+              >
+                System
+              </Typography>
+            </span>
+          </Box>
+          <Box className="d-flex p-relative">
+            <Box className="s-language d-flex">
+              <Box className="s-language__thumb">
+                <img src={langImage} alt="Language" />
+              </Box>
+              <FormControl
+                sx={{ m: 1 }}
+                size="small"
+                variant="standard"
+                className="s-language__select"
+              >
+                <Select value={lang} onChange={handleChange}>
+                  {langData.map((item) => {
+                    return (
+                      <MenuItem
+                        key={item.value}
+                        value={item.value}
+                        className="s-lang__item"
+                      >
+                        {item.title}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
             </Box>
-            <ModalLogout open={open} handleClose={handleToggle} handleLogOut={handleLogOut} />
-        </>
-    );
+            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+              <Avatar
+                alt="avatar"
+                src={userImage}
+                className="s-avatar"
+                //onClick={handleToggle}
+              />
+            </IconButton>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {settings.map((setting) =>
+                setting.route ? (
+                  <MenuItem
+                    key={setting.title}
+                    component={Link}
+                    to={setting.route}
+                    onClick={handleCloseUserMenu}
+                  >
+                    <Typography textAlign="center">{setting.title}</Typography>
+                  </MenuItem>
+                ) : (
+                  <MenuItem
+                    key={setting.title}
+                    // component={Link}
+                    // to={setting.route}
+                    onClick={handleToggle}
+                  >
+                    <Typography textAlign="center">{setting.title}</Typography>
+                  </MenuItem>
+                )
+              )}
+            </Menu>
+          </Box>
+        </Container>
+      </Box>
+      <ModalLogout
+        open={open}
+        handleClose={handleToggle}
+        handleLogOut={handleLogOut}
+      />
+    </>
+  );
 };
 
 export default Header;

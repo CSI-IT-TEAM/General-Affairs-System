@@ -29,6 +29,7 @@
     "frm_user_id": "Mã thẻ",
     "frm_user_nm": "Tên nhân viên",
     "frm_password": "Mật khẩu",
+    "frm_new_password" :"New Password",
     "frm_confirm_password": "Xác nhận mật khẩu",
     "frm_reason": "Lý do",
     "frm_depart_date": "Ngày xuất phát",
@@ -69,6 +70,7 @@
     "btn_login": "Đăng nhập",
     "btn_goback": "Về trang Đăng nhập",
     "btn_reset": "Đặt lại ngay",
+    "btn_change_password": "Đổi mật khẩu",
 
     "404_title": "Oops! Trang không tìm thấy",
     "no_passengers_error": "Oops! Vui lòng kiểm tra lại danh sách hành khách!",

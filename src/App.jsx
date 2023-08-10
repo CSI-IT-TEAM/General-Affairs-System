@@ -8,6 +8,7 @@ import ErrorPage from "./pages/ErrorPage";
 
 import "./App.scss";
 import 'devextreme/dist/css/dx.light.css';
+import FormChangePass from "./pages/FormPage/FormChangePass";
 
 const router = createBrowserRouter([
     {
@@ -30,6 +31,15 @@ const router = createBrowserRouter([
         element: (
             <Layout>
                 <FormCar />
+            </Layout>
+        ),
+    },
+    {
+        path: "/user/passwordchange",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <FormChangePass />
             </Layout>
         ),
     },

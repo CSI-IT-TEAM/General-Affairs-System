@@ -29,6 +29,7 @@
     "frm_user_id": "User ID",
     "frm_user_nm": "User Name",
     "frm_password": "Password",
+    "frm_new_password" :"New Password",
     "frm_confirm_password": "Confirm Password",
     "frm_reason": "Reason",
     "frm_depart_date": "Depart Date",
@@ -69,6 +70,7 @@
     "btn_login": "Login",
     "btn_goback": "Go to Login Page",
     "btn_reset": "Reset now",
+    "btn_change_password": "Change Password",
 
     "404_title": "Oops! Page not found",
     "no_passengers_error": "Oops! Please checking Passengers List Again!",
