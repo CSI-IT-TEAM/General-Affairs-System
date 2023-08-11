@@ -23,8 +23,8 @@ const Header = () => {
   const [anchorElUser, setAnchorElUser] = useState(null);
 
   const settings = [
-    { title: "Đăng xuất", route: "" },
     { title: "Đổi mật khẩu", route: "/user/passwordchange" },
+    { title: "Đăng xuất", route: "" },
   ];
   ///// Set Default language
   const i18_Value =

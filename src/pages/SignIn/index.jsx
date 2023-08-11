@@ -34,8 +34,10 @@ const SignIn = () => {
     localStorage.getItem("lastLogin") === null
       ? ""
       : localStorage.getItem("lastLogin");
-  const [data, setData] = useState(JSON.parse(lastLogin).data);
-  const [data1, setData1] = useState(JSON.parse(lastLogin).data1);
+  const [data, setData] = useState(lastLogin ? JSON.parse(lastLogin).data : "");
+  const [data1, setData1] = useState(
+    lastLogin ? JSON.parse(lastLogin).data1 : ""
+  );
   const [showPassword, setShowPassword] = React.useState(false);
 
   /////// Handle Warning Modal
@@ -52,7 +54,7 @@ const SignIn = () => {
     event.preventDefault();
   };
   //////// Handle Set Controlled Data
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event) => {
     switch (event.target.name) {
       case "USER_ID":
         setData(event.target.value);
@@ -186,7 +188,6 @@ const SignIn = () => {
             let imgData = await arrayBufferToBase64(result[0].PHOTO.data);
             let pwd = await result[0].PASSWORD;
             let isExist = await result[0].IS_EXIST;
-            console.log("password " + pwd);
             if (isExist === 0 && !pwd) {
               //case : Chưa đăng ký
               if (data === data1) {
@@ -237,8 +238,7 @@ const SignIn = () => {
                           );
 
                           setData1(password);
-                        }else{
-                            
+                        } else {
                         }
                       });
                     });

@@ -71,7 +71,7 @@
     "btn_goback": "Về trang Đăng nhập",
     "btn_reset": "Đặt lại ngay",
     "btn_change_password": "Đổi mật khẩu",
-
+    "btn_back_to_home": "Quay lại trang chủ",
     "404_title": "Oops! Trang không tìm thấy",
     "no_passengers_error": "Oops! Vui lòng kiểm tra lại danh sách hành khách!",
     "404_desc": "Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng",
@@ -79,7 +79,7 @@
     "frm_required": "Trường dữ liệu không được rỗng",
 
     "title_please_change_password": "Vui lòng thay đổi mật khẩu",
-    "title_please_change_password_text":"Lần đầu tiên đăng nhập, bạn sẽ phải đổi lại mật khẩu của mình.",
+    "title_please_change_password_text":"Lần đầu tiên đăng nhập, mật khẩu chính là số thẻ, bạn sẽ phải đổi lại mật khẩu của mình.",
     "label_input_new_password": "Nhập mật khẩu mới",
     "input_new_password_place_holder": "Nhập mật khẩu mới",
 
@@ -90,7 +90,19 @@
     "text_user_can_login_with_new_password":"Bạn có thể đăng nhập với mật khẩu mới!",
 
     "title_wrong_password": "Sai tài khoản hoặc mật khẩu!",
-    "text_if_first_time_password": "Nếu là lần đầu tiên đăng nhập mật khẩu là số thẻ.!"
+    "text_if_first_time_password": "Nếu là lần đầu tiên đăng nhập mật khẩu là số thẻ.!",
 
+    "title_success":"Thành công!",
+    "title_change_password_sucessfully":"Mật khẩu mới thay đổi thành công!",
+    "title_change_password_question":"Đổi mật khẩu?",
+    "title_new_password_will_applied":"Mật khẩu mới sẽ được áp dụng",
+    "title_password_must_be_same_as_old_password":"Xác nhận 2 mật khẩu mới phải giống nhau",
+    "title_please_checking_new_password":"Kiểm tra lại mật khẩu mới",
+    "title_wrong_password1":"Sai mật khẩu",
+
+    "title_old_password_incorrect": "Mật khẩu cũ không đúng, vui lòng kiểm tra lại",
+    "title_error":"Lỗi",
+    "title_password_change_unsuccessful":"Thay đổi mật khẩu không thành công!",
+    "title_new_password_can_be_empty":"Mật khẩu mới không được để trống"
 
 }

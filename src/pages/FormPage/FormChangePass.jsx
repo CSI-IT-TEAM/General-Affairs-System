@@ -22,6 +22,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { ButtonPrimary, FormDefaultInfo, FormTitle } from "../../components";
 import { decode as base64_decode, encode as base64_encode } from "base-64";
+import { LoginURL, UserRegisterURL } from "../../api";
 const empData = JSON.parse(sessionStorage.getItem("userData"));
 const FormChangePass = () => {
   /////// Translate Lang
@@ -32,7 +33,7 @@ const FormChangePass = () => {
   const [Password, setPassword] = useState("");
   const [PasswordNew, setPasswordNew] = useState("");
   const [PasswordNewConfirm, setPasswordNewConfirm] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     console.log(empData);
     setLang(i18next.language);
@@ -60,33 +61,119 @@ const FormChangePass = () => {
     event.preventDefault();
   };
 
+  ////// Cancel Fetch API After Timeout
+  const Timeout = (time) => {
+    let controller = new AbortController();
+    setTimeout(() => controller.abort(), time * 1000);
+    return controller;
+  };
+
+  const arrayBufferToBase64 = (buffer) => {
+    var base64Flag = "data:image/jpeg;base64,";
+    var binary = "";
+    var bytes = [].slice.call(new Uint8Array(buffer));
+    bytes.forEach((b) => (binary += String.fromCharCode(b)));
+
+    return base64Flag + window.btoa(binary);
+  };
+
   const HandleChangePass = () => {
+    // console.log(empData.PASSWORD);
+    // return;
+    const empData = JSON.parse(sessionStorage.getItem("userData"));
     if (base64_encode(Password) !== empData.PASSWORD) {
       Swal.fire(
-        "Sai mật khẩu",
-        "Mật khẩu cũ không đúng, vui lòng kiểm tra lại",
+        t("title_wrong_password1"),
+        t("title_old_password_incorrect"),
         "error"
       );
     } else {
-      if (PasswordNewConfirm !== PasswordNew) {
+      if (!PasswordNew || !PasswordNewConfirm) {
+        Swal.fire(t("title_new_password_can_be_empty"), "", "error");
+      } else if (PasswordNewConfirm !== PasswordNew) {
         Swal.fire(
-          "Mật khẩu mới phải giống nhau",
-          "Vui lòng kiểm tra lại mật khẩu mới",
+          t("title_password_must_be_same_as_old_password"),
+          t("title_please_checking_new_password"),
           "error"
         );
       } else {
         //Call Update Password.
         Swal.fire({
-          title: "Đổi mật khẩu?",
-          text: "Mật khẩu mới sẽ được áp dụng sau khi bạn xác nhận",
+          title: t("title_change_password_question"),
+          text: t("title_new_password_will_applied"),
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: "Xác nhận",
+          confirmButtonText: t("btn_confirm"),
         }).then((result) => {
           if (result.isConfirmed) {
-            Swal.fire("OK !", "Thay đổi mật khẩu thành công!.", "success");
+            fetch(UserRegisterURL, {
+              method: "POST",
+              mode: "cors",
+              dataType: "json",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ARG_TYPE: "S",
+                ARG_EMPID: empData.EMPID, //user name
+                ARG_PASSWORD: base64_encode(PasswordNew), //password
+              }),
+              signal: Timeout(5).signal,
+            }).then((response) => {
+              response.json().then(async (result) => {
+                if (result.Result === "OK") {
+                  fetch(LoginURL, {
+                    method: "POST",
+                    mode: "cors",
+                    dataType: "json",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      ARG_TYPE: "Q",
+                      ARG_EMPID: empData.EMPID, //user name
+                      ARG_PASSWORD: base64_encode(PasswordNew), //password
+                      OUT_CURSOR: "",
+                    }),
+                    signal: Timeout(5).signal,
+                  }).then((response) => {
+                    response.json().then(async (result) => {
+                      if (result.length > 0) {
+                        let imgData = await arrayBufferToBase64(
+                          result[0].PHOTO.data
+                        );
+                        sessionStorage.setItem(
+                          "userData",
+                          JSON.stringify(result[0])
+                        );
+                        localStorage.setItem(
+                          "lastLogin",
+                          JSON.stringify({
+                            data: empData.EMPID,
+                            data1: PasswordNew,
+                          })
+                        );
+                        sessionStorage.setItem("userImg", imgData);
+                        Swal.fire(
+                          t("title_success"),
+                          t("title_change_password_sucessfully"),
+                          "success"
+                        );
+                        navigate("/");
+                      }
+                    });
+                  });
+                } else {
+                  Swal.fire(
+                    t("title_error"),
+                    t("title_password_change_unsuccessful"),
+                    "error"
+                  );
+                }
+              });
+            });
           }
         });
       }
@@ -102,7 +189,9 @@ const FormChangePass = () => {
               p: 2,
             }}
           >
-            <Button variant="contained">Back lại trang chủ</Button>
+            <Button variant="contained" onClick={() => navigate("/")}>
+              {t("btn_back_to_home")}
+            </Button>
             <hr
               style={{
                 height: "30px",

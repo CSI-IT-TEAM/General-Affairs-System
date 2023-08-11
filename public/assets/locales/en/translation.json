@@ -71,7 +71,8 @@
     "btn_goback": "Go to Login Page",
     "btn_reset": "Reset now",
     "btn_change_password": "Change Password",
-
+    "btn_confirm": "Confirm",
+    "btn_back_to_home": "Back to Home",
     "404_title": "Oops! Page not found",
     "no_passengers_error": "Oops! Please checking Passengers List Again!",
     "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable",
@@ -79,7 +80,7 @@
     "frm_required": "The text field is required",
 
     "title_please_change_password": "Please Change Password",
-    "title_please_change_password_text":"If first time login. You must to change your password.",
+    "title_please_change_password_text":"First Time, Password and Your ID is same.  You must to change your password.",
     "label_input_new_password": "Please enter new password",
     "input_new_password_place_holder": "Enter new password",
 
@@ -90,5 +91,18 @@
     "text_user_can_login_with_new_password":"You can login with new password.",
 
     "title_wrong_password": "Wrong username or password.",
-    "text_if_first_time_password": "If first time login. You must to change your password."
+    "text_if_first_time_password": "If first time login. Password and Your ID is same.",
+
+    "title_success":"Success!",
+    "title_change_password_sucessfully":"Password has changed succesfully",
+    "title_change_password_question":"Would you like to change your password?",
+    "title_new_password_will_applied":"Password will be applied successfully",
+    "title_password_must_be_same_as_old_password":"New Password Confirm Must Be Same",
+    "title_please_checking_new_password":"Please check your new password",
+    "title_wrong_password1":"Wrong Password",
+
+    "title_old_password_incorrect": "Old Password Incorrect, Please Check Again",
+    "title_error":"Error",
+    "title_password_change_unsuccessful":"Password Change Failed",
+    "title_new_password_can_be_empty":"New Password Can Be Empty"
 }
