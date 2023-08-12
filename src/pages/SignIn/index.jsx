@@ -228,9 +228,9 @@ const SignIn = () => {
                       signal: Timeout(5).signal,
                     }).then((response) => {
                       response.json().then(async (result) => {
-                        console.log(result);
+                        //console.log(result);
                         if (result.Result === "OK") {
-                          console.log("Đăng ký thành công!");
+                          //console.log("Đăng ký thành công!");
                           Swal.fire(
                             t("title_password_change_successfully"),
                             t("text_user_can_login_with_new_password"),
@@ -270,10 +270,16 @@ const SignIn = () => {
                 );
                 sessionStorage.setItem("userImg", imgData);
                 //    sessionStorage.setItem("userInfor", JSON.stringify(result));
-                console.log(result[0]);
+                //console.log(result[0]);
                 navigate("/");
               }
             }
+          }else{
+            Swal.fire(
+              t("title_wrong_password"),
+              t("text_if_first_time_password"),
+              "error"
+            );
           }
         });
       })
@@ -347,6 +353,7 @@ const SignIn = () => {
                   onChange={handleChange}
                   name="PASSWORD"
                   color="info"
+                  helperText={t("text_if_first_time_password")}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
