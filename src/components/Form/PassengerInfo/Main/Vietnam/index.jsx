@@ -8,7 +8,6 @@ import DepartmentSelect from "../../../../SelectModal/DepartmentSelect";
 //Include Me!
 const VietnamPassengerInfo = ({
   cValue,
-  tValue,
   DeptList,
   deptNameHandleSelect,
   _PassengerChange,
@@ -21,7 +20,6 @@ const VietnamPassengerInfo = ({
    
           <DepartmentSelect
             cValue={cValue}
-            tValue={tValue}
             DeptList={DeptList}
             handleEvent={deptNameHandleSelect}
             PassengerChange={_PassengerChange}

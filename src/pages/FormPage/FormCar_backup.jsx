@@ -35,7 +35,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
-import AirlineSeatReclineExtraIcon from "@mui/icons-material/AirlineSeatReclineExtra";
+
 import {
   reqCarData,
   reqCarValidate,
@@ -208,8 +208,17 @@ const FormCar = () => {
   };
 
   //Number Of Passenger in Dept
-  const HandlePassengerChange = (event) => {
-    setPassengerDeptCount(event.target.value);
+  const HandlePassengerChange = (
+    value: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    console.log(value);
+
+    setPassengerDeptCount(value);
+    setData((prevData) => {
+      return {
+        ...prevData,
+      };
+    });
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,13 +331,13 @@ const FormCar = () => {
   }, []);
 
   //////// Handle Set Controlled Data
-  const handleChange = (event) => {
-    // if (event.target.value === "") {
-    //   handleSetValidate(event.target.name, false);
-    // } else {
-    //   handleSetValidate(event.target.name, true);
-    // }
-    console.log(event.target.name);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value === "") {
+      handleSetValidate(event.target.name, false);
+    } else {
+      handleSetValidate(event.target.name, true);
+    }
+
     setData((prevData) => {
       return {
         ...prevData,
@@ -701,13 +710,14 @@ const FormCar = () => {
     // });
 
     if (handleVaidate()) {
+
       if (handleValidateDepart()) {
         await CalcPassengers().then(async (result) => {
-          if (result !== null && result.length > 0 && PassengerDeptCount > 0) {
-            await uploadCarData(data, result[0], PassengerDeptCount).then(
+          if (result !== null && result.length > 0 && result[1] > 0) {
+            await uploadCarData(data, result[0], result[1]).then(
               (uploadData) => {
-                // console.log(uploadData);
-                fetchUpload(uploadData);
+               // console.log(uploadData);
+                 fetchUpload(uploadData);
               }
             );
           } else {
@@ -833,7 +843,7 @@ const FormCar = () => {
           break;
       }
     }
-    // console.log(passengerList);
+    console.log(passengerList);
 
     ////// Validate Passenger List
     // for (let iCount = 0; iCount < passengerList.length; iCount++) {
@@ -969,37 +979,7 @@ const FormCar = () => {
                   </Grid>
                 </Grid>
               </Stack>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                alignItems="center"
-                className="b-text-select b-spec"
-              >
-                <Typography
-                  variant="h6"
-                  className="b-text-input__title b-italic"
-                >
-                  {t("frm_memo_address_detail")}
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={12} xl={12}>
-                    <TextField
-                      name="ADDRESS_MEMO"
-                      disabled={false}
-                      placeholder="Type Memo for Address."
-                      color="info"
-                      fullWidth
-                      onChange={handleChange}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <PlaceOutlinedIcon />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </Stack>
+
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <ResponsiveDateTime
@@ -1133,53 +1113,51 @@ const FormCar = () => {
                   </Stack>
                 </Grid>
 
-                <Grid item xs={12} md={12} lg={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
-                        onChange={handleIsInclude}
-                      />
-                    }
-                    label={t("frm_include_me")}
-                  />
-                </Grid>
-
-                {isInclude && (
-                  <Grid item xs={12} md={12} lg={12}>
-                    <TextField
-                      disabled={true}
-                      placeholder={t("frm_pass_placeholder")}
-                      color="info"
-                      fullWidth
-                      value={empName}
-                    />
-                  </Grid>
-                )}
-
-                <Grid item xs={12} md={12} sm={12} lg={12}>
-                  <Typography
-                    variant="h6"
-                    className="b-text-input__title b-italic"
+                <Grid item xs={12} md={6}>
+                  <Stack
+                    marginBottom={2}
+                    direction={{ xs: "column", sm: "row" }}
+                    alignItems={{ xs: "normal", sm: "center" }}
+                    className="b-text-input"
                   >
-                    {`${t("frm_txt_total_passenger")}`}
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="PASSSENGER_COUNT"
-                    disabled={false}
-                    placeholder="Total Number Of Passengers."
-                    color="info"
-                    value={PassengerDeptCount}
-                    onChange={HandlePassengerChange}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <AirlineSeatReclineExtraIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
+                          onChange={handleIsInclude}
+                        />
+                      }
+                      label={t("frm_include_me")}
+                    />
+                    <Stack sx={{ width: "100%" }}>
+                      {isInclude && (
+                        <Grid item>
+                          <Stack
+                            sx={{ width: "100%" }}
+                            direction="row"
+                            alignItems="center"
+                            className="s-form-sub"
+                          >
+                            <SquareRoundedIcon sx={{ fontSize: 12 }} />
+                            <Typography
+                              variant="h6"
+                              className="b-text-input__sub b-italic"
+                            >
+                              {`${t("frm_txt_passenger_placeholder")}`}
+                            </Typography>
+                          </Stack>
+                          <TextField
+                            className="b-text-input__desc"
+                            disabled={true}
+                            placeholder={t("frm_pass_placeholder")}
+                            color="info"
+                            fullWidth
+                            value={empName}
+                          />
+                        </Grid>
+                      )}
+                    </Stack>
+                  </Stack>
                 </Grid>
 
                 {/* <Stack
@@ -1339,7 +1317,7 @@ const FormCar = () => {
                     variant="h6"
                     className="b-text-input__title b-italic"
                   >
-                    {t("frm_passengers_korean_list")}
+                    {t("frm_passengers_korean_list")} <span>(*)</span>
                   </Typography>
                   <KoreaPassengerInfo
                     cValue={passengerSelectList}
@@ -1355,7 +1333,7 @@ const FormCar = () => {
                   variant="h6"
                   className="b-text-input__title b-italic"
                 >
-                  {t("frm_passengers_vietnam_list")}
+                  {t("frm_passengers_vietnam_list")} <span>(*)</span>
                 </Typography>
                 <VietnamPassengerInfo
                   cValue={DeptName}

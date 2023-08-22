@@ -82,7 +82,7 @@
             color: $color-text-gray;
             font-size: 17px !important;
             min-width: 170px;
-            max-width: 170px;
+            max-width: 250px;
 
             @media screen and (max-width: 991px) {
                 min-width: 160px;
@@ -114,19 +114,19 @@
             }
         }
     
-        input{
-            padding: 12px 15px !important;
-            background-color: $color-bg-white;
+        // input{
+        //     padding: 12px 15px !important;
+        //     background-color: $color-bg-white;
 
-            @media screen and (max-width: 767px) {
-                max-height: 43px;
-            }
+        //     @media screen and (max-width: 767px) {
+        //         max-height: 43px;
+        //     }
 
-            @media screen and (max-width: 479px) {
-                padding: 10px !important;
-                font-size: 16px !important;
-            }
-        }
+        //     @media screen and (max-width: 479px) {
+        //         padding: 10px !important;
+        //         font-size: 16px !important;
+        //     }
+        // }
     }
 
     textarea{

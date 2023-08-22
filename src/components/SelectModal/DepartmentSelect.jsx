@@ -26,7 +26,6 @@ const names = ["IT", "HR", "Modern", "PCC", "RSM"];
 
 const DepartmentSelect = ({
   cValue,
-  tValue,
   DeptList,
   handleEvent,
   PassengerChange,
@@ -64,7 +63,7 @@ const DepartmentSelect = ({
     <div>
       <FormControl fullWidth>
         <Grid container spacing={2}>
-          <Grid item xs={cValue !== "" ? 6 : 12}>
+          <Grid item xs={12}>
             <InputLabel id="demo-multiple-checkbox-label">
               Department
             </InputLabel>
@@ -86,7 +85,7 @@ const DepartmentSelect = ({
             </Select>
           </Grid>
 
-          {cValue && (
+          {/* {cValue && (
             <Grid item xs={6}>
               <TextField
                 name="PASSSENGER_COUNT"
@@ -114,7 +113,7 @@ const DepartmentSelect = ({
                 // }
               />
             </Grid>
-          )}
+          )} */}
         </Grid>
       </FormControl>
     </div>

@@ -26,6 +26,7 @@ const reqCarData = {
     "MAIN_REASON_CD": "",
     "SUB_REASON_CD": "",
     "DROP_OFF_CD": "",
+    "ADDRESS_MEMO":"",
     "CREATOR": "",
     "CREATE_PC": "",
     "CREATE_PROGRAM_ID": "",

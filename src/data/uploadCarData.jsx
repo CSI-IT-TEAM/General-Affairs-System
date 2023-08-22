@@ -30,6 +30,7 @@ const uploadCarData = async (data, passengerList, passengerCount) => {
     ARG_DROP_OFF_CD: "", //passengerList[0].dropOff,
     ARG_DROP_OFF_LIST: "", //formatPassengerDropOffList(passengerList),
     ARG_PASSENGERS: getMainPassenger(passengerList),
+    ARG_ADDRESS_MEMO: data.ADDRESS_MEMO,
     ARG_CREATOR: data.CREATOR,
     ARG_CREATE_PC: "PHUOC.IT",
     ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
