@@ -17,6 +17,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useState, useEffect } from "react";
+import { Buffer } from "buffer";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import i18next from "i18next";
@@ -94,6 +95,7 @@ const FormCar = () => {
   const [PassengerCount, setPassengerCount] = useState(1);
   const [PassengerDeptCount, setPassengerDeptCount] = useState(1);
   const [DeptName, setDeptName] = useState("");
+  const [addressMemo, setaddressMemo] = useState("");
   /////// Handle Warning Modal
   const [openWarn, setOpenWarn] = useState(false);
   const handleOpenWarn = () => setOpenWarn(true);
@@ -152,7 +154,8 @@ const FormCar = () => {
       if (DeptName && PassengerDeptCount !== "") {
         _arrList.push({
           id: DeptName,
-          name: DeptName + "-" + PassengerDeptCount,
+          // name: DeptName + "-" + PassengerDeptCount,
+          name: DeptName,
           validate: true,
           dropOff: "",
           validDropOff: true,
@@ -293,6 +296,11 @@ const FormCar = () => {
     setOpenPickUp(false);
     setIsInclude(false);
     setPassengerList([]);
+    setPassengerDeptCount(0);
+    setPassengerList([]);
+    setpassengerSelectList([]);
+    setaddressMemo("");
+    setDeptName([]);
     setEmpID("");
 
     if (empData != null) {
@@ -328,13 +336,31 @@ const FormCar = () => {
     // } else {
     //   handleSetValidate(event.target.name, true);
     // }
-    console.log(event.target.name);
-    setData((prevData) => {
-      return {
-        ...prevData,
-        [event.target.name]: event.target.value,
-      };
-    });
+    if (event.target.name === "ADDRESS_MEMO") {
+      setaddressMemo(event.target.value);
+      // console.log(Buffer.from(event.target.value,"utf8").toString("base64"));
+      // console.log(
+      //   Buffer.from(
+      //     Buffer.from(Buffer.from(event.target.value,"utf8").toString("base64"),"base64")
+      //   ).toString("utf8")
+      // );
+      setData((prevData) => {
+        return {
+          ...prevData,
+          [event.target.name]:
+            event.target.value.length > 0
+              ? Buffer.from(event.target.value).toString("base64")
+              : event.target.value,
+        };
+      });
+    } else {
+      setData((prevData) => {
+        return {
+          ...prevData,
+          [event.target.name]: event.target.value,
+        };
+      });
+    }
   };
 
   const handleChangeSub = (name, value) => {
@@ -400,14 +426,14 @@ const FormCar = () => {
           handleSetValidate(
             "GO_DATE",
             false,
-            "The return date and time must be 2 hours greater than the present time",
-            "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại"
+            "The return date and time must be 3 hours greater than the present time",
+            "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại"
           );
           handleSetValidate(
             "GO_TIME",
             false,
-            "The return date and time must be 2 hours greater than the present time",
-            "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại"
+            "The return date and time must be 3 hours greater than the present time",
+            "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại"
           );
           break;
         }
@@ -480,14 +506,14 @@ const FormCar = () => {
           handleSetValidate(
             "GO_DATE",
             false,
-            "The return date and time must be 2 hours greater than the present time",
-            "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại"
+            "The return date and time must be 3 hours greater than the present time",
+            "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại"
           );
           handleSetValidate(
             "GO_TIME",
             false,
-            "The return date and time must be 2 hours greater than the present time",
-            "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại"
+            "The return date and time must be 3 hours greater than the present time",
+            "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại"
           );
         }
 
@@ -879,14 +905,14 @@ const FormCar = () => {
       handleSetValidate(
         "GO_DATE",
         false,
-        "The return date and time must be 2 hours greater than the present time",
-        "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại"
+        "The return date and time must be 3 hours greater than the present time",
+        "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại"
       );
       handleSetValidate(
         "GO_TIME",
         false,
-        "The return date and time must be 2 hours greater than the present time",
-        "Ngày giờ xuất phát phải lớn hơn 2 tiếng so với hiện tại"
+        "The return date and time must be 3 hours greater than the present time",
+        "Ngày giờ xuất phát phải lớn hơn 3 tiếng so với hiện tại"
       );
     }
 
@@ -988,6 +1014,7 @@ const FormCar = () => {
                       placeholder="Type Memo for Address."
                       color="info"
                       fullWidth
+                      value={addressMemo}
                       onChange={handleChange}
                       InputProps={{
                         endAdornment: (
@@ -1007,7 +1034,7 @@ const FormCar = () => {
                     title={t("frm_depart_date")}
                     placeholder={t("frm_depart_date_placeholder")}
                     name="GO_DATE"
-                    cValue={getDevice() ? data.GO_DATE_FULL : data.GO_DATE}
+                    cValue={data.GO_DATE_FULL}
                     handleChange={handleChangeSub}
                     isValidate={validate.GO_DATE.validate}
                     validMessage={
@@ -1042,9 +1069,7 @@ const FormCar = () => {
                     title={t("frm_cb_date")}
                     placeholder={t("frm_cb_date_placeholder")}
                     name="COMEBACK_DATE"
-                    cValue={
-                      getDevice() ? data.COMEBACK_DATE_FULL : data.COMEBACK_DATE
-                    }
+                    cValue={data.COMEBACK_DATE_FULL}
                     handleChange={handleChangeSub}
                     isValidate={validate.COMEBACK_DATE.validate}
                     validMessage={
@@ -1137,6 +1162,7 @@ const FormCar = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
+                        checked={isInclude}
                         sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
                         onChange={handleIsInclude}
                       />

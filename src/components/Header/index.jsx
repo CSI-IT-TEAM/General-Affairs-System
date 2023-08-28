@@ -16,15 +16,16 @@ import i18next from "i18next";
 import avatarImage from "../../assets/images/avatar.png";
 import ModalLogout from "../Modal/Logout";
 import { langData } from "../../data";
+import { useTranslation } from "react-i18next";
 
 const Header = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [anchorElUser, setAnchorElUser] = useState(null);
-
+  const { t } = useTranslation();
   const settings = [
-    { title: "Đổi mật khẩu", route: "/user/passwordchange" },
-    { title: "Đăng xuất", route: "" },
+    { title: t('title_change_password'), route: "/user/passwordchange" },
+    { title: t('title_log_out'), route: "" },
   ];
   ///// Set Default language
   const i18_Value =

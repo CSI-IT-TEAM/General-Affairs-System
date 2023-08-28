@@ -106,5 +106,7 @@
     "title_old_password_incorrect": "Old Password Incorrect, Please Check Again",
     "title_error":"Error",
     "title_password_change_unsuccessful":"Password Change Failed",
-    "title_new_password_can_be_empty":"New Password Can Be Empty"
+    "title_new_password_can_be_empty":"New Password Can Be Empty",
+     "title_change_password":"Change Password",
+     "title_log_out":"Log Out"
 }

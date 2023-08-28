@@ -269,7 +269,12 @@ const FormChangePass = () => {
                   fullWidth
                 />
               </Grid>
-
+              <hr
+                style={{
+                  height: "30px",
+                  border: "none",
+                }}
+              />
               <Grid item sx={12} sm={12} md={12} lg={12}>
                 <TextField
                   type={showPassword ? "text" : "password"}

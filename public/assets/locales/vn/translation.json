@@ -29,7 +29,7 @@
     "frm_user_id": "Mã thẻ",
     "frm_user_nm": "Tên nhân viên",
     "frm_password": "Mật khẩu",
-    "frm_new_password" :"New Password",
+    "frm_new_password" :"Mật khẩu mới",
     "frm_confirm_password": "Xác nhận mật khẩu",
     "frm_reason": "Lý do",
     "frm_depart_date": "Ngày xuất phát",
@@ -105,6 +105,8 @@
     "title_old_password_incorrect": "Mật khẩu cũ không đúng, vui lòng kiểm tra lại",
     "title_error":"Lỗi",
     "title_password_change_unsuccessful":"Thay đổi mật khẩu không thành công!",
-    "title_new_password_can_be_empty":"Mật khẩu mới không được để trống"
+    "title_new_password_can_be_empty":"Mật khẩu mới không được để trống",
+    "title_change_password":"Đổi mật khẩu",
+    "title_log_out":"Đăng xuất"
 
 }
