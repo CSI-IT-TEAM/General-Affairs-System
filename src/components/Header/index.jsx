@@ -6,7 +6,7 @@ import {
   IconButton,
   Menu,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -20,13 +20,33 @@ import { useTranslation } from "react-i18next";
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { t } = useTranslation();
-  const settings = [
-    { title: t('title_change_password'), route: "/user/passwordchange" },
-    { title: t('title_log_out'), route: "" },
-  ];
+
+  console.log(location);
+  let settings = [];
+  if (location.pathname ==="/"){
+    settings = [
+    
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  }else if (location.pathname === "/request/car"){
+    settings = [
+      { title: t("title_history"), route: "/user/history" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  }else{
+    settings = [
+      // { title: t("title_history"), route: "/user/history" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  }
+   
   ///// Set Default language
   const i18_Value =
     i18next.language !== null &&
@@ -161,12 +181,7 @@ const Header = () => {
                     <Typography textAlign="center">{setting.title}</Typography>
                   </MenuItem>
                 ) : (
-                  <MenuItem
-                    key={setting.title}
-                    // component={Link}
-                    // to={setting.route}
-                    onClick={handleToggle}
-                  >
+                  <MenuItem key={setting.title} onClick={handleToggle}>
                     <Typography textAlign="center">{setting.title}</Typography>
                   </MenuItem>
                 )

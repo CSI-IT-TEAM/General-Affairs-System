@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignIn from "./pages/SignIn";
 import HomePage from "./pages/HomePage";
 import FormCar from "./pages/FormPage/FormCar";
+import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import Layout from "./components/Layout";
 import ErrorPage from "./pages/ErrorPage";
 
@@ -31,6 +32,15 @@ const router = createBrowserRouter([
         element: (
             <Layout>
                 <FormCar />
+            </Layout>
+        ),
+    },
+    {
+        path: "/user/history",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <HistoryPage />
             </Layout>
         ),
     },

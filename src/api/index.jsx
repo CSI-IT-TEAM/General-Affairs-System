@@ -8,8 +8,9 @@ const emailURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.SMT_SEND_EMAIL/SAVE";
 
 //PHUOC ADD MORE 2023-08-09
 const LoginURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_LOGIN_SELECT";
-const UserRegisterURL =
-  baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REGISTER_SAVE/SAVE";
+const UserRegisterURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REGISTER_SAVE/SAVE";
+const historyURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REQUEST_HISTORY";
+
 export {
   downloadURL,
   uploadURL,
@@ -17,4 +18,5 @@ export {
   emailURL,
   LoginURL,
   UserRegisterURL,
+  historyURL
 };

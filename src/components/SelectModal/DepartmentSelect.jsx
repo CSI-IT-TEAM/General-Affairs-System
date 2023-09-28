@@ -64,16 +64,16 @@ const DepartmentSelect = ({
       <FormControl fullWidth>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <InputLabel id="demo-multiple-checkbox-label">
+            {/* <InputLabel id="demo-multiple-checkbox-label">
               Department
-            </InputLabel>
+            </InputLabel> */}
             <Select
               fullWidth
-              labelId="demo-multiple-checkbox-label"
+              // labelId="demo-multiple-checkbox-label"
               id="demo-multiple-checkbox"
               value={cValue}
               onChange={handleChange}
-              input={<OutlinedInput label="Department" />}
+              // input={<OutlinedInput label="Department" />}
               // renderValue={(selected) => selected.join(", ")}
               MenuProps={MenuProps}
             >

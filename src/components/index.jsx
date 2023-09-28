@@ -3,6 +3,7 @@ import ButtonRound from "./Button/Round";
 import ModalWarning from "./Modal/Warning";
 import ModalInfo from "./Modal/Info";
 import CardPrimary from "./Card/Primary";
+import NoticeCard from "./Card/Notice/NoticeCard";
 
 import SelectModal from "./SelectModal";
 import PassengersSelect from "./SelectModal/PassengersSelect";
@@ -40,4 +41,5 @@ export {
   ResponsiveDateTime,
   KoreaPassengerInfo,
   VietnamPassengerInfo,
+  NoticeCard
 };

@@ -120,7 +120,7 @@ const FormCar = () => {
 
   async function CalcPassengers() {
     try {
-      var PassengerCounts = 0;
+      var PassengerCounts = 1;
       const empData = JSON.parse(sessionStorage.getItem("userData"));
       var _arrList = [];
       if (isInclude) {
@@ -296,11 +296,11 @@ const FormCar = () => {
     setOpenPickUp(false);
     setIsInclude(false);
     setPassengerList([]);
-    setPassengerDeptCount(0);
+    setPassengerDeptCount(1);
     setPassengerList([]);
     setpassengerSelectList([]);
     setaddressMemo("");
-    setDeptName([]);
+    setDeptName("");
     setEmpID("");
 
     if (empData != null) {
@@ -353,6 +353,12 @@ const FormCar = () => {
               : event.target.value,
         };
       });
+
+      if (event.target.value.length > 0) {
+        handleSetValidate("ADDRESS_MEMO", true);
+      } else {
+        handleSetValidate("ADDRESS_MEMO", false);
+      }
     } else {
       setData((prevData) => {
         return {
@@ -784,6 +790,7 @@ const FormCar = () => {
         case "GO_DATE":
         case "GO_TIME":
         case "DEPART_CD":
+        case "ADDRESS_MEMO":
         case "DEPART_NM":
           if (data[property] === "") {
             _result = false;
@@ -939,6 +946,14 @@ const FormCar = () => {
     return _result;
   };
 
+  // React.useEffect(() => {
+  //   console.log("Effect Change!");
+  //   if (handleVaidate()) {
+  //     if (handleValidateDepart()) {
+  //     }
+  //   }
+  // }, []);
+
   return (
     <>
       <Box className="s-form">
@@ -1004,14 +1019,14 @@ const FormCar = () => {
                   variant="h6"
                   className="b-text-input__title b-italic"
                 >
-                  {t("frm_memo_address_detail")}
+                  {t("frm_memo_address_detail")} <span>(*)</span>
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={12} xl={12}>
                     <TextField
                       name="ADDRESS_MEMO"
                       disabled={false}
-                      placeholder="Type Memo for Address."
+                      placeholder={t("frm_address")}
                       color="info"
                       fullWidth
                       value={addressMemo}
@@ -1024,6 +1039,16 @@ const FormCar = () => {
                         ),
                       }}
                     />
+                    {!validate.ADDRESS_MEMO.validate && (
+                      <Typography className="b-validate">
+                        <HighlightOffIcon
+                          sx={{ width: "15px", height: "15px" }}
+                        />
+                        {lang === "en"
+                          ? validate.ADDRESS_MEMO.message
+                          : validate.ADDRESS_MEMO.messageVN}
+                      </Typography>
+                    )}
                   </Grid>
                 </Grid>
               </Stack>
@@ -1188,7 +1213,7 @@ const FormCar = () => {
                     variant="h6"
                     className="b-text-input__title b-italic"
                   >
-                    {`${t("frm_txt_total_passenger")}`}
+                    {`${t("frm_txt_total_passenger")}`} <span>(*)</span>
                   </Typography>
                   <TextField
                     fullWidth
@@ -1381,8 +1406,9 @@ const FormCar = () => {
                   variant="h6"
                   className="b-text-input__title b-italic"
                 >
-                  {t("frm_passengers_vietnam_list")}
+                  {t("frm_passengers_vietnam_list")} <span>(*)</span>
                 </Typography>
+
                 <VietnamPassengerInfo
                   cValue={DeptName}
                   tValue={PassengerDeptCount}
@@ -1394,13 +1420,49 @@ const FormCar = () => {
                   deptNameHandleSelect={handleDeptSelect}
                   _PassengerChange={HandlePassengerChange}
                 />
+                {/* {!DeptName && (
+                  <Typography className="b-validate">
+                    <HighlightOffIcon sx={{ width: "15px", height: "15px" }} />
+                    {t("error_required_department_select")}
+                  </Typography>
+                )} */}
               </Grid>
-              <Box className="s-form-bot">
-                <ButtonPrimary
-                  title={t("btn_request")}
-                  handleClick={handleSubmit}
-                />
-              </Box>
+              {data.MAIN_REASON_CD &&
+              data.SUB_REASON_CD &&
+              addressMemo &&
+              data.ARRIVAL &&
+              data.DEPART_CD &&
+              data.GO_DATE &&
+              data.GO_TIME &&
+              data.COMEBACK_DATE &&
+              data.COMEBACK_TIME &&
+              DeptName &&
+              validate.GO_DATE.validate &&
+              validate.GO_TIME.validate &&
+              validate.COMEBACK_DATE.validate &&
+              validate.COMEBACK_TIME.validate &&
+              PassengerDeptCount > 0 ? (
+                <Box className="s-form-bot">
+                  <ButtonPrimary
+                    title={t("btn_request")}
+                    handleClick={handleSubmit}
+                  />
+                </Box>
+              ) : (
+                <Box
+                  className="s-form-bot"
+                  p={3}
+                  border={2}
+                  borderRadius={5}
+                  borderColor={"red"}
+                  alignContent={"center"}
+                  textAlign={"center"}
+                >
+                  <Typography alignSelf={"center"} color={"red"}>
+                    {t("error_lack_of_information")}
+                  </Typography>
+                </Box>
+              )}
             </form>
           </Box>
         </Container>

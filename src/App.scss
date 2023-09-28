@@ -386,3 +386,10 @@ body {
     font-size: 15px !important;
     font-weight: 500 !important;
 }
+
+.MuiContainer-root{
+    @media screen and (max-width: 479px) {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+}
