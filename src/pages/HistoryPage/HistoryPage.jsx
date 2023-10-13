@@ -162,7 +162,7 @@ export default function HistoryPage() {
                           p={2}
                           borderRadius={15}
                         >
-                          Waitting...
+                          Waiting...
                         </Typography>
                       </Stack>
                     ) : (
