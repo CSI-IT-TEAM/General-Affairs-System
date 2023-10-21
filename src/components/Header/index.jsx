@@ -25,7 +25,6 @@ const Header = () => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { t } = useTranslation();
 
-  console.log(location);
   let settings = [];
   if (location.pathname ==="/"){
     settings = [
@@ -39,7 +38,21 @@ const Header = () => {
       { title: t("title_change_password"), route: "/user/passwordchange" },
       { title: t("title_log_out"), route: "" },
     ];
-  }else{
+  }else if (location.pathname === "/fee/medical"){
+    settings = [
+      { title: t("title_medical_history"), route: "/fee/medical/history" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  }
+  else if (location.pathname === "/fee/medical/history"){
+    settings = [
+      { title: t("title_medical"), route: "/fee/medical" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  }
+  else{
     settings = [
       // { title: t("title_history"), route: "/user/history" },
       { title: t("title_change_password"), route: "/user/passwordchange" },

@@ -29,12 +29,14 @@
             height: 110px;
             margin-bottom: 15px;
         }
+        
     }
 
     .b-thumb--first{
         @media screen and (max-width: 479px) {
             height: 120px;
         }
+       
     }
 
     .b-image{
@@ -45,7 +47,7 @@
         transform: translate(-50%, 0);
 
         img{
-            transition: transform 0.4s ease-in-out;
+            transition: transform 0.2s ease-in-out;
         }
 
         @media screen and (max-width: 479px) {
@@ -98,7 +100,6 @@
 
     &:hover{
         transform: translate(0, -5px);
-        
         img{
             transform: translateY(-10%) scale(1.1);
         }

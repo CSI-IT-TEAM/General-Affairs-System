@@ -52,7 +52,8 @@
         background-color: $color-white;
         overflow: hidden;
         border: 1px solid $color-border;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        // box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        box-shadow:-5px 10px 10px -10px rgba(0,0,0,0.6);
         padding: 30px 50px 40px;
 
         @media screen and (max-width: 991px) {
@@ -64,9 +65,9 @@
         }
 
         @media screen and (max-width: 479px) {
-            padding: 0;
-            box-shadow: none;
-            border: none;
+            padding: 15px 15px 20px;
+            // box-shadow: none;
+            // border: none;
         }
     }
 
@@ -81,8 +82,8 @@
         &__title{
             color: $color-text-gray;
             font-size: 17px !important;
-            min-width: 180px;
-            max-width: 250px;
+            // min-width: 400px;
+            // max-width: 550px;
 
             @media screen and (max-width: 991px) {
                 min-width: 160px;

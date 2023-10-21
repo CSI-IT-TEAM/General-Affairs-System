@@ -15,6 +15,7 @@ import {
   Select,
   MenuItem,
   Divider,
+  Button,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Buffer } from "buffer";
@@ -275,6 +276,12 @@ const FormCar = () => {
     }
   };
 
+  const scrollToTop = () => {
+    // window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    document
+      .getElementById("title_text")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
   ////// Handle Include Myself Event
   const handleRadPassList = (event) => {
     console.log(event.target.value);
@@ -770,6 +777,7 @@ const FormCar = () => {
           setData((prev) => reqCarData);
           setValidate((prev) => reqCarValidate);
           handleDefault();
+          scrollToTop();
         } else {
           handleOpenWarn();
         }
@@ -958,300 +966,306 @@ const FormCar = () => {
     <>
       <Box className="s-form">
         <Container>
-          <h3 className="s-form-title">
+          <h3 className="s-form-title" id="title_text">
             {t("request")} <span>{t("vehicle")}</span>
           </h3>
-          <Box className="s-form-content">
-            <form>
-              <FormTitle order="1" title={t("title_first")} />
-              <FormDefaultInfo data={data} />
-              <FormTitle order="2" title={t("title_second")} />
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                alignItems="center"
-                className="b-text-select b-spec"
-              >
-                <Typography
-                  variant="h6"
-                  className="b-text-input__title b-italic"
-                >
-                  {t("frm_reason")} <span>(*)</span>
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={4} xl={3}>
-                    <SelectModal
-                      name="MAIN_REASON_CD"
-                      data={_mainReason}
-                      placeholder={t("frm_reason_placeholder")}
-                      cValue={data.MAIN_REASON_CD}
-                      handleEvent={handleChangeSub}
-                      isValidate={validate.MAIN_REASON_CD.validate}
-                      message={
-                        lang === "en"
-                          ? validate.MAIN_REASON_CD.message
-                          : validate.MAIN_REASON_CD.messageVN
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={8} xl={9}>
-                    <SelectModal
-                      name="SUB_REASON_CD"
-                      data={reason}
-                      placeholder={t("frm_reason_detail_placeholder")}
-                      cValue={data.SUB_REASON_CD}
-                      handleEvent={handleChangeSub}
-                      isValidate={validate.SUB_REASON_CD.validate}
-                      message={
-                        lang === "en"
-                          ? validate.SUB_REASON_CD.message
-                          : validate.SUB_REASON_CD.messageVN
-                      }
-                    />
-                  </Grid>
-                </Grid>
+          <form>
+            <Stack direction="column" spacing={2}>
+              <Stack direction="column">
+                <FormTitle order="1" title={t("title_first")} />
+                <Box className="s-form-content">
+                  <FormDefaultInfo data={data} />
+                </Box>
               </Stack>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                alignItems="center"
-                className="b-text-select b-spec"
-              >
-                <Typography
-                  variant="h6"
-                  className="b-text-input__title b-italic"
-                >
-                  {t("frm_memo_address_detail")} <span>(*)</span>
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={12} xl={12}>
-                    <TextField
-                      name="ADDRESS_MEMO"
-                      disabled={false}
-                      placeholder={t("frm_address")}
-                      color="info"
-                      fullWidth
-                      value={addressMemo}
-                      onChange={handleChange}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <PlaceOutlinedIcon />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    {!validate.ADDRESS_MEMO.validate && (
-                      <Typography className="b-validate">
-                        <HighlightOffIcon
-                          sx={{ width: "15px", height: "15px" }}
-                        />
-                        {lang === "en"
-                          ? validate.ADDRESS_MEMO.message
-                          : validate.ADDRESS_MEMO.messageVN}
-                      </Typography>
-                    )}
-                  </Grid>
-                </Grid>
-              </Stack>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <ResponsiveDateTime
-                    type="DATE"
-                    title={t("frm_depart_date")}
-                    placeholder={t("frm_depart_date_placeholder")}
-                    name="GO_DATE"
-                    cValue={data.GO_DATE_FULL}
-                    handleChange={handleChangeSub}
-                    isValidate={validate.GO_DATE.validate}
-                    validMessage={
-                      lang === "en"
-                        ? validate.GO_DATE.message
-                        : validate.GO_DATE.messageVN
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <ResponsiveDateTime
-                    type="TIME"
-                    title={t("frm_depart_time")}
-                    placeholder={t("frm_depart_time_placeholder")}
-                    name="GO_TIME"
-                    cValue={data.GO_TIME_FULL}
-                    handleChange={handleChangeSub}
-                    isValidate={validate.GO_TIME.validate}
-                    validMessage={
-                      lang === "en"
-                        ? validate.GO_TIME.message
-                        : validate.GO_TIME.messageVN
-                    }
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <ResponsiveDateTime
-                    type="DATE"
-                    title={t("frm_cb_date")}
-                    placeholder={t("frm_cb_date_placeholder")}
-                    name="COMEBACK_DATE"
-                    cValue={data.COMEBACK_DATE_FULL}
-                    handleChange={handleChangeSub}
-                    isValidate={validate.COMEBACK_DATE.validate}
-                    validMessage={
-                      lang === "en"
-                        ? validate.COMEBACK_DATE.message
-                        : validate.COMEBACK_DATE.messageVN
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <ResponsiveDateTime
-                    type="TIME"
-                    title={t("frm_cb_time")}
-                    placeholder={t("frm_cb_time_placeholder")}
-                    name="COMEBACK_TIME"
-                    cValue={data.COMEBACK_TIME_FULL}
-                    handleChange={handleChangeSub}
-                    isValidate={validate.COMEBACK_TIME.validate}
-                    validMessage={
-                      lang === "en"
-                        ? validate.COMEBACK_TIME.message
-                        : validate.COMEBACK_TIME.messageVN
-                    }
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+              <Stack direction="column">
+                <FormTitle order="2" title={t("title_second")} />
+                <Box className="s-form-content">
                   <Stack
-                    marginBottom={2}
                     direction={{ xs: "column", sm: "row" }}
-                    alignItems={{ xs: "normal", sm: "center" }}
-                    className="b-text-input"
+                    alignItems="center"
+                    className="b-text-select b-spec"
                   >
                     <Typography
                       variant="h6"
                       className="b-text-input__title b-italic"
                     >
-                      {t("frm_pickup")} <span>(*)</span>
+                      {t("frm_reason")} <span>(*)</span>
                     </Typography>
-                    <Stack sx={{ width: "100%" }}>
-                      <SelectModal
-                        name="DEPART_CD"
-                        data={_departList}
-                        placeholder={t("frm_pickup_placeholder")}
-                        cValue={data.DEPART_CD}
-                        handleEvent={handleChangeSub}
-                        isValidate={validate.DEPART_CD.validate}
-                        message={
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={4} xl={3}>
+                        <SelectModal
+                          name="MAIN_REASON_CD"
+                          data={_mainReason}
+                          placeholder={t("frm_reason_placeholder")}
+                          cValue={data.MAIN_REASON_CD}
+                          handleEvent={handleChangeSub}
+                          isValidate={validate.MAIN_REASON_CD.validate}
+                          message={
+                            lang === "en"
+                              ? validate.MAIN_REASON_CD.message
+                              : validate.MAIN_REASON_CD.messageVN
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={8} xl={9}>
+                        <SelectModal
+                          name="SUB_REASON_CD"
+                          data={reason}
+                          placeholder={t("frm_reason_detail_placeholder")}
+                          cValue={data.SUB_REASON_CD}
+                          handleEvent={handleChangeSub}
+                          isValidate={validate.SUB_REASON_CD.validate}
+                          message={
+                            lang === "en"
+                              ? validate.SUB_REASON_CD.message
+                              : validate.SUB_REASON_CD.messageVN
+                          }
+                        />
+                      </Grid>
+                    </Grid>
+                  </Stack>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    alignItems="center"
+                    className="b-text-select b-spec"
+                  >
+                    <Typography
+                      variant="h6"
+                      className="b-text-input__title b-italic"
+                    >
+                      {t("frm_memo_address_detail")} <span>(*)</span>
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={12} xl={12}>
+                        <TextField
+                          name="ADDRESS_MEMO"
+                          disabled={false}
+                          placeholder={t("frm_address")}
+                          color="info"
+                          fullWidth
+                          value={addressMemo}
+                          onChange={handleChange}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <PlaceOutlinedIcon />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                        {!validate.ADDRESS_MEMO.validate && (
+                          <Typography className="b-validate">
+                            <HighlightOffIcon
+                              sx={{ width: "15px", height: "15px" }}
+                            />
+                            {lang === "en"
+                              ? validate.ADDRESS_MEMO.message
+                              : validate.ADDRESS_MEMO.messageVN}
+                          </Typography>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Stack>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <ResponsiveDateTime
+                        type="DATE"
+                        title={t("frm_depart_date")}
+                        placeholder={t("frm_depart_date_placeholder")}
+                        name="GO_DATE"
+                        cValue={data.GO_DATE_FULL}
+                        handleChange={handleChangeSub}
+                        isValidate={validate.GO_DATE.validate}
+                        validMessage={
                           lang === "en"
-                            ? validate.DEPART_CD.message
-                            : validate.DEPART_CD.messageVN
+                            ? validate.GO_DATE.message
+                            : validate.GO_DATE.messageVN
                         }
                       />
-                      {openPickUp && (
-                        <>
-                          <TextField
-                            name="DEPART_NM"
-                            className="b-text-input__desc b-text-input__desc--sub"
-                            disabled={false}
-                            placeholder="Type place to pick up"
-                            color="info"
-                            fullWidth
-                            value={data.DEPART_NM}
-                            onChange={handleChange}
-                            InputProps={{
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <PlaceOutlinedIcon />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                          {!validate.DEPART_NM.validate && (
-                            <Typography className="b-validate">
-                              <HighlightOffIcon
-                                sx={{ width: "17px", height: "17px" }}
-                              />
-                              {t("frm_required")}
-                            </Typography>
-                          )}
-                        </>
-                      )}
-                    </Stack>
-                  </Stack>
-                </Grid>
-
-                <Grid item xs={12} md={12} lg={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={isInclude}
-                        sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
-                        onChange={handleIsInclude}
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <ResponsiveDateTime
+                        type="TIME"
+                        title={t("frm_depart_time")}
+                        placeholder={t("frm_depart_time_placeholder")}
+                        name="GO_TIME"
+                        cValue={data.GO_TIME_FULL}
+                        handleChange={handleChangeSub}
+                        isValidate={validate.GO_TIME.validate}
+                        validMessage={
+                          lang === "en"
+                            ? validate.GO_TIME.message
+                            : validate.GO_TIME.messageVN
+                        }
                       />
-                    }
-                    label={t("frm_include_me")}
-                  />
-                </Grid>
-
-                {isInclude && (
-                  <Grid item xs={12} md={12} lg={12}>
-                    <TextField
-                      disabled={true}
-                      placeholder={t("frm_pass_placeholder")}
-                      color="info"
-                      fullWidth
-                      value={empName}
-                    />
+                    </Grid>
                   </Grid>
-                )}
 
-                <Grid item xs={12} md={12} sm={12} lg={12}>
-                  <Typography
-                    variant="h6"
-                    className="b-text-input__title b-italic"
-                  >
-                    {`${t("frm_txt_total_passenger")}`} <span>(*)</span>
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="PASSSENGER_COUNT"
-                    disabled={false}
-                    placeholder="Total Number Of Passengers."
-                    color="info"
-                    value={PassengerDeptCount}
-                    onChange={HandlePassengerChange}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <AirlineSeatReclineExtraIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <ResponsiveDateTime
+                        type="DATE"
+                        title={t("frm_cb_date")}
+                        placeholder={t("frm_cb_date_placeholder")}
+                        name="COMEBACK_DATE"
+                        cValue={data.COMEBACK_DATE_FULL}
+                        handleChange={handleChangeSub}
+                        isValidate={validate.COMEBACK_DATE.validate}
+                        validMessage={
+                          lang === "en"
+                            ? validate.COMEBACK_DATE.message
+                            : validate.COMEBACK_DATE.messageVN
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <ResponsiveDateTime
+                        type="TIME"
+                        title={t("frm_cb_time")}
+                        placeholder={t("frm_cb_time_placeholder")}
+                        name="COMEBACK_TIME"
+                        cValue={data.COMEBACK_TIME_FULL}
+                        handleChange={handleChangeSub}
+                        isValidate={validate.COMEBACK_TIME.validate}
+                        validMessage={
+                          lang === "en"
+                            ? validate.COMEBACK_TIME.message
+                            : validate.COMEBACK_TIME.messageVN
+                        }
+                      />
+                    </Grid>
+                  </Grid>
 
-                {/* <Stack
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Stack
+                        marginBottom={2}
+                        direction={{ xs: "column", sm: "row" }}
+                        alignItems={{ xs: "normal", sm: "center" }}
+                        className="b-text-input"
+                      >
+                        <Typography
+                          variant="h6"
+                          className="b-text-input__title b-italic"
+                        >
+                          {t("frm_pickup")} <span>(*)</span>
+                        </Typography>
+                        <Stack sx={{ width: "100%" }}>
+                          <SelectModal
+                            name="DEPART_CD"
+                            data={_departList}
+                            placeholder={t("frm_pickup_placeholder")}
+                            cValue={data.DEPART_CD}
+                            handleEvent={handleChangeSub}
+                            isValidate={validate.DEPART_CD.validate}
+                            message={
+                              lang === "en"
+                                ? validate.DEPART_CD.message
+                                : validate.DEPART_CD.messageVN
+                            }
+                          />
+                          {openPickUp && (
+                            <>
+                              <TextField
+                                name="DEPART_NM"
+                                className="b-text-input__desc b-text-input__desc--sub"
+                                disabled={false}
+                                placeholder="Type place to pick up"
+                                color="info"
+                                fullWidth
+                                value={data.DEPART_NM}
+                                onChange={handleChange}
+                                InputProps={{
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      <PlaceOutlinedIcon />
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                              {!validate.DEPART_NM.validate && (
+                                <Typography className="b-validate">
+                                  <HighlightOffIcon
+                                    sx={{ width: "17px", height: "17px" }}
+                                  />
+                                  {t("frm_required")}
+                                </Typography>
+                              )}
+                            </>
+                          )}
+                        </Stack>
+                      </Stack>
+                    </Grid>
+
+                    <Grid item xs={12} md={12} lg={12}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={isInclude}
+                            sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
+                            onChange={handleIsInclude}
+                          />
+                        }
+                        label={t("frm_include_me")}
+                      />
+                    </Grid>
+
+                    {isInclude && (
+                      <Grid item xs={12} md={12} lg={12}>
+                        <TextField
+                          disabled={true}
+                          placeholder={t("frm_pass_placeholder")}
+                          color="info"
+                          fullWidth
+                          value={empName}
+                        />
+                      </Grid>
+                    )}
+
+                    <Grid item xs={12} md={12} sm={12} lg={12}>
+                      <Typography
+                        variant="h6"
+                        className="b-text-input__title b-italic"
+                      >
+                        {`${t("frm_txt_total_passenger")}`} <span>(*)</span>
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        name="PASSSENGER_COUNT"
+                        disabled={false}
+                        placeholder="Total Number Of Passengers."
+                        color="info"
+                        value={PassengerDeptCount}
+                        onChange={HandlePassengerChange}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <AirlineSeatReclineExtraIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+
+                    {/* <Stack
                     marginBottom={2}
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "normal", sm: "center" }}
                     className="b-text-input"
                   > */}
-                {/* <Typography
+                    {/* <Typography
                       variant="h6"
                       className="b-text-input__title b-italic"
                     >
                       {t("frm_passenger")} <span>(*)</span>
                     </Typography> */}
-                {/* <Stack
+                    {/* <Stack
                       sx={{ width: "100%" }}
                       direction={{ xs: "column", sm: "row" }}
                       justifyContent="center"
                       alignItems={{ xs: "flex-start", sm: "center" }}
                     > */}
-                {/* <SelectModal
+                    {/* <SelectModal
                         name="MAN_QTY"
                         data={passengerNum}
                         placeholder={t("frm_passenger_placeholder")}
@@ -1264,7 +1278,7 @@ const FormCar = () => {
                             : validate.MAN_QTY.messageVN
                         }
                       /> */}
-                {/* <FormControlLabel
+                    {/* <FormControlLabel
                       control={
                         <Checkbox
                           sx={{ "& .MuiSvgIcon-root": { fontSize: 28 } }}
@@ -1273,8 +1287,8 @@ const FormCar = () => {
                       }
                       label={t("frm_include_me")}
                     /> */}
-                {/* </Stack> */}
-                {/* {isInclude && (
+                    {/* </Stack> */}
+                    {/* {isInclude && (
                       <Grid item xs={12} md={6}>
                         <Stack
                           sx={{ width: "100%" }}
@@ -1304,8 +1318,8 @@ const FormCar = () => {
                         />
                       </Grid>
                     )} */}
-                {/* </Stack> */}
-                {/* <Grid item>
+                    {/* </Stack> */}
+                    {/* <Grid item>
                   <Stack sx={{ width: "100%" }}>
                     <FormControl>
                       <Typography
@@ -1340,8 +1354,8 @@ const FormCar = () => {
                   </Stack>
                 </Grid> */}
 
-                {/* {passengerList.map((item, index) => { */}
-                {/* // if (!isInclude && index === 0) {
+                    {/* {passengerList.map((item, index) => { */}
+                    {/* // if (!isInclude && index === 0) {
                         //   return (
                         //     <MainPassengerInfo
                         //       key={index}
@@ -1366,7 +1380,7 @@ const FormCar = () => {
                         //   );
                         // }
                      // })} */}
-                {/* <FormControl fullWidth>
+                    {/* <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-autowidth-label">
                       Age
                     </InputLabel>
@@ -1383,88 +1397,91 @@ const FormCar = () => {
                     
                     </Select>
                   </FormControl> */}
-              </Grid>
-              <Grid item>
-                <Stack fullWidth>
-                  <Typography
-                    variant="h6"
-                    className="b-text-input__title b-italic"
-                  >
-                    {t("frm_passengers_korean_list")}
-                  </Typography>
-                  <KoreaPassengerInfo
-                    cValue={passengerSelectList}
-                    expList={_EXPList}
-                    handleName={handleSearch}
-                    handlePassengerSelect={handlePassengerSelect}
-                    handleClearClick={handleClearClick}
-                  />
-                </Stack>
-              </Grid>
-              <Grid item>
-                <Typography
-                  variant="h6"
-                  className="b-text-input__title b-italic"
-                >
-                  {t("frm_passengers_vietnam_list")} <span>(*)</span>
-                </Typography>
+                  </Grid>
+                  <Grid item>
+                    <Stack fullWidth>
+                      <Typography
+                        variant="h6"
+                        className="b-text-input__title b-italic"
+                      >
+                        {t("frm_passengers_korean_list")}
+                      </Typography>
+                      <KoreaPassengerInfo
+                        cValue={passengerSelectList}
+                        expList={_EXPList}
+                        handleName={handleSearch}
+                        handlePassengerSelect={handlePassengerSelect}
+                        handleClearClick={handleClearClick}
+                      />
+                    </Stack>
+                  </Grid>
+                  <Grid item>
+                    <Typography
+                      variant="h6"
+                      className="b-text-input__title b-italic"
+                    >
+                      {t("frm_passengers_vietnam_list")} <span>(*)</span>
+                    </Typography>
 
-                <VietnamPassengerInfo
-                  cValue={DeptName}
-                  tValue={PassengerDeptCount}
-                  DeptList={_DEPTList}
-                  empName={empName}
-                  dropOffList={_dropOffList}
-                  handleName={handleSearch}
-                  handleDropOff={handlePassengerDropOff}
-                  deptNameHandleSelect={handleDeptSelect}
-                  _PassengerChange={HandlePassengerChange}
-                />
-                {/* {!DeptName && (
+                    <VietnamPassengerInfo
+                      cValue={DeptName}
+                      tValue={PassengerDeptCount}
+                      DeptList={_DEPTList}
+                      empName={empName}
+                      dropOffList={_dropOffList}
+                      handleName={handleSearch}
+                      handleDropOff={handlePassengerDropOff}
+                      deptNameHandleSelect={handleDeptSelect}
+                      _PassengerChange={HandlePassengerChange}
+                    />
+                    {/* {!DeptName && (
                   <Typography className="b-validate">
                     <HighlightOffIcon sx={{ width: "15px", height: "15px" }} />
                     {t("error_required_department_select")}
                   </Typography>
                 )} */}
-              </Grid>
-              {data.MAIN_REASON_CD &&
-              data.SUB_REASON_CD &&
-              addressMemo &&
-              data.ARRIVAL &&
-              data.DEPART_CD &&
-              data.GO_DATE &&
-              data.GO_TIME &&
-              data.COMEBACK_DATE &&
-              data.COMEBACK_TIME &&
-              DeptName &&
-              validate.GO_DATE.validate &&
-              validate.GO_TIME.validate &&
-              validate.COMEBACK_DATE.validate &&
-              validate.COMEBACK_TIME.validate &&
-              PassengerDeptCount > 0 ? (
-                <Box className="s-form-bot">
-                  <ButtonPrimary
-                    title={t("btn_request")}
-                    handleClick={handleSubmit}
-                  />
+                  </Grid>
                 </Box>
-              ) : (
-                <Box
-                  className="s-form-bot"
-                  p={3}
-                  border={2}
-                  borderRadius={5}
-                  borderColor={"red"}
-                  alignContent={"center"}
-                  textAlign={"center"}
-                >
-                  <Typography alignSelf={"center"} color={"red"}>
-                    {t("error_lack_of_information")}
-                  </Typography>
-                </Box>
-              )}
-            </form>
-          </Box>
+              </Stack>
+            </Stack>
+
+            {data.MAIN_REASON_CD &&
+            data.SUB_REASON_CD &&
+            addressMemo &&
+            data.ARRIVAL &&
+            data.DEPART_CD &&
+            data.GO_DATE &&
+            data.GO_TIME &&
+            data.COMEBACK_DATE &&
+            data.COMEBACK_TIME &&
+            DeptName &&
+            validate.GO_DATE.validate &&
+            validate.GO_TIME.validate &&
+            validate.COMEBACK_DATE.validate &&
+            validate.COMEBACK_TIME.validate &&
+            PassengerDeptCount > 0 ? (
+              <Box className="s-form-bot">
+                <ButtonPrimary
+                  title={t("btn_request")}
+                  handleClick={handleSubmit}
+                />
+              </Box>
+            ) : (
+              <Box
+                className="s-form-bot"
+                p={3}
+                border={2}
+                borderRadius={5}
+                borderColor={"red"}
+                alignContent={"center"}
+                textAlign={"center"}
+              >
+                <Typography alignSelf={"center"} color={"red"}>
+                  {t("error_lack_of_information")}
+                </Typography>
+              </Box>
+            )}
+          </form>
         </Container>
       </Box>
       <ModalWarning

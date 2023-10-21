@@ -10,7 +10,7 @@ const emailURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.SMT_SEND_EMAIL/SAVE";
 const LoginURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_LOGIN_SELECT";
 const UserRegisterURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REGISTER_SAVE/SAVE";
 const historyURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REQUEST_HISTORY";
-
+const CancelRequestURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_CANCEL_REQUEST_SAVE/SAVE";
 export {
   downloadURL,
   uploadURL,
@@ -18,5 +18,6 @@ export {
   emailURL,
   LoginURL,
   UserRegisterURL,
-  historyURL
+  historyURL,
+  CancelRequestURL
 };

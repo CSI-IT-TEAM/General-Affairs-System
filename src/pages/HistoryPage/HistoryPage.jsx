@@ -14,11 +14,13 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
-import { Box, Container, Stack } from "@mui/material";
+import { Box, Button, Container, Stack } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { historyURL } from "../../api";
+import { historyURL, CancelRequestURL } from "../../api";
 import { NoticeCard } from "../../components";
+import Swal from "sweetalert2";
 const carImage = "../../assets/images/car.png";
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -50,6 +52,60 @@ export default function HistoryPage() {
     setTimeout(() => controller.abort(), time * 1000);
     return controller;
   };
+
+  const CancelRequestHandle = (RequestNumber) => {
+    console.log(RequestNumber);
+    Swal.fire({
+      title: t("title_user_cancel_request_question"),
+      // text: t("title_text_user_cancel_request_question"),
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: t("btn_ok"),
+      cancelButtonText: t("btn_close"),
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(CancelRequestURL, {
+          method: "POST",
+          mode: "cors",
+          dataType: "json",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ARG_TYPE: "Q",
+            ARG_REQ_NO: RequestNumber, //user name
+          }),
+          signal: Timeout(5).signal,
+        })
+          .then((response) => {
+            response.json().then(async (result) => {
+              if (result.Result === "OK") {
+                console.log("Cancel Successful.");
+                const newData = data.filter(
+                  (item) => item.REQ_NO === RequestNumber
+                );
+                newData[0]["CFM_YN"] = "C";
+                console.log(newData);
+                setData(
+                  // Replace the state
+                  [
+                    // with a new array
+                    ...data, // that contains all the old items
+                    newData, // and one new item at the end
+                  ]
+                );
+              }
+            });
+          })
+          .catch(() => {
+            setOpenInfo(true);
+          });
+      }
+    });
+  };
+
   const handleDownload = (empID) => {
     fetch(historyURL, {
       method: "POST",
@@ -94,7 +150,10 @@ export default function HistoryPage() {
         {data && data !== null && data?.length > 0 ? (
           data.map((item, index) => {
             return (
-              <Card sx={{ width: "100%", marginTop: 2, borderRadius: 5 }}>
+              <Card
+                key={item.REQ_NO}
+                sx={{ width: "100%", marginTop: 2, borderRadius: 5 }}
+              >
                 <CardHeader
                   avatar={
                     <Avatar
@@ -106,11 +165,13 @@ export default function HistoryPage() {
                       R
                     </Avatar>
                   }
-                  action={
-                    <IconButton aria-label="settings">
-                      <MoreVertIcon />
-                    </IconButton>
-                  }
+                  // action={
+                  //   item.CFM_YN === "N" ? (
+                  //     <IconButton color="error" aria-label="cancelation">
+                  //       <DeleteIcon />
+                  //     </IconButton>
+                  //   ) : null
+                  // }
                   title={item.DEPART + " > " + item.ARRIVAL}
                   titleTypographyProps={{ variant: "h5" }}
                   subheader={
@@ -141,13 +202,48 @@ export default function HistoryPage() {
                         <Typography
                           bgcolor={"green"}
                           color="white"
-                          p={2}
-                          borderRadius={15}
+                          px={2}
+                          py={1}
+                          borderRadius={5}
+                          border={2}
+                          borderColor={"yellow"}
                         >
-                          Confirmed
+                          {t("frm_confirmed")}
                         </Typography>
                       </Stack>
                     ) : item.CFM_YN === "N" ? (
+                      <Stack
+                        direction={"row"}
+                        alignItems={"center"}
+                        justifyContent={"space-between"}
+                      >
+                        <Button
+                          onClick={() => CancelRequestHandle(item.REQ_NO)}
+                          startIcon={<DeleteIcon />}
+                          variant="outlined"
+                          color="error"
+                          title={t("btn_cancel_request")}
+                          px={2}
+                          sx={{
+                            textTransform: "none",
+                          }}
+                        >
+                          {t("btn_cancel_request")}
+                        </Button>
+                        {/* <Typography></Typography> */}
+                        <Typography
+                          bgcolor={"yellow"}
+                          color="black"
+                          px={2}
+                          py={1}
+                          borderRadius={5}
+                          border={2}
+                          borderColor={"blue"}
+                        >
+                          {t("frm_waiting")}
+                        </Typography>
+                      </Stack>
+                    ) : item.CFM_YN === "C" ? (
                       <Stack
                         direction={"row"}
                         alignItems={"center"}
@@ -157,12 +253,15 @@ export default function HistoryPage() {
                           {/* - {t("btn_confirm")}: */}
                         </Typography>
                         <Typography
-                          bgcolor={"yellow"}
+                          bgcolor={"silver"}
+                          border={2}
+                          borderColor={"yellow"}
                           color="black"
-                          p={2}
+                          px={2}
+                          py={1}
                           borderRadius={15}
                         >
-                          Waiting...
+                          {t("frm_request_cancelled")}
                         </Typography>
                       </Stack>
                     ) : (
@@ -177,10 +276,13 @@ export default function HistoryPage() {
                         <Typography
                           bgcolor={"red"}
                           color="white"
-                          p={2}
+                          px={2}
+                          py={1}
+                          border={2}
+                          borderColor={"yellow"}
                           borderRadius={15}
                         >
-                          Denied
+                          {t("frm_denied")}
                         </Typography>
                       </Stack>
                     )}

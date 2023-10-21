@@ -271,10 +271,22 @@ const SignIn = () => {
                 sessionStorage.setItem("userImg", imgData);
                 //    sessionStorage.setItem("userInfor", JSON.stringify(result));
                 //console.log(result[0]);
+
                 navigate("/");
+
+                if ("caches" in window) {
+                  caches.keys().then((names) => {
+                    // delete all the cache files
+                    names.foreach((name) => {
+                      caches.delete(name);
+                    });
+                  });
+                  // makes sure the page reloads. changes are only visible after you refresh.
+                   window.location.reload(true);
+                }
               }
             }
-          }else{
+          } else {
             Swal.fire(
               t("title_wrong_password"),
               t("text_if_first_time_password"),

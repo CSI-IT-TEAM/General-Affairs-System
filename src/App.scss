@@ -34,7 +34,7 @@ img{
 
 input {
     color: $color-input !important;
-    font-weight: 500 !important;
+    // font-weight: 500 !important;
     font-size: 17px !important;
     // padding: 15px 0 !important;
 }
@@ -170,7 +170,6 @@ body {
     border-radius: 10px;
     background: #6d6d6d; 
 }
-
 .s-header{
     position: fixed;
     top: 0;

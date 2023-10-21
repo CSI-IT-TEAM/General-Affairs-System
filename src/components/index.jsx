@@ -15,11 +15,13 @@ import TimeModal from "./TimeModal/Desktop";
 import TimeModalMobile from "./TimeModal/Mobile";
 import FormTitle from "./Title/Form";
 import FormDefaultInfo from "./Form/DefaultInfo";
+import FormMedicalDefaultInfo from "./Form/MedicalDefaultInfo";
 import PassengerInfo from "./Form/PassengerInfo";
 import MainPassengerInfo from "./Form/PassengerInfo/Main";
 import KoreaPassengerInfo from "./Form/PassengerInfo/Main/Korea";
 import VietnamPassengerInfo from "./Form/PassengerInfo/Main/Vietnam";
 import ResponsiveDateTime from "./ResponsiveDateTime";
+import BottomNavigation from "./Bottom/Navigation/BottomNavigation"
 export {
   CardPrimary,
   ButtonPrimary,
@@ -36,10 +38,12 @@ export {
   TimeModalMobile,
   FormTitle,
   FormDefaultInfo,
+  FormMedicalDefaultInfo,
   PassengerInfo,
   MainPassengerInfo,
   ResponsiveDateTime,
   KoreaPassengerInfo,
   VietnamPassengerInfo,
-  NoticeCard
+  NoticeCard,
+  BottomNavigation,
 };

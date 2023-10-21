@@ -10,7 +10,8 @@ import ErrorPage from "./pages/ErrorPage";
 import "./App.scss";
 import 'devextreme/dist/css/dx.light.css';
 import FormChangePass from "./pages/FormPage/FormChangePass";
-
+import FormHospital from "./pages/FormPage/FormHospital";
+import HistoryMedicalPage from "./pages/HistoryPage/HistoryMedicalPage";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -36,11 +37,29 @@ const router = createBrowserRouter([
         ),
     },
     {
+        path: "/fee/medical",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <FormHospital />
+            </Layout>
+        ),
+    },
+    {
         path: "/user/history",
         errorElement: <ErrorPage />,
         element: (
             <Layout>
                 <HistoryPage />
+            </Layout>
+        ),
+    },
+    {
+        path: "/fee/medical/history",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <HistoryMedicalPage />
             </Layout>
         ),
     },

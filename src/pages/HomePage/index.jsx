@@ -108,7 +108,7 @@ const HomePage = () => {
         navigate("/request/car");
         break;
       case "002":
-        navigate("/request/hospital");
+        navigate("/fee/medical");
         break;
       case "003":
         navigate("/request/plane");
@@ -129,7 +129,7 @@ const HomePage = () => {
           </h3>
           <Grid container spacing={colSpacing}>
             {optionData.map((item, index) => {
-              if (item.id === "001") {
+              if (item.id === "001" || item.id === "002") {
                 return (
                   <Grid item md={4} xs={12} key={item.id}>
                     <CardPrimary
@@ -140,7 +140,7 @@ const HomePage = () => {
                 );
               } else {
                 return (
-                  <Grid item md={4} xs={6} key={item.id}>
+                  <Grid item md={4} xs={12} key={item.id}>
                     <CardPrimary data={item} handleClick={handleOpen} />
                   </Grid>
                 );
