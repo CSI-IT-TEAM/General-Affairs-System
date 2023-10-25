@@ -75,7 +75,7 @@ const TextInput = ({
               disabled={disable}
               placeholder={placeholder}
               fullWidth
-              value={30000000}
+              value={value}
               onChange={handleEvent}
               sx={{
                 ".MuiInputBase-input": {

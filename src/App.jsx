@@ -6,7 +6,7 @@ import FormCar from "./pages/FormPage/FormCar";
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import Layout from "./components/Layout";
 import ErrorPage from "./pages/ErrorPage";
-
+import "rsuite/dist/rsuite-no-reset.css"; 
 import "./App.scss";
 import 'devextreme/dist/css/dx.light.css';
 import FormChangePass from "./pages/FormPage/FormChangePass";

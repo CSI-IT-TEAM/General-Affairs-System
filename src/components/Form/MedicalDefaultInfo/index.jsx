@@ -1,11 +1,10 @@
-import { Grid, InputAdornment } from "@mui/material";
+import { FormHelperText, Grid, InputAdornment } from "@mui/material";
 import TextInput from "../../TextInput";
 import { useTranslation } from "react-i18next";
 import FactoryIcon from "@mui/icons-material/Factory";
 const FormMedicalDefaultInfo = ({ data }) => {
   /////// Translate Lang
   const { t } = useTranslation();
-
   return (
     <>
       <Grid container spacing={2}>
@@ -55,6 +54,7 @@ const FormMedicalDefaultInfo = ({ data }) => {
             inputProp={{ inputMode: "text" }}
             isDefault={true}
           />
+          <FormHelperText>{data.EMP_NAME_KOR}</FormHelperText>
         </Grid>
         <Grid item xs={12} md={6} xl={3}>
           <TextInput
@@ -67,11 +67,20 @@ const FormMedicalDefaultInfo = ({ data }) => {
           />
         </Grid>
         <Grid item xs={12} md={6} xl={3}>
-          <TextInput
+          {/* <TextInput
             name="BUDGET"
             title={t("frm_user_budget")}
             placeholder=""
             value={data.BUDGET}
+            disable={true}
+            inputProp={{ inputMode: "text" }}
+            isDefault={true}
+          /> */}
+          <TextInput
+            name="PASSPORT"
+            title={t("frm_user_passport")}
+            placeholder=""
+            value={data.PASSPORT}
             disable={true}
             inputProp={{ inputMode: "text" }}
             isDefault={true}

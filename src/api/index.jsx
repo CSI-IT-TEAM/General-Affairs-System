@@ -8,9 +8,19 @@ const emailURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.SMT_SEND_EMAIL/SAVE";
 
 //PHUOC ADD MORE 2023-08-09
 const LoginURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_LOGIN_SELECT";
-const UserRegisterURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REGISTER_SAVE/SAVE";
+const UserRegisterURL =
+  baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REGISTER_SAVE/SAVE";
 const historyURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_REQUEST_HISTORY";
-const CancelRequestURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_CANCEL_REQUEST_SAVE/SAVE";
+const CancelRequestURL =
+  baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.USER_CANCEL_REQUEST_SAVE/SAVE";
+
+const ClinicListURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HOSPITAL_LIST_SELECT";
+const UnitListURL = baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.UNIT_LIST_SELECT";
+const HistoryListURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_LIST_SELECT";
+const MedicalClinicSaveURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_CLINIC_SAVE/SAVE";
 export {
   downloadURL,
   uploadURL,
@@ -19,5 +29,9 @@ export {
   LoginURL,
   UserRegisterURL,
   historyURL,
-  CancelRequestURL
+  CancelRequestURL,
+  ClinicListURL,
+  UnitListURL,
+  MedicalClinicSaveURL,
+  HistoryListURL,
 };

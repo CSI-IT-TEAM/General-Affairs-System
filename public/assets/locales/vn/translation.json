@@ -151,5 +151,21 @@
     "frm_discount_price":"Giảm giá",
     "frm_amount_price":"Thành tiền",
     "frm_notes":"Ghi chú",
-    "frm_user_budget": "Ngân sách"
+    "frm_user_budget": "Ngân sách",
+    "frm_medical_name": "Tên phòng khám",
+    "frm_history": "Lịch sử",
+    "frm_user_passport" : "Số Passport",
+    "swal_are_you_sure": "Bạn chắc chắn chưa?",
+    "swal_success": "Thành công!",
+    "swal_your_data_uploaded": "Dữ liệu đã được tải lên thành công.",
+
+    "swal_failed":"Lỗi rồi.",
+    "swal_networking_error": "Có vấn đề lỗi mạng.",
+
+    "swal_data_empty": "Nhập thiếu dữ liệu...",
+    "swal_checking_again": "Vui lòng kiểm tra lại",
+    "swal_red_fields_is_blank":"Không được bỏ qua các ô màu đỏ.",
+    "frm_helper_relationship": "Nếu bản thân của bạn hãy nhập vào 'Bản thân'. Nếu người thân hãy nhập vào tên của họ.",
+    "frm_helper_customer_code":"Là mã khách hàng của bệnh viện được in trên tờ hóa đơn.",
+    "frm_helper_new_clinic":"Thêm mới một phòng khám hoặc bệnh viện sẽ được ghi nhớ cho lần sau."
 }

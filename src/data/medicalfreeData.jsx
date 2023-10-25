@@ -9,13 +9,15 @@ const medicalfreeData = {
     "EMP_NAME_KOR": "",   
     "EMAIL_ADDRESS": "",   
     "CUSTOMER_CODE": "",
-    "BIRTHDATE": "",           
+    "BIRTHDATE": "",
+    "BUDGET": "0",           
     "PASSPORT": "", 
     "RELATIONSHIP": "",
     "SERVICE_TYPE": "",  
     "SERVICE_NAME": "",        
     "MEDICAL_CD": "",    
-    "MEDICAL_NAME": "",       
+    "MEDICAL_NAME": "", 
+    "IS_CLINIC_NEW":"",      
     "UNIT_CD": "", 
     "QTY": "", 
     "UNIT_PRICE": "", 
@@ -24,7 +26,7 @@ const medicalfreeData = {
     "REMARKS": "",       
     "CREATOR": "",
     "CREATE_PC": "",
-    "CREATE_PROGRAM_ID": "",
+    "CREATE_PROGRAM_ID": ""
 }
 
 

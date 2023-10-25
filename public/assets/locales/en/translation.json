@@ -155,5 +155,22 @@
     "frm_medical_nm": "Hospital Name",
     "frm_medical_helper_text":"Please select a Hospital",
     "frm_unit_helper_text": "Please select a unit",
-    "frm_user_budget": "Budget"
+    "frm_user_budget": "Budget",
+    "frm_medical_name": "Clinic Name",
+    "frm_history": "History",
+    "frm_user_passport": "Passport",
+
+    "swal_are_you_sure": "Are you sure?",
+    "swal_success": "Successfully!",
+    "swal_your_data_uploaded": "Your Data Has Been Uploaded.",
+
+    "swal_failed":"Error.",
+    "swal_networking_error": "Networking Or Data Error!.",
+
+    "swal_data_empty": "Lack of Information...",
+    "swal_checking_again": "Please check again.",
+    "swal_red_fields_is_blank":"You cannot leave red fields blank!.",
+    "frm_helper_relationship": "If your self enter 'MySelf'. If you are a relative, please enter their name.",
+    "frm_helper_customer_code":"The hospital/Clinic's customer code is printed on the invoice.",
+    "frm_helper_new_clinic": "Adding a new clinic or hospital will be remembered for next time."
 }
