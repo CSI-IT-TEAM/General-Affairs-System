@@ -3,7 +3,7 @@
 .p-sub-title{
     color: $color-main !important;
     font-weight: 600 !important;
-    margin-bottom: 15px !important;
+    margin-bottom: 25px !important;
     margin-top: 10px !important;
     display: flex;
     align-items: center;
@@ -30,8 +30,8 @@
         font-weight: bold;
 
         @media screen and (max-width: 991px) {
-            width: 18px;
-            height: 18px;
+            width: 25px;
+            height: 25px;
         }
     }
 }

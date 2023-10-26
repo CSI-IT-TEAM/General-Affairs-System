@@ -64,6 +64,10 @@ const getDateTime = () => {
   return ymd + " " + hms;
 };
 
+const date_to_yyyymmdd = (DateValue) => {
+  return DateValue.replaceAll("/", "");
+};
+
 export {
   getDate,
   getDateTime,
@@ -72,4 +76,5 @@ export {
   formatDate,
   formatHMS,
   formatHMS_00,
+  date_to_yyyymmdd,
 };

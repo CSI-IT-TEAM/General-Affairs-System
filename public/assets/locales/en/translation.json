@@ -74,6 +74,7 @@
     "frm_passengers_vietnam_list": "Department",
     "frm_txt_total_passenger": "Total Passengers",
     "frm_memo_address_detail":"Detailed description & Destination address",
+    "frm_select_clinic_helper": "If your Clinic or Hopsital dose not listed, please choose 'Not Listed Clinic/Hospital' option.",
     "btn_request": "Request Now",
     "btn_ok":"OK",
     "btn_close": "Close",
@@ -170,7 +171,10 @@
     "swal_data_empty": "Lack of Information...",
     "swal_checking_again": "Please check again.",
     "swal_red_fields_is_blank":"You cannot leave red fields blank!.",
-    "frm_helper_relationship": "If your self enter 'MySelf'. If you are a relative, please enter their name.",
+    "frm_helper_relationship": "If you are a relative, please uncheck and select their name.",
     "frm_helper_customer_code":"The hospital/Clinic's customer code is printed on the invoice.",
-    "frm_helper_new_clinic": "Adding a new clinic or hospital will be remembered for next time."
+    "frm_helper_new_clinic": "Adding a new clinic or hospital will be remembered for next time.",
+    "frm_title_check_myself": "Myself",
+    "btn_title_attachment_invoice": "Attach An Invoice Image",
+    "btn_title_remove": "Remove"
 }

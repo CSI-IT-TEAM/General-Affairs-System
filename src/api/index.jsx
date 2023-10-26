@@ -17,10 +17,18 @@ const CancelRequestURL =
 const ClinicListURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HOSPITAL_LIST_SELECT";
 const UnitListURL = baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.UNIT_LIST_SELECT";
+const RelationListURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.RELATION_LIST_SELECT";
 const HistoryListURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_LIST_SELECT";
 const MedicalClinicSaveURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_CLINIC_SAVE/SAVE";
+
+const MedicalClinicSaveWithImageURL =
+  "http://172.30.10.120:9000/MEDICAL_SYSTEM_WEB_SAVE";
+// const MedicalClinicSaveWithImageURL =
+//   "http://172.30.30.41:4000/MEDICAL_SYSTEM_WEB_SAVE";
+
 export {
   downloadURL,
   uploadURL,
@@ -33,5 +41,7 @@ export {
   ClinicListURL,
   UnitListURL,
   MedicalClinicSaveURL,
+  MedicalClinicSaveWithImageURL,
   HistoryListURL,
+  RelationListURL,
 };
