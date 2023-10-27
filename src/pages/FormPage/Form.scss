@@ -1,6 +1,8 @@
 @import "../../styles/color.scss";
 @import "../../styles/mixin.scss";
-
+.MuiGrid-container{
+    margin-top: 0 !important;
+}
 .s-form {
     padding: 40px 0;
     padding-top: 120px;
@@ -196,9 +198,9 @@
             padding-top: 10px !important;
         }
 
-        .MuiGrid-container{
-            margin-top: 0 !important;
-        }
+        // .MuiGrid-container{
+        //     margin-top: 0 !important;
+        // }
 
         .MuiSelect-select{
             padding:  10px !important;
@@ -216,9 +218,12 @@
             }
         }
     }
+    
 
     @media screen and (max-width: 479px) {
-
+        // .MuiGrid-container{
+        //     margin-top: 0 !important;
+        // }
         .b-spec{
 
             .b-text-input__title{
@@ -283,3 +288,7 @@
 .MuiInputBase-multiline{
     font-weight: 500 !important;
 }
+
+// .dx-texteditor-input{
+//     readonly:true,
+// }

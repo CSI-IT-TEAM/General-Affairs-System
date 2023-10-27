@@ -28,7 +28,8 @@ const MedicalClinicSaveWithImageURL =
   "http://172.30.10.120:9000/MEDICAL_SYSTEM_WEB_SAVE";
 // const MedicalClinicSaveWithImageURL =
 //   "http://172.30.30.41:4000/MEDICAL_SYSTEM_WEB_SAVE";
-
+const MedicalHistoryDeleteURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_DELETE/SAVE";
 export {
   downloadURL,
   uploadURL,
@@ -44,4 +45,5 @@ export {
   MedicalClinicSaveWithImageURL,
   HistoryListURL,
   RelationListURL,
+  MedicalHistoryDeleteURL,
 };

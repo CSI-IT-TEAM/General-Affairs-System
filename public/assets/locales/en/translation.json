@@ -74,7 +74,7 @@
     "frm_passengers_vietnam_list": "Department",
     "frm_txt_total_passenger": "Total Passengers",
     "frm_memo_address_detail":"Detailed description & Destination address",
-    "frm_select_clinic_helper": "If your Clinic or Hopsital dose not listed, please choose 'Not Listed Clinic/Hospital' option.",
+    "frm_select_clinic_helper": "If your Clinic or Hopsital dose not listed, please choose 'Insert New Clinic/Hospital' option.",
     "btn_request": "Request Now",
     "btn_ok":"OK",
     "btn_close": "Close",
@@ -149,7 +149,7 @@
     "frm_services_name":"Services Name",
     "frm_unit_cd":"Unit",
     "frm_qty":"Quantity",
-    "frm_unit_price":"Price",
+    "frm_unit_price":"Unit Price",
     "frm_discount_price":"Discount Price",
     "frm_amount_price":"Amount Price",
     "frm_notes":"Notes",
@@ -168,6 +168,16 @@
     "swal_failed":"Error.",
     "swal_networking_error": "Networking Or Data Error!.",
 
+
+    "swal_deleted": "Deleted!",
+    "swal_deleted_content": "Your invoice has been deleted.",
+    "swal_deleted_fail": "Failed!",
+    "swal_deleted_content_fail": "Your invoice can't deleted.",
+    
+    "swal_are_you_sure_content": "You won't be able to revert this!",
+    "swal_confirm_delete_btn": "Yes, delete it!",
+    "swal_cancel_btn":"Cancel",
+
     "swal_data_empty": "Lack of Information...",
     "swal_checking_again": "Please check again.",
     "swal_red_fields_is_blank":"You cannot leave red fields blank!.",
@@ -176,5 +186,7 @@
     "frm_helper_new_clinic": "Adding a new clinic or hospital will be remembered for next time.",
     "frm_title_check_myself": "Myself",
     "btn_title_attachment_invoice": "Attach An Invoice Image",
-    "btn_title_remove": "Remove"
+    "btn_title_remove": "Remove",
+    "frm_helper_not_relationship":"You don't have a registered relative",
+    "btn_delete_invoice":"Delete Invoice"
 }

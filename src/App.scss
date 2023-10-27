@@ -10,7 +10,7 @@ body,html{
     height: 100%;
     margin: 0px;
     padding: 0px;
-    overflow-x: hidden;
+    // overflow-x: hidden;
     background-color: $color-white;
 }
 
@@ -392,3 +392,25 @@ body {
         padding-right: 8px !important;
     }
 }
+
+
+.swal2-modal .swal2-close {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    opacity: 0.9 !important;
+    width: 1em !important;
+    height: 1em !important;
+    transition: color 0.1s ease-out !important;
+    border: none !important;
+    background: rgb(250, 71, 71) !important;
+    color: #ccc;
+    font-family: "Poppins" !important;
+    font-size: 35px !important;
+    cursor: pointer !important;
+  }
+
+// .swal2-modal .swal2-close {
+//     color: #ff0202 !important;
+//     cursor: pointer !important;
+//   }

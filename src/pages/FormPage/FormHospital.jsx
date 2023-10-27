@@ -39,6 +39,7 @@ import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantity
 import DiscountIcon from "@mui/icons-material/Discount";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import CommentIcon from "@mui/icons-material/Comment";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import i18next from "i18next";
 
 import {
@@ -246,6 +247,7 @@ const FormHospital = () => {
           BUDGET: empData.BUDGET,
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
+          QTY: 1,
           CREATOR: getLastName(empData.EMP_NM),
           CREATE_PROGRAM_ID: "MEDICAL_FEE",
         };
@@ -462,8 +464,8 @@ const FormHospital = () => {
                     "success"
                   ).then(() => {
                     setTimeout(() => {
-                      // scrollToTop();
-                      // HandleDefault();
+                      scrollToTop();
+                      HandleDefault();
                     }, 500);
                   });
                 } else {
@@ -552,6 +554,7 @@ const FormHospital = () => {
                             }
                             control={
                               <Checkbox
+                                disabled={RelationListData.length === 0}
                                 size="large"
                                 color="success"
                                 checked={isMyself}
@@ -564,7 +567,9 @@ const FormHospital = () => {
                               marginLeft: "35px",
                             }}
                           >
-                            {t("frm_helper_relationship")}
+                            {RelationListData.length === 0
+                              ? t("frm_helper_not_relationship")
+                              : t("frm_helper_relationship")}
                           </FormHelperText>
                         </Stack>
                         <Collapse in={!isMyself}>
@@ -655,13 +660,17 @@ const FormHospital = () => {
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={12}>
                       <DateBox
+                        inputAttr={{
+                          readonly: "true",
+                        }}
+                        acceptCustomValue={false}
                         name="TREAT_DATE"
                         max={Date.now()}
                         label={t("frm_treat_date")}
                         isValid={true}
                         defaultValue={new Date()}
                         placeholder={t("frm_treat_date")}
-                        type="date"
+                        // type="date"
                         onValueChanged={(e) => {
                           setData((prevData) => {
                             return {
@@ -671,7 +680,7 @@ const FormHospital = () => {
                           });
                         }}
                         pickerType="rollers"
-                        useMaskBehavior={true}
+                        // useMaskBehavior={true}
                         displayFormat={"dd-MM-yyyy"}
                       />
                     </Grid>
@@ -711,7 +720,7 @@ const FormHospital = () => {
                           ) => ({
                             ...base,
                             backgroundColor:
-                              data.label === "Not Listed Clinic/Hospital"
+                              data.label === "Insert New Clinic/Hospital"
                                 ? isSelected
                                   ? "navy"
                                   : "#e65522"
@@ -721,7 +730,7 @@ const FormHospital = () => {
                                 ? "#00B2E2"
                                 : "#ffffff",
                             color:
-                              data.label === "Not Listed Clinic/Hospital"
+                              data.label === "Insert New Clinic/Hospital"
                                 ? "white"
                                 : isSelected
                                 ? "white"
@@ -796,7 +805,7 @@ const FormHospital = () => {
                       </Grid>
                     ) : null}
 
-                    <Grid item xs={12} md={4}>
+                    {/* <Grid item xs={12} md={4}>
                       <TextField
                         name="SERVICE_TYPE"
                         error={data.SERVICE_TYPE === ""}
@@ -807,7 +816,7 @@ const FormHospital = () => {
                         color="info"
                         fullWidth
                         inputProps={{
-                          maxLength: 20,
+                          maxLength: 50,
                         }}
                         InputProps={{
                           startAdornment: (
@@ -818,7 +827,7 @@ const FormHospital = () => {
                         }}
                         onChange={(event) => HandleControlsChange(event)}
                       />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12} md={8}>
                       <TextField
                         name="SERVICE_NAME"
@@ -853,7 +862,7 @@ const FormHospital = () => {
                         fullWidth
                         inputProps={{
                           inputMode: "numeric",
-                          pattern: "[0-9]*",
+                          pattern: "[0-9/,]*",
                           maxLength: 10,
                         }}
                         InputProps={{
@@ -932,7 +941,7 @@ const FormHospital = () => {
                         />
                       </FormControl>
                     </Grid> */}
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         autoComplete="false"
                         // inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -946,13 +955,13 @@ const FormHospital = () => {
                         fullWidth
                         inputProps={{
                           inputMode: "numeric",
-                          pattern: "[0-9]*",
-                          maxLength: 10,
+                          // pattern: "[0-9/,]*",
+                          maxLength: 20,
                         }}
                         InputProps={{
                           inputMode: "numeric",
                           pattern: "[0-9]*",
-                          inputComponent: NumericFormatThounsand,
+                          inputComponent: NumericFormatCustom,
                           startAdornment: (
                             <InputAdornment position="start">
                               <PriceChangeIcon />
@@ -962,7 +971,7 @@ const FormHospital = () => {
                         onChange={(event) => HandleControlsChange(event)}
                       />
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         autoComplete="false"
                         // inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -975,8 +984,8 @@ const FormHospital = () => {
                         fullWidth
                         inputProps={{
                           inputMode: "numeric",
-                          pattern: "[0-9]*",
-                          maxLength: 10,
+                          // pattern: "[0-9/,]*",
+                          maxLength: 20,
                         }}
                         InputProps={{
                           inputComponent: NumericFormatCustom,
@@ -1011,7 +1020,6 @@ const FormHospital = () => {
                         fullWidth
                         color="warning"
                         InputProps={{
-                          
                           inputComponent: NumericFormatCustom,
                           endAdornment: (
                             <InputAdornment position="start">
@@ -1097,7 +1105,7 @@ const FormHospital = () => {
                               sx={{
                                 textTransform: "none",
                               }}
-                              startIcon={<ImageIcon />}
+                              startIcon={<AddPhotoAlternateIcon />}
                               variant="contained"
                               color="success"
                               onClick={() => fileInputRef.current.click()}
@@ -1108,6 +1116,7 @@ const FormHospital = () => {
                               ref={fileInputRef}
                               style={{ display: "none" }}
                               type="file"
+                              accept="image/*"
                               name="INVOICE_PIC"
                               // onChange={handleUploadFileChanged} multiple={false}
                               onChange={(event) => {
@@ -1119,8 +1128,8 @@ const FormHospital = () => {
                                 img.onload = function (el) {
                                   var elem = document.createElement("canvas"); //create a canvas
                                   //scale the image to 600 (width) and keep aspect ratio
-                                  var scaleFactor = 600 / el.target.width;
-                                  elem.width = 600;
+                                  var scaleFactor = 1000 / el.target.width;
+                                  elem.width = 1000;
                                   elem.height = el.target.height * scaleFactor;
 
                                   //draw in canvas

@@ -3,7 +3,7 @@
 
 .b-card{
     display: block;
-    height: calc(100% - 60px);
+    // height: calc(100% - 60px);
     padding-bottom: 60px;
     border-radius: 10px !important;
     position: relative;
@@ -14,13 +14,13 @@
     cursor: pointer;
 
     @media screen and (max-width: 479px) {
-        height: calc(100% - 55px);
-        padding-bottom: 55px;
+        // height: calc(100% - 55px);
+        // padding-bottom: 55px;
     }
 
     .b-thumb{
-        height: 200px;
-        border-radius: 10px;
+        height: 160px;
+        border-radius: 10px 10px 0px 0px;
         margin-bottom: 40px;
         position: relative;
         @include flex(center, center);
@@ -40,9 +40,9 @@
     }
 
     .b-image{
-        width: 80%;
+        width: 50%;
         position: absolute;
-        top: -20px;
+        top: 10%;
         left: 50%;
         transform: translate(-50%, 0);
 
@@ -110,12 +110,12 @@
     }
 
     .b-content {
-        padding: 5px 25px 30px;
+        padding: 5px 25px 5px;
         position: relative;
         z-index: 99;
 
         @media screen and (max-width: 479px) {
-            padding: 0 10px 15px !important;
+           padding: 0 10px 5px !important;
         }
 
         .b-title{
@@ -156,7 +156,7 @@
         position: absolute;
         width: calc(100% - 40px);
         left: 20px;
-        bottom: -20px;
+        bottom: 10px;
         z-index: 99;
 
         @media screen and (max-width: 479px) {

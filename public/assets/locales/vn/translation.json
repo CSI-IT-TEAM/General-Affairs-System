@@ -73,7 +73,7 @@
     "frm_request_cancelled": "Đã hủy",
     "frm_txt_total_passenger": "Tổng hành khách",
     "frm_memo_address_detail":"Mô tả chi tiết & địa chỉ",
-    "frm_select_clinic_helper": "Nếu phòng khám hoặc bệnh viện bạn cần không có trong danh sách vui lòng chọn 'Not Listed Clinic/Hospital'.",
+    "frm_select_clinic_helper": "Nếu phòng khám hoặc bệnh viện bạn cần không có trong danh sách vui lòng chọn 'Insert New Clinic/Hospital'.",
     "btn_request": "Đăng Ký Ngay",
     "btn_yes": "Có",
     "btn_no": "Không",
@@ -148,7 +148,7 @@
     "frm_services_name":"Tên dịch vụ",
     "frm_unit_cd":"Đơn vị",
     "frm_qty":"Số lượng",
-    "frm_unit_price":"Giá",
+    "frm_unit_price":"Đơn giá",
     "frm_discount_price":"Giảm giá",
     "frm_amount_price":"Thành tiền",
     "frm_notes":"Ghi chú",
@@ -166,10 +166,21 @@
     "swal_data_empty": "Nhập thiếu dữ liệu...",
     "swal_checking_again": "Vui lòng kiểm tra lại",
     "swal_red_fields_is_blank":"Không được bỏ qua các ô màu đỏ.",
+    "swal_deleted": "Đã xóa",
+    "swal_deleted_content": "Hóa đơn của bạn đã được xóa thành công.",
+    "swal_deleted_fail": "Không thể xóa",
+    "swal_deleted_content_fail": "Không thể xóa được hóa đơn của bạn lúc này.",
+    
+    "swal_are_you_sure_content": "Bạn không thể khôi phục sau khi xóa",
+    "swal_confirm_delete_btn": "Hãy xóa nó",
+    "swal_cancel_btn":"Hủy bỏ",
+
     "frm_helper_relationship": "Nếu người thân hãy bỏ check và chọn tên của họ.",
     "frm_helper_customer_code":"Là mã khách hàng của bệnh viện được in trên tờ hóa đơn.",
     "frm_helper_new_clinic":"Thêm mới một phòng khám hoặc bệnh viện sẽ được ghi nhớ cho lần sau.",
     "frm_title_check_myself": "Bản thân",
     "btn_title_attachment_invoice": "Thêm hình ảnh hóa đơn",
-    "btn_title_remove": "Xóa"
+    "btn_title_remove": "Xóa",
+    "frm_helper_not_relationship":"Bạn chưa đăng ký những người thân.",
+    "btn_delete_invoice":"Xóa hóa đơn"
 }

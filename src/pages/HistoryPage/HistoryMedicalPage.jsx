@@ -107,7 +107,6 @@ export default function HistoryMedicalPage() {
   const [date, setDate] = React.useState([new Date(), new Date()]);
 
   const handleDateChange = (event) => {
-    console.log(event);
     setDate(event);
     //const empData = JSON.parse(sessionStorage.getItem("userData"));
     // getHistoryList(
@@ -136,7 +135,6 @@ export default function HistoryMedicalPage() {
       .then((response) => {
         response.json().then(async (result) => {
           if (result.length > 0) {
-            console.log(result);
             sethistoryData(result);
           }
         });
@@ -173,6 +171,7 @@ export default function HistoryMedicalPage() {
             )}
           </h3>
           <DateRangePicker
+            cleanable={false}
             ranges={predefinedRanges}
             showOneCalendar
             value={date}
@@ -185,15 +184,7 @@ export default function HistoryMedicalPage() {
           <Grid container spacing={2}>
             {historyData && historyData.length > 0 ? (
               historyData.map(function (item, index) {
-                return (
-                  <Grid key={item.ROWID} item xs={12} sm={6} md={6}>
-                    <Paper>
-                      <Stack>
-                        <HistoryCard item={item} />
-                      </Stack>
-                    </Paper>
-                  </Grid>
-                );
+                return <HistoryCard item={item} />;
               })
             ) : (
               <Grid
