@@ -42,7 +42,7 @@ export default function HistoryCard({ item }) {
   const handleImageClick = (item) => {
     Swal.fire({
       title: " ",
-      
+
       showCloseButton: true,
       width: "100%",
       imageUrl: item.IMG_NAME,
@@ -120,7 +120,14 @@ export default function HistoryCard({ item }) {
       >
         <Paper>
           <Stack>
-            <Card key={item.ROWID} sx={{ width: "100%" }}>
+            <Card
+              key={item.ROWID}
+              sx={{
+                width: "100%",
+                // border: "0.5px dashed",
+                // borderColor: item.CFM_YN === "Y" ? "green" : "yellow",
+              }}
+            >
               <CardContent>
                 <Stack>
                   <Stack>
@@ -256,9 +263,10 @@ export default function HistoryCard({ item }) {
                       direction={"row"}
                       alignItems={"center"}
                       justifyContent={"space-between"}
+                      spacing={2}
                     >
-                      <Typography></Typography>
                       <Button
+                        disabled={item.CFM_YN === "Y" || item.CFM_YN === "D"}
                         sx={{
                           textTransform: "none",
                         }}
@@ -270,6 +278,48 @@ export default function HistoryCard({ item }) {
                       >
                         {t("btn_delete_invoice")}
                       </Button>
+
+                      {item.CFM_YN === "N" ? (
+                        <Box
+                          sx={{
+                            px: 2,
+                            py: 0.3,
+                            bgcolor: "yellow",
+                            borderRadius: 2,
+                          }}
+                        >
+                          <Typography color={"blue"}>
+                            {t("frm_waiting")}
+                          </Typography>{" "}
+                        </Box>
+                      ) : item.CFM_YN === "Y" ? (
+                        <Box
+                          sx={{
+                            px: 2,
+                            py: 0.3,
+                            bgcolor: "green",
+                            borderRadius: 2,
+                          }}
+                        >
+                          <Typography color={"white"}>
+                            {t("frm_confirmed")}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            px: 2,
+                            py: 0.3,
+                            bgcolor: "red",
+                            borderRadius: 2,
+                          }}
+                        >
+                          <Typography color={"white"}>
+                            {t("frm_denied")}
+                          </Typography>
+                        </Box>
+                      )}
+
                       {/* <IconButton
           onClick={() => alert(item.ROWID)}
           color="error"

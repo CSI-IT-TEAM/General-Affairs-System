@@ -63,7 +63,7 @@ const CardPrimary = ({ data, handleClick }) => {
           </Typography>
         </CardContent>
         <Box className="b-bot">
-          <ButtonSecondary title={t("order")} />
+          <ButtonSecondary title={t(data.btn_order_text)} />
         </Box>
       </Card>
     </>

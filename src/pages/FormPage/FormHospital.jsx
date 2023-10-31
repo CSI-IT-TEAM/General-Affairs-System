@@ -444,12 +444,14 @@ const FormHospital = () => {
         showCancelButton: true,
         confirmButtonColor: "#0f005f",
         cancelButtonColor: "red",
-        confirmButtonText: "Confirm",
+        confirmButtonText: t("btn_confirm"),
+        cancelButtonText: t("btn_cancel"),
       }).then((result) => {
         if (result.isConfirmed) {
           //Upload Data
           //  alert(JSON.stringify(data));
           uploadMedicalFormData(data).then((uploadData) => {
+            console.log(data);
             // Display the key/value pairs
             fetch(MedicalClinicSaveWithImageURL, {
               method: "POST",

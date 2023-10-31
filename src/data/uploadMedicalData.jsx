@@ -40,6 +40,7 @@ const uploadMedicalFormData = async (data) => {
   _formData.append("ARG_CUSTOMER_CODE", data.CUSTOMER_CODE);
   _formData.append("ARG_BIRTHDAY", date_to_yyyymmdd(data.BIRTHDATE));
   _formData.append("ARG_PASSPORT", data.PASSPORT);
+  _formData.append("ARG_EMAIL_ADDRESS", data.EMAIL_ADDRESS);
   _formData.append("ARG_RELATIONSHIP", data.RELATIONSHIP);
   _formData.append("ARG_SERVICE_TYPE", removeVietnamese(data.SERVICE_TYPE));
   _formData.append("ARG_SERVICE_NAME", removeVietnamese(data.SERVICE_NAME));
