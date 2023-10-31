@@ -20,6 +20,7 @@ import {
   Paper,
   Hidden,
   Chip,
+  TextField,
 } from "@mui/material";
 import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import StyleIcon from "@mui/icons-material/Style";
@@ -39,9 +40,9 @@ export default function HistoryCard({ item }) {
   const [Iscollapse, setIscollapse] = useState(true);
   const [IsDisplay, setIsDisplay] = useState(true);
   const handleImageClick = (item) => {
-    console.log(item);
     Swal.fire({
       title: " ",
+      
       showCloseButton: true,
       width: "100%",
       imageUrl: item.IMG_NAME,
@@ -233,7 +234,20 @@ export default function HistoryCard({ item }) {
                         primaryTypographyProps={{
                           fontSize: "18px",
                         }}
-                        primary={`${item.SERVICE_NAME}`}
+                        primary={
+                          <TextField
+                            label={t("frm_services_name")}
+                            color="warning"
+                            focused
+                            fullWidth
+                            variant="standard"
+                            inputProps={{
+                              readonly: "true",
+                            }}
+                            multiline
+                            value={item.SERVICE_NAME}
+                          ></TextField>
+                        }
                       />
                     </ListItem>
                   </List>

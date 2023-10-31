@@ -24,43 +24,7 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { t } = useTranslation();
-
-  let settings = [];
-  if (location.pathname ==="/"){
-    settings = [
-    
-      { title: t("title_change_password"), route: "/user/passwordchange" },
-      { title: t("title_log_out"), route: "" },
-    ];
-  }else if (location.pathname === "/request/car"){
-    settings = [
-      { title: t("title_history"), route: "/user/history" },
-      { title: t("title_change_password"), route: "/user/passwordchange" },
-      { title: t("title_log_out"), route: "" },
-    ];
-  }
-  else if (location.pathname === "/fee/medical"){
-    settings = [
-      { title: t("title_medical_history"), route: "/fee/medical/history" },
-      { title: t("title_change_password"), route: "/user/passwordchange" },
-      { title: t("title_log_out"), route: "" },
-    ];
-  }
-  else if (location.pathname === "/fee/medical/history"){
-    settings = [
-      { title: t("title_medical"), route: "/fee/medical" },
-      { title: t("title_change_password"), route: "/user/passwordchange" },
-      { title: t("title_log_out"), route: "" },
-    ];
-  }
-  else{
-    settings = [
-      // { title: t("title_history"), route: "/user/history" },
-      { title: t("title_change_password"), route: "/user/passwordchange" },
-      { title: t("title_log_out"), route: "" },
-    ];
-  }
-   
+  const [LangImage, setLangImage] = useState("");
   ///// Set Default language
   const i18_Value =
     i18next.language !== null &&
@@ -69,6 +33,40 @@ const Header = () => {
       ? i18next.language
       : "en";
   const [lang, setLang] = useState(i18_Value);
+  let settings = [];
+  if (location.pathname === "/") {
+    settings = [
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  } else if (location.pathname === "/request/car") {
+    settings = [
+      { title: t("title_history"), route: "/user/history" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  } else if (location.pathname === "/fee/medical") {
+    
+    settings = [
+      { title: t("title_medical_history"), route: "/fee/medical/history" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  } else if (location.pathname === "/fee/medical/history") {
+    // setLang("kr");
+    settings = [
+      { title: t("title_medical"), route: "/fee/medical" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  } else {
+    settings = [
+      // { title: t("title_history"), route: "/user/history" },
+      { title: t("title_change_password"), route: "/user/passwordchange" },
+      { title: t("title_log_out"), route: "" },
+    ];
+  }
+
   const handleChange = (event: SelectChangeEvent) => {
     i18next.changeLanguage(event.target.value);
     setLang(event.target.value);

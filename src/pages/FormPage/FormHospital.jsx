@@ -133,10 +133,10 @@ NumericFormatCustom.propTypes = {
 
 const FormHospital = () => {
   /////// Translate Lang
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { navigate } = useNavigate();
   const langCookie = i18next.language;
-  const [lang, setLang] = useState(langCookie);
+  const [lang, setLang] = useState("kr"); //langCookie
   const [data, setData] = useState(medicalfreeData);
 
   const [ClinicListData, setClinicListData] = useState([]);
@@ -150,6 +150,7 @@ const FormHospital = () => {
   const yesterday = dayjs().subtract(1, "day");
   const todayStartOfTheDay = today.startOf("day");
   const fileInputRef = useRef();
+
   ///DATABASE SELECT
   const fetchClinicListSelect = async () => {
     fetch(ClinicListURL, {
@@ -257,8 +258,6 @@ const FormHospital = () => {
     }
   };
   useEffect(() => {
-    setLang(i18next.language);
-
     HandleDefault();
   }, []);
 
@@ -830,6 +829,8 @@ const FormHospital = () => {
                     </Grid> */}
                     <Grid item xs={12} md={8}>
                       <TextField
+                        multiline
+                        maxRows={4}
                         name="SERVICE_NAME"
                         error={data.SERVICE_NAME === ""}
                         value={data.SERVICE_NAME}
@@ -1035,6 +1036,8 @@ const FormHospital = () => {
                     </Grid>
                     <Grid item xs={12} md={12}>
                       <TextField
+                        multiline
+                        maxRows={4}
                         inputProps={{
                           maxLength: 500,
                         }}
