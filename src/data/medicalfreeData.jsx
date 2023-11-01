@@ -20,13 +20,15 @@ const medicalfreeData = {
     "IS_CLINIC_NEW":"",      
     "UNIT_CD": "", 
     "QTY": "", 
+    "CURRENCY":"",
     "UNIT_PRICE": "", 
     "DISCOUNT_QTY": "", 
     "AMOUNT_QTY": "",      
     "REMARKS": "",       
     "CREATOR": "",
     "CREATE_PC": "",
-    "CREATE_PROGRAM_ID": ""
+    "CREATE_PROGRAM_ID": "",
+    "CURRENCY_CD": "",
 }
 
 

@@ -74,7 +74,7 @@
     "frm_request_cancelled": "Đã hủy",
     "frm_txt_total_passenger": "Tổng hành khách",
     "frm_memo_address_detail":"Mô tả chi tiết & địa chỉ",
-    "frm_select_clinic_helper": "Nếu phòng khám hoặc bệnh viện bạn cần không có trong danh sách vui lòng chọn 'Insert New Clinic/Hospital'.",
+    "frm_select_clinic_helper": "Nếu phòng khám hoặc bệnh viện bạn cần không có trong danh sách vui lòng chọn 'Add New Hospital'.",
     "btn_request": "Đăng Ký Ngay",
     "btn_yes": "Có",
     "btn_no": "Không",
@@ -185,5 +185,6 @@
     "btn_title_attachment_invoice": "Thêm hình ảnh hóa đơn",
     "btn_title_remove": "Xóa",
     "frm_helper_not_relationship":"Bạn chưa đăng ký những người thân.",
-    "btn_delete_invoice":"Xóa hóa đơn"
+    "btn_delete_invoice":"Xóa hóa đơn",
+    "frm_currency": "Đơn vị tiền tệ"
 }

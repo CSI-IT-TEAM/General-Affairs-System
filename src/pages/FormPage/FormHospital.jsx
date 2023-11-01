@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { IMaskInput } from "react-imask";
 import { NumericFormat } from "react-number-format";
 import "../../components/Button/Primary/ButtonPrimary.scss";
-
 import moment from "moment";
 import {
   Box,
@@ -14,11 +13,14 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
+  FormLabel,
   Grid,
   InputAdornment,
   InputLabel,
   MenuItem,
   Paper,
+  Radio,
+  RadioGroup,
   Stack,
   TextField,
   Typography,
@@ -41,7 +43,7 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import i18next from "i18next";
-
+import { Translator, Translate } from "react-auto-translate";
 import {
   BottomNavigation,
   ButtonPrimary,
@@ -76,6 +78,7 @@ import {
   uploadMedicalData,
   uploadMedicalFormData,
 } from "../../data/uploadMedicalData";
+import { pink } from "@mui/material/colors";
 
 const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
   props,
@@ -97,7 +100,6 @@ const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
       }}
       thousandSeparator
       valueIsNumericString
-      suffix=" VNĐ"
     />
   );
 });
@@ -120,6 +122,7 @@ const NumericFormatThounsand = React.forwardRef(function NumericFormatCustom(
           },
         });
       }}
+      suffix=" "
       thousandSeparator
       valueIsNumericString
     />
@@ -142,10 +145,10 @@ const FormHospital = () => {
   const [ClinicListData, setClinicListData] = useState([]);
   const [UnitListData, setUnitListData] = useState([]);
   const [RelationListData, setRelationListData] = useState([]);
+  const [TextTransServicesName, setTextTransServicesName] = useState("");
   const [selectIndex, setselectIndex] = useState(0);
   const [isMyself, setisMyself] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
-
   const today = dayjs();
   const yesterday = dayjs().subtract(1, "day");
   const todayStartOfTheDay = today.startOf("day");
@@ -229,6 +232,7 @@ const FormHospital = () => {
     setselectIndex(0);
     setisMyself(true);
     setSelectedImage(null);
+    setTextTransServicesName("");
     const empData = JSON.parse(sessionStorage.getItem("userData"));
     if (empData != null) {
       fetchRelationListSelect(empData.EMPID);
@@ -249,6 +253,7 @@ const FormHospital = () => {
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
           QTY: 1,
+          CURRENCY: "VND",
           CREATOR: getLastName(empData.EMP_NM),
           CREATE_PROGRAM_ID: "MEDICAL_FEE",
         };
@@ -257,6 +262,7 @@ const FormHospital = () => {
       navigate("/signin");
     }
   };
+
   useEffect(() => {
     HandleDefault();
   }, []);
@@ -328,7 +334,6 @@ const FormHospital = () => {
         };
       });
     } else {
-      // console.log(RelationListData[0]);
       setData((prevData) => {
         return {
           ...prevData,
@@ -345,7 +350,7 @@ const FormHospital = () => {
       if (key === "QTY" || key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
         value = value.replace(",", "").replace(" VNĐ", "");
       }
-      if (key !== "REMARKS" && key !== "DISCOUNT_QTY") {
+      if (key !== "REMARKS") {
         if (value === "") {
           isValid = false;
         }
@@ -418,13 +423,35 @@ const FormHospital = () => {
     }
   };
 
+  const TestTrans = (textTarget) => {
+    fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${textTarget}`,
+      {
+        method: "GET",
+        dataType: "json",
+      }
+    )
+      .then((response) => {
+        response.json().then(async (result) => {
+          console.log(result);
+          if (result[0] !== null) setTextTransServicesName(result[0][0][0]);
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        setTextTransServicesName(error.message);
+      });
+  };
+
   const handleSubmitv2 = (event) => {
     event.preventDefault();
     let isValid = true;
     var formData = new FormData(event.target);
     for (var [key, value] of formData.entries()) {
-      if (key === "QTY" || key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
+      if (key === "QTY") {
         value = value.replace(",", "").replace(" VNĐ", "");
+      } else if (key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
+        value = Number(value.replace(",", "").replace(" VNĐ", "")).toFixed(2);
       }
       if (key !== "REMARKS" && key !== "DISCOUNT_QTY") {
         if (value === "") {
@@ -451,7 +478,7 @@ const FormHospital = () => {
           //Upload Data
           //  alert(JSON.stringify(data));
           uploadMedicalFormData(data).then((uploadData) => {
-            console.log(data);
+            // console.log(data);
             // Display the key/value pairs
             fetch(MedicalClinicSaveWithImageURL, {
               method: "POST",
@@ -508,6 +535,16 @@ const FormHospital = () => {
             <Stack direction="column" spacing={2}>
               <Stack direction="column">
                 <FormTitle order="1" title={t("title_first")} />
+                <Translator
+                  from="en"
+                  to="vi"
+                  googleApiKey="2d5034752a2836660b76fbdc06a4ad450de1c61b"
+                >
+                  <h1>
+                    <Translate>Welcome!</Translate>
+                  </h1>
+                  ...
+                </Translator>
                 <Box className="s-form-content">
                   <FormMedicalDefaultInfo data={data} />
                 </Box>
@@ -573,7 +610,7 @@ const FormHospital = () => {
                               : t("frm_helper_relationship")}
                           </FormHelperText>
                         </Stack>
-                        <Collapse in={!isMyself}>
+                        <Collapse in={true}>
                           {/* <TextField
                             hidden
                             disabled={isMyself}
@@ -595,6 +632,8 @@ const FormHospital = () => {
                           /> */}
                           <FormControl fullWidth>
                             <Select
+                              placeholder="It's Me!"
+                              isDisabled={isMyself}
                               defaultValue={RelationListData[selectIndex]}
                               value={RelationListData.filter(
                                 (item) => item.value === data.RELATIONSHIP
@@ -721,7 +760,7 @@ const FormHospital = () => {
                           ) => ({
                             ...base,
                             backgroundColor:
-                              data.label === "Insert New Clinic/Hospital"
+                              data.label === "Add New Hospital"
                                 ? isSelected
                                   ? "navy"
                                   : "#e65522"
@@ -731,7 +770,7 @@ const FormHospital = () => {
                                 ? "#00B2E2"
                                 : "#ffffff",
                             color:
-                              data.label === "Insert New Clinic/Hospital"
+                              data.label === "Add New Hospital"
                                 ? "white"
                                 : isSelected
                                 ? "white"
@@ -841,6 +880,9 @@ const FormHospital = () => {
                         placeholder={t("frm_services_name")}
                         color="info"
                         fullWidth
+                        onBlur={(event) => {
+                          TestTrans(event.target.value);
+                        }}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -850,6 +892,23 @@ const FormHospital = () => {
                         }}
                         onChange={(event) => HandleControlsChange(event)}
                       />
+                    </Grid>
+
+                    <Grid item xs={12} md={12}>
+                      <Collapse in={TextTransServicesName}>
+                        <TextField
+                          label="Auto translated to english"
+                          fullWidth
+                          disabled
+                          multiline
+                          value={TextTransServicesName}
+                          variant="standard"
+                          sx={{
+                            color: "hotpink",
+                            fontSize: "14px",
+                          }}
+                        />
+                      </Collapse>
                     </Grid>
 
                     <Grid item xs={12} md={4}>
@@ -879,6 +938,7 @@ const FormHospital = () => {
                         onChange={(event) => HandleControlsChange(event)}
                       />
                     </Grid>
+
                     {/* <Grid item xs={6} md={3}> */}
                     {/* <TextField
                         name="UNIT_CD"
@@ -944,6 +1004,97 @@ const FormHospital = () => {
                         />
                       </FormControl>
                     </Grid> */}
+                    <Grid item xs={12} md={12}>
+                      <Box fullWidth alignItems={"center"}>
+                        <FormLabel id="demo-row-radio-buttons-group-label">
+                          {t("frm_currency")}
+                        </FormLabel>
+                        <RadioGroup
+                          name="CURRENCY"
+                          value={data.CURRENCY}
+                          row
+                          sx={{
+                            bgcolor: "#b8d7e3",
+                            borderRadius: "5px",
+                          }}
+                          onChange={(event) => {
+                            setData((prevData) => {
+                              return {
+                                ...prevData,
+                                CURRENCY: event.target.value,
+                              };
+                            });
+                          }}
+                        >
+                          <FormControlLabel
+                            fullWidth
+                            sx={{
+                              justifyContent: "center",
+                            }}
+                            value="WON"
+                            control={<Radio color="primary" />}
+                            label={
+                              <Typography
+                                sx={{
+                                  fontWeight: "bold",
+                                  color: "navy",
+                                }}
+                              >
+                                Won
+                              </Typography>
+                            }
+                          />
+                          <FormControlLabel
+                            fullWidth
+                            sx={{
+                              justifyContent: "center",
+                            }}
+                            justifyContent="center"
+                            value="USD"
+                            color="success"
+                            control={
+                              <Radio
+                                sx={{
+                                  color: pink[800],
+                                  "&.Mui-checked": {
+                                    color: pink[600],
+                                  },
+                                }}
+                              />
+                            }
+                            label={
+                              <Typography
+                                sx={{
+                                  fontWeight: "bold",
+                                  color: "navy",
+                                }}
+                              >
+                                USD
+                              </Typography>
+                            }
+                          />
+                          <FormControlLabel
+                            fullWidth
+                            sx={{
+                              justifyContent: "center",
+                            }}
+                            justifyContent="center"
+                            value="VND"
+                            control={<Radio color="secondary" />}
+                            label={
+                              <Typography
+                                sx={{
+                                  fontWeight: "bold",
+                                  color: "navy",
+                                }}
+                              >
+                                VNĐ
+                              </Typography>
+                            }
+                          />
+                        </RadioGroup>
+                      </Box>
+                    </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
                         autoComplete="false"
@@ -964,11 +1115,14 @@ const FormHospital = () => {
                         InputProps={{
                           inputMode: "numeric",
                           pattern: "[0-9]*",
-                          inputComponent: NumericFormatCustom,
+                          inputComponent: NumericFormatThounsand,
                           startAdornment: (
                             <InputAdornment position="start">
                               <PriceChangeIcon />
                             </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <Typography>{data.CURRENCY}</Typography>
                           ),
                         }}
                         onChange={(event) => HandleControlsChange(event)}
@@ -991,11 +1145,14 @@ const FormHospital = () => {
                           maxLength: 20,
                         }}
                         InputProps={{
-                          inputComponent: NumericFormatCustom,
+                          inputComponent: NumericFormatThounsand,
                           startAdornment: (
                             <InputAdornment position="start">
                               <DiscountIcon />
                             </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <Typography>{data.CURRENCY}</Typography>
                           ),
                         }}
                         onChange={(event) => HandleControlsChange(event)}
@@ -1015,7 +1172,12 @@ const FormHospital = () => {
                         value={
                           data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY < 0
                             ? 0
-                            : data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY
+                            : (data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY) *
+                              (data.CURRENCY === "USD"
+                                ? 24.585
+                                : data.CURRENCY === "WON"
+                                ? 18.11
+                                : 1)
                         }
                         label={t("frm_amount_price")}
                         disabled
@@ -1023,17 +1185,29 @@ const FormHospital = () => {
                         fullWidth
                         color="warning"
                         InputProps={{
-                          inputComponent: NumericFormatCustom,
+                          inputComponent: NumericFormatThounsand,
+                          // endAdornment: (
+                          //   <InputAdornment position="start">
+                          //     <MonetizationOnIcon />
+                          //   </InputAdornment>
+                          // ),
                           endAdornment: (
                             <InputAdornment position="start">
-                              <MonetizationOnIcon />
+                              <Typography>VNĐ</Typography>
                             </InputAdornment>
                           ),
                           inputProps: {
                             style: { textAlign: "center" },
                           },
                         }}
-                        onChange={(event) => HandleControlsChange(event)}
+                        onChange={(event) => {
+                          setData((prevData) => {
+                            return {
+                              ...prevData,
+                              AMOUNT_QTY: event.target.value,
+                            };
+                          });
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={12}>

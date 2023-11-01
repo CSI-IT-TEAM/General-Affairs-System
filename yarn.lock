@@ -5780,6 +5780,11 @@ globule@^1.0.0:
     lodash "^4.17.21"
     minimatch "~3.0.2"
 
+google-translate-api-x@^10.6.7:
+  version "10.6.7"
+  resolved "https://registry.yarnpkg.com/google-translate-api-x/-/google-translate-api-x-10.6.7.tgz#8d680f9a464949edb1ebc62304f7365569019f7e"
+  integrity sha512-xw20Kjv5u84Q3FwKTk4CU1PZrYoOsRcKq0z7J3a98aIcscOCZnW3T43Rb/SOl/JPUj/QYyjJiRW9G+MQhxUnAw==
+
 gopd@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/gopd/-/gopd-1.0.1.tgz#29ff76de69dac7489b7c0918a5788e56477c332c"
@@ -9076,6 +9081,11 @@ react-app-polyfill@^3.0.0:
     raf "^3.4.1"
     regenerator-runtime "^0.13.9"
     whatwg-fetch "^3.6.2"
+
+react-auto-translate@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/react-auto-translate/-/react-auto-translate-0.0.6.tgz#b0838133aef9a89b34ea12b7b11948e5cfc26fa3"
+  integrity sha512-6peT9hlmiHGPUd98t13Xs+5pc5nB5d6wIhAMYDZSR7L5USVig7LVWQh0dGs3Rm6lVjimjjbvplBl13uhnEW7cQ==
 
 react-dev-utils@^12.0.1:
   version "12.0.1"

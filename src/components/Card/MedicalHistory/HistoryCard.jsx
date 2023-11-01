@@ -258,7 +258,7 @@ export default function HistoryCard({ item }) {
                       />
                     </ListItem>
                   </List>
-                  <Divider textAlign="right" color="red">
+                  <Divider textAlign="left" color="red">
                     <Stack
                       direction={"row"}
                       alignItems={"center"}

@@ -75,7 +75,7 @@
     "frm_passengers_vietnam_list": "Department",
     "frm_txt_total_passenger": "Total Passengers",
     "frm_memo_address_detail":"Detailed description & Destination address",
-    "frm_select_clinic_helper": "If your Clinic or Hopsital dose not listed, please choose 'Insert New Clinic/Hospital' option.",
+    "frm_select_clinic_helper": "If your hopsital dose not listed, please choose 'Add New Hospital' option.",
     "btn_request": "Request Now",
     "btn_ok":"OK",
     "btn_close": "Close",
@@ -148,7 +148,7 @@
     "frm_relationship": "Relationship",
     "frm_treat_date":"Treat Date",
     "frm_services_type":"Services Type",
-    "frm_services_name":"Services Name",
+    "frm_services_name":"Name Of Diease",
     "frm_unit_cd":"Unit",
     "frm_qty":"Quantity",
     "frm_unit_price":"Unit Price",
@@ -190,5 +190,6 @@
     "btn_title_attachment_invoice": "Attach An Invoice Image",
     "btn_title_remove": "Remove",
     "frm_helper_not_relationship":"You don't have a registered relative",
-    "btn_delete_invoice":"Delete Invoice"
+    "btn_delete_invoice":"Cancelation",
+    "frm_currency": "Currency"
 }

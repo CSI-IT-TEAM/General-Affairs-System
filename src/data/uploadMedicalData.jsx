@@ -3,7 +3,6 @@ import { removeVietnamese } from "../function/getFormat";
 import { v4 as uuidv4 } from "uuid";
 
 const uploadMedicalData = async (data) => {
-  console.log(data);
   return {
     ARG_TYPE: "U",
     ARG_TREAT_DATE: data.TREAT_DATE,
@@ -21,6 +20,7 @@ const uploadMedicalData = async (data) => {
     ARG_IS_MEDICAL_NEW: data.IS_CLINIC_NEW,
     ARG_UNIT_CD: data.UNIT_CD,
     ARG_QTY: data.QTY,
+    ARG_CURRENCY: data.CURRENCY,
     ARG_UNIT_PRICE: data.UNIT_PRICE,
     ARG_DISCOUNT_QTY: data.DISCOUNT_QTY,
     ARG_AMOUNT_QTY: data.AMOUNT_QTY,
@@ -49,6 +49,7 @@ const uploadMedicalFormData = async (data) => {
   _formData.append("ARG_IS_MEDICAL_NEW", data.IS_CLINIC_NEW);
   _formData.append("ARG_UNIT_CD", data.UNIT_CD);
   _formData.append("ARG_QTY", data.QTY);
+  _formData.append("ARG_CURRENCY", data.CURRENCY);
   _formData.append("ARG_UNIT_PRICE", data.UNIT_PRICE);
   _formData.append("ARG_DISCOUNT_QTY", data.DISCOUNT_QTY);
   _formData.append("ARG_AMOUNT_QTY", data.AMOUNT_QTY);
