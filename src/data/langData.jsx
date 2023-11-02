@@ -3,19 +3,19 @@ import vnImage from "../assets/images/languages/vn.png";
 import krImage from "../assets/images/languages/kr.png";
 const langData = [
   {
-    title: "EN",
+    title: "English",
     value: "en",
     desc: "English",
     thumb: enImage,
   },
   {
-    title: "VN",
+    title: "Việt Nam",
     value: "vn",
     desc: "Vietnamese",
     thumb: vnImage,
   },
   {
-    title: "KR",
+    title: "Korea",
     value: "kr",
     desc: "Korea",
     thumb: krImage,

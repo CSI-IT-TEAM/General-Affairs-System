@@ -50,10 +50,13 @@ const uploadMedicalFormData = async (data) => {
   _formData.append("ARG_UNIT_CD", data.UNIT_CD);
   _formData.append("ARG_QTY", data.QTY);
   _formData.append("ARG_CURRENCY", data.CURRENCY);
+  _formData.append("ARG_EXCHANGE_RATE", data.EXCHANGE_RATE);
+  _formData.append("ARG_SERVICE_NAME_TL", removeVietnamese(data.SERVICE_NAME_TL));
   _formData.append("ARG_UNIT_PRICE", data.UNIT_PRICE);
   _formData.append("ARG_DISCOUNT_QTY", data.DISCOUNT_QTY);
   _formData.append("ARG_AMOUNT_QTY", data.AMOUNT_QTY);
   _formData.append("ARG_REMARKS", removeVietnamese(data.REMARKS));
+  _formData.append("ARG_MEMO_TL", removeVietnamese(data.MEMO_TL));
   _formData.append("ARG_PIC_NAME", uuidv4());
   _formData.append("ARG_CREATOR", data.CREATOR);
   _formData.append("ARG_CREATE_PC", data.CREATE_PC);

@@ -191,5 +191,6 @@
     "btn_title_remove": "Remove",
     "frm_helper_not_relationship":"등록된 친척이 없습니다.",
     "btn_delete_invoice":"송장 삭제",
-    "frm_currency": "Currency"
+    "frm_currency": "통화",
+    "frm_translate_to_vietnamese": "베트남어로 번역"
 }

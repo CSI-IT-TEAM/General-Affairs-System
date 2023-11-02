@@ -5,6 +5,7 @@ import {
   Avatar,
   IconButton,
   Menu,
+  Stack,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -46,7 +47,6 @@ const Header = () => {
       { title: t("title_log_out"), route: "" },
     ];
   } else if (location.pathname === "/fee/medical") {
-    
     settings = [
       { title: t("title_medical_history"), route: "/fee/medical/history" },
       { title: t("title_change_password"), route: "/user/passwordchange" },
@@ -114,9 +114,9 @@ const Header = () => {
       <Box className="s-header">
         <Container className="d-flex">
           <Box className="s-header-text" onClick={() => handleNavigate("/")}>
-            <Typography variant="h5" component="div" className="s-header-logo">
+            {/* <Typography variant="h5" component="div" className="s-header-logo">
               CSG
-            </Typography>
+            </Typography> */}
             <span>
               <Typography
                 variant="h1"
@@ -134,9 +134,9 @@ const Header = () => {
           </Box>
           <Box className="d-flex p-relative">
             <Box className="s-language d-flex">
-              <Box className="s-language__thumb">
+              {/* <Box className="s-language__thumb">
                 <img src={langImage} alt="Language" />
-              </Box>
+              </Box> */}
               <FormControl
                 sx={{ m: 1 }}
                 size="small"
@@ -151,7 +151,27 @@ const Header = () => {
                         value={item.value}
                         className="s-lang__item"
                       >
-                        {item.title}
+                        <Stack
+                          spacing={1}
+                          direction={"row"}
+                          alignItems={"center"}
+                        >
+                          <img
+                            alt="Language"
+                            style={{
+                              width: "52px",
+                              height: "32px",
+                            }}
+                            src={item.thumb}
+                          />
+                          <Typography
+                            sx={{
+                              fontSize: "12px",
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                        </Stack>
                       </MenuItem>
                     );
                   })}

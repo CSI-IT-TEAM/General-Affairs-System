@@ -146,6 +146,7 @@ const FormHospital = () => {
   const [UnitListData, setUnitListData] = useState([]);
   const [RelationListData, setRelationListData] = useState([]);
   const [TextTransServicesName, setTextTransServicesName] = useState("");
+  const [TextTransMemo, setTextTransMemo] = useState("");
   const [selectIndex, setselectIndex] = useState(0);
   const [isMyself, setisMyself] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -233,6 +234,7 @@ const FormHospital = () => {
     setisMyself(true);
     setSelectedImage(null);
     setTextTransServicesName("");
+    setTextTransMemo("");
     const empData = JSON.parse(sessionStorage.getItem("userData"));
     if (empData != null) {
       fetchRelationListSelect(empData.EMPID);
@@ -252,8 +254,10 @@ const FormHospital = () => {
           BUDGET: empData.BUDGET,
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
+          EXCHANGE_RATE: data.EXCHANGE_RATE ? data.EXCHANGE_RATE : 1,
+          SERVICE_NAME_TL: "",
           QTY: 1,
-          CURRENCY: "VND",
+          CURRENCY: data.CURRENCY ? data.CURRENCY : "VND",
           CREATOR: getLastName(empData.EMP_NM),
           CREATE_PROGRAM_ID: "MEDICAL_FEE",
         };
@@ -423,9 +427,9 @@ const FormHospital = () => {
     }
   };
 
-  const TestTrans = (textTarget) => {
+  const TestTrans = (name, textTarget) => {
     fetch(
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${textTarget}`,
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=vi&f=text&dt=t&q=${textTarget}`,
       {
         method: "GET",
         dataType: "json",
@@ -433,12 +437,68 @@ const FormHospital = () => {
     )
       .then((response) => {
         response.json().then(async (result) => {
-          console.log(result);
-          if (result[0] !== null) setTextTransServicesName(result[0][0][0]);
+          //console.log(result);
+          if (result[0] !== null) {
+            let transText = "";
+            result[0].forEach((item) => {
+              transText += item[0];
+            });
+            switch (name) {
+              case "SERVICE_NAME":
+                setTextTransServicesName(transText);
+                setData((prevData) => {
+                  return {
+                    ...prevData,
+                    SERVICE_NAME_TL: transText,
+                  };
+                });
+                break;
+              default:
+                setTextTransMemo(transText);
+                setData((prevData) => {
+                  return {
+                    ...prevData,
+                    MEMO_TL: transText,
+                  };
+                });
+                break;
+            }
+          }
         });
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
+        setTextTransServicesName(error.message);
+      });
+  };
+
+  const TestTransv2 = (textTarget) => {
+    fetch(
+      `https://translation.googleapis.com/language/translate/v2?key=AIzaSyBJtlRHyvmlIXIbhxsuxASf1ZNhbjAyW_8&format=text&target=vi&q=${textTarget}`,
+      {
+        method: "POST",
+        dataType: "json",
+      }
+    )
+      .then((response) => {
+        response.json().then(async (result) => {
+          // console.log(result.data.translations);
+          if (result.data.translations !== null) {
+            setTextTransServicesName(
+              result.data.translations[0].translatedText
+            );
+
+            setData((prevData) => {
+              return {
+                ...prevData,
+                SERVICE_NAME_TL: result.data.translations[0].translatedText,
+              };
+            });
+          }
+        });
+      })
+      .catch((error) => {
+        // console.log(error);
         setTextTransServicesName(error.message);
       });
   };
@@ -478,7 +538,7 @@ const FormHospital = () => {
           //Upload Data
           //  alert(JSON.stringify(data));
           uploadMedicalFormData(data).then((uploadData) => {
-            // console.log(data);
+            console.log(data);
             // Display the key/value pairs
             fetch(MedicalClinicSaveWithImageURL, {
               method: "POST",
@@ -535,16 +595,6 @@ const FormHospital = () => {
             <Stack direction="column" spacing={2}>
               <Stack direction="column">
                 <FormTitle order="1" title={t("title_first")} />
-                <Translator
-                  from="en"
-                  to="vi"
-                  googleApiKey="2d5034752a2836660b76fbdc06a4ad450de1c61b"
-                >
-                  <h1>
-                    <Translate>Welcome!</Translate>
-                  </h1>
-                  ...
-                </Translator>
                 <Box className="s-form-content">
                   <FormMedicalDefaultInfo data={data} />
                 </Box>
@@ -881,7 +931,10 @@ const FormHospital = () => {
                         color="info"
                         fullWidth
                         onBlur={(event) => {
-                          TestTrans(event.target.value);
+                          TestTrans(
+                            "SERVICE_NAME",
+                            encodeURIComponent(event.target.value)
+                          );
                         }}
                         InputProps={{
                           startAdornment: (
@@ -894,22 +947,24 @@ const FormHospital = () => {
                       />
                     </Grid>
 
-                    <Grid item xs={12} md={12}>
-                      <Collapse in={TextTransServicesName}>
-                        <TextField
-                          label="Auto translated to english"
-                          fullWidth
-                          disabled
-                          multiline
-                          value={TextTransServicesName}
-                          variant="standard"
-                          sx={{
-                            color: "hotpink",
-                            fontSize: "14px",
-                          }}
-                        />
-                      </Collapse>
-                    </Grid>
+                    {TextTransServicesName && (
+                      <Grid item xs={12} md={12}>
+                        <Collapse in={TextTransServicesName}>
+                          <TextField
+                            label={t('frm_translate_to_vietnamese')}
+                            fullWidth
+                            disabled
+                            multiline
+                            value={TextTransServicesName}
+                            variant="standard"
+                            sx={{
+                              color: "hotpink",
+                              fontSize: "14px",
+                            }}
+                          />
+                        </Collapse>
+                      </Grid>
+                    )}
 
                     <Grid item xs={12} md={4}>
                       <TextField
@@ -1005,8 +1060,20 @@ const FormHospital = () => {
                       </FormControl>
                     </Grid> */}
                     <Grid item xs={12} md={12}>
-                      <Box fullWidth alignItems={"center"}>
-                        <FormLabel id="demo-row-radio-buttons-group-label">
+                      <Box
+                        fullWidth
+                        alignItems={"center"}
+                        bgcolor={"#829fbd"}
+                        borderRadius={"5px"}
+                      >
+                        <FormLabel
+                          sx={{
+                            marginLeft: 1,
+                            color: "white",
+                            textAlign: "center",
+                          }}
+                          id="demo-row-radio-buttons-group-label"
+                        >
                           {t("frm_currency")}
                         </FormLabel>
                         <RadioGroup
@@ -1014,13 +1081,21 @@ const FormHospital = () => {
                           value={data.CURRENCY}
                           row
                           sx={{
-                            bgcolor: "#b8d7e3",
+                            border: "2px dashed #4b50f0",
                             borderRadius: "5px",
+                            justifyContent: "center",
+                            backgroundColor: "#e6f2ff",
                           }}
                           onChange={(event) => {
                             setData((prevData) => {
                               return {
                                 ...prevData,
+                                EXCHANGE_RATE:
+                                  event.target.value === "USD"
+                                    ? 24.39
+                                    : event.target.value === "WON"
+                                    ? 18.11
+                                    : 1,
                                 CURRENCY: event.target.value,
                               };
                             });
@@ -1040,7 +1115,7 @@ const FormHospital = () => {
                                   color: "navy",
                                 }}
                               >
-                                Won
+                                WON
                               </Typography>
                             }
                           />
@@ -1088,7 +1163,7 @@ const FormHospital = () => {
                                   color: "navy",
                                 }}
                               >
-                                VNĐ
+                                VND
                               </Typography>
                             }
                           />
@@ -1122,7 +1197,17 @@ const FormHospital = () => {
                             </InputAdornment>
                           ),
                           endAdornment: (
-                            <Typography>{data.CURRENCY}</Typography>
+                            <Typography
+                              sx={{
+                                px: 2,
+                                py: 0.5,
+                                backgroundColor: "navy",
+                                fontWeight: "bold",
+                                color: "white",
+                              }}
+                            >
+                              {data.CURRENCY}
+                            </Typography>
                           ),
                         }}
                         onChange={(event) => HandleControlsChange(event)}
@@ -1152,7 +1237,17 @@ const FormHospital = () => {
                             </InputAdornment>
                           ),
                           endAdornment: (
-                            <Typography>{data.CURRENCY}</Typography>
+                            <Typography
+                              sx={{
+                                px: 2,
+                                py: 0.5,
+                                backgroundColor: "navy",
+                                fontWeight: "bold",
+                                color: "white",
+                              }}
+                            >
+                              {data.CURRENCY}
+                            </Typography>
                           ),
                         }}
                         onChange={(event) => HandleControlsChange(event)}
@@ -1173,11 +1268,7 @@ const FormHospital = () => {
                           data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY < 0
                             ? 0
                             : (data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY) *
-                              (data.CURRENCY === "USD"
-                                ? 24.585
-                                : data.CURRENCY === "WON"
-                                ? 18.11
-                                : 1)
+                              data.EXCHANGE_RATE
                         }
                         label={t("frm_amount_price")}
                         disabled
@@ -1193,7 +1284,15 @@ const FormHospital = () => {
                           // ),
                           endAdornment: (
                             <InputAdornment position="start">
-                              <Typography>VNĐ</Typography>
+                              <Typography
+                                sx={{
+                                  fontWeight: "bold",
+                                  color: "navy",
+                                  fontSize: "1.2em",
+                                }}
+                              >
+                                VND
+                              </Typography>
                             </InputAdornment>
                           ),
                           inputProps: {
@@ -1232,8 +1331,35 @@ const FormHospital = () => {
                           ),
                         }}
                         onChange={(event) => HandleControlsChange(event)}
+                        onBlur={(event) => {
+                          TestTrans(
+                            "REMARKS",
+                            encodeURIComponent(event.target.value)
+                          );
+                        }}
                       />
                     </Grid>
+
+                    {TextTransMemo && (
+                      <Grid item xs={12} md={12}>
+                        <Collapse in={TextTransMemo}>
+                          <TextField
+                            label={t('frm_translate_to_vietnamese')}
+                            fullWidth
+                            disabled
+                            multiline
+                            value={TextTransMemo}
+                            variant="standard"
+                            sx={{
+                              color: "hotpink",
+                              fontSize: "14px",
+                            }}
+                          />
+                        </Collapse>
+                      </Grid>
+                    )}
+
+
                     <Grid item sx={12} md={12} width={"100%"}>
                       {selectedImage ? (
                         <Box
@@ -1283,10 +1409,10 @@ const FormHospital = () => {
                             <Button
                               sx={{
                                 textTransform: "none",
+                                backgroundColor: "navy",
                               }}
                               startIcon={<AddPhotoAlternateIcon />}
                               variant="contained"
-                              color="success"
                               onClick={() => fileInputRef.current.click()}
                             >
                               {t("btn_title_attachment_invoice")}
@@ -1307,8 +1433,8 @@ const FormHospital = () => {
                                 img.onload = function (el) {
                                   var elem = document.createElement("canvas"); //create a canvas
                                   //scale the image to 600 (width) and keep aspect ratio
-                                  var scaleFactor = 1000 / el.target.width;
-                                  elem.width = 1000;
+                                  var scaleFactor = 800 / el.target.width;
+                                  elem.width = 800;
                                   elem.height = el.target.height * scaleFactor;
 
                                   //draw in canvas
