@@ -951,7 +951,7 @@ const FormHospital = () => {
                       <Grid item xs={12} md={12}>
                         <Collapse in={TextTransServicesName}>
                           <TextField
-                            label={t('frm_translate_to_vietnamese')}
+                            label={t("frm_translate_to_vietnamese")}
                             fullWidth
                             disabled
                             multiline
@@ -1062,7 +1062,7 @@ const FormHospital = () => {
                     <Grid item xs={12} md={12}>
                       <Box
                         fullWidth
-                        alignItems={"center"}
+                        // alignItems={"center"}
                         bgcolor={"#829fbd"}
                         borderRadius={"5px"}
                       >
@@ -1083,7 +1083,7 @@ const FormHospital = () => {
                           sx={{
                             border: "2px dashed #4b50f0",
                             borderRadius: "5px",
-                            justifyContent: "center",
+                            // justifyContent: "center",
                             backgroundColor: "#e6f2ff",
                           }}
                           onChange={(event) => {
@@ -1344,7 +1344,7 @@ const FormHospital = () => {
                       <Grid item xs={12} md={12}>
                         <Collapse in={TextTransMemo}>
                           <TextField
-                            label={t('frm_translate_to_vietnamese')}
+                            label={t("frm_translate_to_vietnamese")}
                             fullWidth
                             disabled
                             multiline
@@ -1358,7 +1358,6 @@ const FormHospital = () => {
                         </Collapse>
                       </Grid>
                     )}
-
 
                     <Grid item sx={12} md={12} width={"100%"}>
                       {selectedImage ? (

@@ -1,4 +1,10 @@
-import { FormHelperText, Grid, InputAdornment } from "@mui/material";
+import {
+  Collapse,
+  FormHelperText,
+  Grid,
+  InputAdornment,
+  Typography,
+} from "@mui/material";
 import TextInput from "../../TextInput";
 import { useTranslation } from "react-i18next";
 import FactoryIcon from "@mui/icons-material/Factory";
@@ -7,7 +13,7 @@ const FormMedicalDefaultInfo = ({ data }) => {
   const { t } = useTranslation();
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} >
         <Grid item xs={12} md={6} xl={3}>
           <TextInput
             title={t("frm_fty")}
@@ -47,14 +53,15 @@ const FormMedicalDefaultInfo = ({ data }) => {
         </Grid>
         <Grid item xs={12} md={6} xl={3}>
           <TextInput
-            title={t("frm_user_nm")}
+            title={t("frm_user_nm") } 
             placeholder=""
             value={data.EMP_NAME_EN}
             disable={true}
             inputProp={{ inputMode: "text" }}
             isDefault={true}
+            FormHelperText={<Typography>{data.EMP_NAME_KOR}</Typography>}
           />
-          <FormHelperText>{data.EMP_NAME_KOR}</FormHelperText>
+          {/* <FormHelperText>{data.EMP_NAME_KOR}</FormHelperText> */}
         </Grid>
         <Grid item xs={12} md={6} xl={3}>
           <TextInput
@@ -66,8 +73,9 @@ const FormMedicalDefaultInfo = ({ data }) => {
             isDefault={true}
           />
         </Grid>
-        <Grid item xs={12} md={6} xl={3}>
-          {/* <TextInput
+        <Collapse in={false}>
+          <Grid item xs={12} md={6} xl={3}>
+            {/* <TextInput
             name="BUDGET"
             title={t("frm_user_budget")}
             placeholder=""
@@ -76,16 +84,17 @@ const FormMedicalDefaultInfo = ({ data }) => {
             inputProp={{ inputMode: "text" }}
             isDefault={true}
           /> */}
-          <TextInput
-            name="PASSPORT"
-            title={t("frm_user_passport")}
-            placeholder=""
-            value={data.PASSPORT}
-            disable={true}
-            inputProp={{ inputMode: "text" }}
-            isDefault={true}
-          />
-        </Grid>
+            <TextInput
+              name="PASSPORT"
+              title={t("frm_user_passport")}
+              placeholder=""
+              value={data.PASSPORT}
+              disable={true}
+              inputProp={{ inputMode: "text" }}
+              isDefault={true}
+            />
+          </Grid>
+        </Collapse>
       </Grid>
     </>
   );
