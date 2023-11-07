@@ -792,6 +792,18 @@ const FormHospital = () => {
                         }}
                         onChange={(event) => HandleControlsChange(event)}
                       /> */}
+                      <FormLabel
+                        sx={{
+                          fontSize: "12px",
+                          top: "12px",
+                          left: "10px",
+                          backgroundColor: "white",
+                          zIndex: 999,
+                          paddingX: "2px",
+                        }}
+                      >
+                        {t("frm_medical_nm")}
+                      </FormLabel>
                       <Select
                         defaultValue={ClinicListData[selectIndex]}
                         value={ClinicListData.filter(
@@ -802,6 +814,12 @@ const FormHospital = () => {
                             state.isFocused
                               ? "border-red-600"
                               : "border-grey-300",
+                        }}
+                        textFieldProps={{
+                          label: "Label",
+                          InputLabelProps: {
+                            shrink: true,
+                          },
                         }}
                         styles={{
                           option: (

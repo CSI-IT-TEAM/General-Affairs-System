@@ -129,7 +129,7 @@ const HomePage = () => {
           </h3>
           <Grid container spacing={colSpacing}>
             {optionData.map((item, index) => {
-              if (item.id === "001" || item.id === "002") {
+              if (item.id === "001"  || item.id === "002") { //|| item.id === "002"
                 return (
                   <Grid item md={4} xs={12} key={item.id}>
                     <CardPrimary
