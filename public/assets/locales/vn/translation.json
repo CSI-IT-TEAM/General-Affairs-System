@@ -187,5 +187,6 @@
     "frm_helper_not_relationship":"Bạn chưa đăng ký những người thân.",
     "btn_delete_invoice":"Xóa hóa đơn",
     "frm_currency": "Đơn vị tiền tệ",
-    "frm_translate_to_vietnamese": "Dịch sang tiếng Việt"
+    "frm_translate_to_vietnamese": "Dịch sang tiếng Việt",
+    "frm_medical_type_nm":"Loại bệnh viện"
 }

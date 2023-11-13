@@ -21,6 +21,8 @@ const RelationListURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.RELATION_LIST_SELECT";
 const HistoryListURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_LIST_SELECT";
+const HospitalTypeListURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HOSPITAL_TYPE_LIST_SELECT";
 const MedicalClinicSaveURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_CLINIC_SAVE/SAVE";
 
@@ -46,4 +48,5 @@ export {
   HistoryListURL,
   RelationListURL,
   MedicalHistoryDeleteURL,
+  HospitalTypeListURL,
 };

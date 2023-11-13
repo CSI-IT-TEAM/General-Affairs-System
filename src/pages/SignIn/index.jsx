@@ -198,7 +198,7 @@ const SignIn = () => {
                   inputLabel: t("label_input_new_password"),
                   inputPlaceholder: t("input_new_password_place_holder"),
                   inputAttributes: {
-                    maxlength: 10,
+                    maxlength: 50,
                     autocapitalize: "off",
                     autocorrect: "off",
                   },

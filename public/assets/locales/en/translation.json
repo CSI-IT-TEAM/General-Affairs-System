@@ -192,5 +192,6 @@
     "frm_helper_not_relationship":"You don't have a registered relative",
     "btn_delete_invoice":"Cancelation",
     "frm_currency": "Currency",
-    "frm_translate_to_vietnamese": "Translation to Vietnamese"
+    "frm_translate_to_vietnamese": "Translation to Vietnamese",
+    "frm_medical_type_nm":"Types of Hospital"
 }

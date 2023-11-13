@@ -57,6 +57,7 @@ const uploadMedicalFormData = async (data) => {
   _formData.append("ARG_AMOUNT_QTY", data.AMOUNT_QTY);
   _formData.append("ARG_REMARKS", removeVietnamese(data.REMARKS));
   _formData.append("ARG_MEMO_TL", removeVietnamese(data.MEMO_TL));
+  _formData.append("ARG_HOSPITAL_TYPE_CD", data.HOSPITAL_TYPE_CD);
   _formData.append("ARG_PIC_NAME", uuidv4());
   _formData.append("ARG_CREATOR", data.CREATOR);
   _formData.append("ARG_CREATE_PC", data.CREATE_PC);

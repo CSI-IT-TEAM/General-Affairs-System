@@ -68,6 +68,7 @@ import {
 import { DateBox } from "devextreme-react";
 import {
   ClinicListURL,
+  HospitalTypeListURL,
   MedicalClinicSaveURL,
   MedicalClinicSaveWithImageURL,
   RelationListURL,
@@ -145,6 +146,7 @@ const FormHospital = () => {
   const [ClinicListData, setClinicListData] = useState([]);
   const [UnitListData, setUnitListData] = useState([]);
   const [RelationListData, setRelationListData] = useState([]);
+  const [HospitalTypeListData, setHospitalTypeListData] = useState([]);
   const [TextTransServicesName, setTextTransServicesName] = useState("");
   const [TextTransMemo, setTextTransMemo] = useState("");
   const [selectIndex, setselectIndex] = useState(0);
@@ -173,6 +175,28 @@ const FormHospital = () => {
         response.json().then(async (result) => {
           if (result.length > 0) {
             setClinicListData(result);
+          }
+        });
+      })
+      .catch((e) => console.log(e));
+  };
+  const fetchHospitalTypeListSelect = async () => {
+    fetch(HospitalTypeListURL, {
+      method: "POST",
+      mode: "cors",
+      dataType: "json",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ARG_TYPE: "Q",
+        OUT_CURSOR: "",
+      }),
+    })
+      .then((response) => {
+        response.json().then(async (result) => {
+          if (result.length > 0) {
+            setHospitalTypeListData(result);
           }
         });
       })
@@ -227,6 +251,7 @@ const FormHospital = () => {
   };
 
   const HandleDefault = () => {
+    fetchHospitalTypeListSelect();
     fetchClinicListSelect();
     // fetchUnitListSelect();
     setData(medicalfreeData);
@@ -254,6 +279,8 @@ const FormHospital = () => {
           BUDGET: empData.BUDGET,
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
+          MEDICAL_CD:"M00011",
+          HOSPITAL_TYPE_CD:"T0001",
           EXCHANGE_RATE: data.EXCHANGE_RATE ? data.EXCHANGE_RATE : 1,
           SERVICE_NAME_TL: "",
           QTY: 1,
@@ -298,6 +325,16 @@ const FormHospital = () => {
       return {
         ...prevData,
         [event.target.name]: event.target.value,
+      };
+    });
+  };
+
+  const HandleHospitalSelectChange = (event) => {
+    setData((prevData) => {
+      return {
+        ...prevData,
+        [event.code]: event.value,
+        [event.name]: event.label,
       };
     });
   };
@@ -518,8 +555,13 @@ const FormHospital = () => {
           isValid = false;
         }
       }
-      // console.log(key, value, "valuedated: ", value !== "");
+      console.log(key, value, "valuedated: ", value !== "");
     }
+
+    if (data.MEDICAL_CD === "" || data.HOSPITAL_TYPE_CD === "") {
+      isValid = false;
+    }
+
     if (isValid) {
       //Test View Data Again
       // alert(data);
@@ -774,6 +816,96 @@ const FormHospital = () => {
                         displayFormat={"dd-MM-yyyy"}
                       />
                     </Grid>
+                    <Grid item xs={12} md={12}>
+                      <Box
+                        sx={{
+                          paddingTop: "0px",
+                          marginTop: "-20px",
+                        }}
+                      >
+                        <FormLabel
+                          sx={{
+                            fontSize: "12px",
+                            top: "12px",
+                            left: "10px",
+                            backgroundColor: "white",
+                            zIndex: 999,
+                            paddingX: "2px",
+                          }}
+                        >
+                          {t("frm_medical_type_nm")}
+                        </FormLabel>
+                        <Select
+                          defaultValue={HospitalTypeListData[selectIndex]}
+                          value={HospitalTypeListData.filter(
+                            (item) => item.value === data.HOSPITAL_TYPE_CD
+                          )}
+                          classNames={{
+                            control: (state) =>
+                              state.isFocused
+                                ? "border-red-600"
+                                : "border-grey-300",
+                          }}
+                          textFieldProps={{
+                            label: "Label",
+                            InputLabelProps: {
+                              shrink: true,
+                            },
+                          }}
+                          styles={{
+                            option: (
+                              base,
+                              { data, isDisabled, isFocused, isSelected }
+                            ) => ({
+                              ...base,
+                              backgroundColor: isSelected
+                                ? "navy"
+                                : isFocused
+                                ? "#00B2E2"
+                                : "#ffffff",
+                              color: isSelected
+                                ? "white"
+                                : isFocused
+                                ? "white"
+                                : data.TEXT_COLOR,
+                            }),
+                            control: (base, { isDisabled, isFocused }) => ({
+                              ...base,
+                              borderRadius: 5,
+                              border: `1px solid ${
+                                isFocused
+                                  ? "#00B2E2"
+                                  : data.HOSPITAL_TYPE_CD === ""
+                                  ? "#CB2D2D"
+                                  : "#CCCCCC"
+                              }`,
+                              "&:hover": {
+                                borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
+                                cursor: "pointer",
+                              },
+                              minHeight: 55,
+                              fontWeight: 500,
+                              background: isDisabled ? "#EBEBEB" : "#FFFFFF",
+                            }),
+                            // Fixes the overlapping problem of the component
+                            menu: (provided) => ({ ...provided, zIndex: 9999 }),
+                          }}
+                          options={HospitalTypeListData}
+                          theme={(theme) => ({
+                            ...theme,
+                            borderRadius: 0,
+                            colors: {
+                              ...theme.colors,
+                              primary25: "orangered",
+                              primary: "#0f005f",
+                            },
+                          })}
+                          onChange={(event) =>
+                            HandleHospitalSelectChange(event)
+                          }
+                        />
+                      </Box>
+                    </Grid>
                     <Grid item xs={12} md={data.IS_CLINIC_NEW === "Y" ? 6 : 12}>
                       {/* <TextField
                         name="UNIT_CD"
@@ -792,96 +924,103 @@ const FormHospital = () => {
                         }}
                         onChange={(event) => HandleControlsChange(event)}
                       /> */}
-                      <FormLabel
+                      <Box
                         sx={{
-                          fontSize: "12px",
-                          top: "12px",
-                          left: "10px",
-                          backgroundColor: "white",
-                          zIndex: 999,
-                          paddingX: "2px",
+                          paddingTop: "0px",
+                          marginTop: "-20px",
                         }}
                       >
-                        {t("frm_medical_nm")}
-                      </FormLabel>
-                      <Select
-                        defaultValue={ClinicListData[selectIndex]}
-                        value={ClinicListData.filter(
-                          (item) => item.value === data.MEDICAL_CD
-                        )}
-                        classNames={{
-                          control: (state) =>
-                            state.isFocused
-                              ? "border-red-600"
-                              : "border-grey-300",
-                        }}
-                        textFieldProps={{
-                          label: "Label",
-                          InputLabelProps: {
-                            shrink: true,
-                          },
-                        }}
-                        styles={{
-                          option: (
-                            base,
-                            { data, isDisabled, isFocused, isSelected }
-                          ) => ({
-                            ...base,
-                            backgroundColor:
-                              data.label === "Add New Hospital"
-                                ? isSelected
-                                  ? "navy"
-                                  : "#e65522"
-                                : isSelected
-                                ? "navy"
-                                : isFocused
-                                ? "#00B2E2"
-                                : "#ffffff",
-                            color:
-                              data.label === "Add New Hospital"
-                                ? "white"
-                                : isSelected
-                                ? "white"
-                                : isFocused
-                                ? "white"
-                                : "black",
-                          }),
-                          control: (base, { isDisabled, isFocused }) => ({
-                            ...base,
-                            borderRadius: 5,
-                            border: `1px solid ${
-                              isFocused
-                                ? "#00B2E2"
-                                : data.MEDICAL_CD === ""
-                                ? "#CB2D2D"
-                                : "#CCCCCC"
-                            }`,
-                            "&:hover": {
-                              borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
-                              cursor: "pointer",
+                        <FormLabel
+                          sx={{
+                            fontSize: "12px",
+                            top: "12px",
+                            left: "10px",
+                            backgroundColor: "white",
+                            zIndex: 999,
+                            paddingX: "2px",
+                          }}
+                        >
+                          {t("frm_medical_nm")}
+                        </FormLabel>
+                        <Select
+                          defaultValue={ClinicListData[selectIndex]}
+                          value={ClinicListData.filter(
+                            (item) => item.value === data.MEDICAL_CD
+                          )}
+                          classNames={{
+                            control: (state) =>
+                              state.isFocused
+                                ? "border-red-600"
+                                : "border-grey-300",
+                          }}
+                          textFieldProps={{
+                            label: "Label",
+                            InputLabelProps: {
+                              shrink: true,
                             },
-                            minHeight: 55,
-                            fontWeight: 500,
-                            background: isDisabled ? "#EBEBEB" : "#FFFFFF",
-                          }),
-                          // Fixes the overlapping problem of the component
-                          menu: (provided) => ({ ...provided, zIndex: 9999 }),
-                        }}
-                        options={ClinicListData}
-                        theme={(theme) => ({
-                          ...theme,
-                          borderRadius: 0,
-                          colors: {
-                            ...theme.colors,
-                            primary25: "orangered",
-                            primary: "#0f005f",
-                          },
-                        })}
-                        onChange={(event) => HandleSelectChange(event)}
-                      />
-                      <FormHelperText>
-                        {t("frm_select_clinic_helper")}
-                      </FormHelperText>
+                          }}
+                          styles={{
+                            option: (
+                              base,
+                              { data, isDisabled, isFocused, isSelected }
+                            ) => ({
+                              ...base,
+                              backgroundColor:
+                                data.label === "Add New Hospital"
+                                  ? isSelected
+                                    ? "navy"
+                                    : "#e65522"
+                                  : isSelected
+                                  ? "navy"
+                                  : isFocused
+                                  ? "#00B2E2"
+                                  : "#ffffff",
+                              color:
+                                data.label === "Add New Hospital"
+                                  ? "white"
+                                  : isSelected
+                                  ? "white"
+                                  : isFocused
+                                  ? "white"
+                                  : "black",
+                            }),
+                            control: (base, { isDisabled, isFocused }) => ({
+                              ...base,
+                              borderRadius: 5,
+                              border: `1px solid ${
+                                isFocused
+                                  ? "#00B2E2"
+                                  : data.MEDICAL_CD === ""
+                                  ? "#CB2D2D"
+                                  : "#CCCCCC"
+                              }`,
+                              "&:hover": {
+                                borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
+                                cursor: "pointer",
+                              },
+                              minHeight: 55,
+                              fontWeight: 500,
+                              background: isDisabled ? "#EBEBEB" : "#FFFFFF",
+                            }),
+                            // Fixes the overlapping problem of the component
+                            menu: (provided) => ({ ...provided, zIndex: 9999 }),
+                          }}
+                          options={ClinicListData}
+                          theme={(theme) => ({
+                            ...theme,
+                            borderRadius: 0,
+                            colors: {
+                              ...theme.colors,
+                              primary25: "orangered",
+                              primary: "#0f005f",
+                            },
+                          })}
+                          onChange={(event) => HandleSelectChange(event)}
+                        />
+                        <FormHelperText>
+                          {t("frm_select_clinic_helper")}
+                        </FormHelperText>
+                      </Box>
                     </Grid>
                     {data.IS_CLINIC_NEW === "Y" ? (
                       <Grid item xs={12} md={6}>
