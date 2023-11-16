@@ -23,6 +23,7 @@ const reqCarData = {
     "PASSENGERS_COUNT": 0,
     "PASSENGERS_IN_DEPT_COUNT":0,
     "MAN_LIST": "",
+    "MAN_KR_LIST": "",
     "MAIN_REASON_CD": "",
     "SUB_REASON_CD": "",
     "DROP_OFF_CD": "",

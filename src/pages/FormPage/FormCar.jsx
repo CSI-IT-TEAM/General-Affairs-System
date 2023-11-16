@@ -124,6 +124,7 @@ const FormCar = () => {
       var PassengerCounts = 1;
       const empData = JSON.parse(sessionStorage.getItem("userData"));
       var _arrList = [];
+      var _arrKoreansList = [];
       if (isInclude) {
         console.log("Bao gồm tôi");
         _arrList.push({
@@ -142,6 +143,13 @@ const FormCar = () => {
           var EXPs = _EXPList.filter((item) => item.EMPID === EMPID);
           if (EXPs.length > 0) {
             _arrList.push({
+              id: EMPID,
+              name: EXPs[0].NAME,
+              validate: true,
+              dropOff: "",
+              validDropOff: true,
+            });
+            _arrKoreansList.push({
               id: EMPID,
               name: EXPs[0].NAME,
               validate: true,
@@ -175,7 +183,7 @@ const FormCar = () => {
       return [];
     }
 
-    return [_arrList, PassengerCounts];
+    return [_arrList, PassengerCounts, _arrKoreansList];
   }
   const handleClearClick = () => {
     setpassengerSelectList([]);
@@ -743,9 +751,9 @@ const FormCar = () => {
       if (handleValidateDepart()) {
         await CalcPassengers().then(async (result) => {
           if (result !== null && result.length > 0 && PassengerDeptCount > 0) {
-            await uploadCarData(data, result[0], PassengerDeptCount).then(
+            await uploadCarData(data, result, PassengerDeptCount).then(
               (uploadData) => {
-                // console.log(uploadData);
+                console.log(uploadData);
                 fetchUpload(uploadData);
               }
             );
@@ -1038,9 +1046,12 @@ const FormCar = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} md={12} xl={12}>
                         <TextField
+                          multiline
+                          maxRows={5}
                           name="ADDRESS_MEMO"
                           disabled={false}
                           placeholder={t("frm_address")}
+                          helperText={t("frm_address_helper")}
                           color="info"
                           fullWidth
                           value={addressMemo}
@@ -1053,6 +1064,7 @@ const FormCar = () => {
                             ),
                           }}
                         />
+
                         {!validate.ADDRESS_MEMO.validate && (
                           <Typography className="b-validate">
                             <HighlightOffIcon
