@@ -16,7 +16,8 @@ import {
   MenuItem,
   Divider,
   Button,
-} from "@mui/material";
+} from "@mui/material";  
+//testing upload
 import { useState, useEffect } from "react";
 import { Buffer } from "buffer";
 import { useTranslation } from "react-i18next";
@@ -1051,7 +1052,11 @@ const FormCar = () => {
                           name="ADDRESS_MEMO"
                           disabled={false}
                           placeholder={t("frm_address")}
-                          helperText={t("frm_address_helper")}
+                          // helperText={t("frm_address_helper")}
+                          FormHelperTextProps={{
+                            color: "red",
+                            fontSize: "1.2em",
+                          }}
                           color="info"
                           fullWidth
                           value={addressMemo}
@@ -1064,7 +1069,7 @@ const FormCar = () => {
                             ),
                           }}
                         />
-
+                        <Typography color={"red"}>{t("frm_address_helper")}</Typography>
                         {!validate.ADDRESS_MEMO.validate && (
                           <Typography className="b-validate">
                             <HighlightOffIcon
