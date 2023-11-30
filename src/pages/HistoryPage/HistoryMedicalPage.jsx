@@ -183,56 +183,6 @@ export default function HistoryMedicalPage() {
               </>
             )}
           </h3>
-          {historyData && historyData.length > 0 ? (
-            <AppBar
-              position="static"
-              sx={{
-                borderRadius: "10px",
-              }}
-            >
-              <Paper
-                sx={{
-                  borderWidth: "3px",
-                  borderColor: "navy",
-                  borderStyle: "solid",
-                  borderRadius: "10px",
-                }}
-              >
-                <Grid container textAlign={"center"}>
-                  <Grid item xs={6} md={6} lg={4}>
-                    <Typography
-                      sx={{
-                        fontWeight: "bold",
-                        color: "green",
-                      }}
-                    >
-                      Budget: {formatNumber(historyData[0].BUDGET)}đ
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} md={6} lg={4}>
-                    <Typography
-                      sx={{
-                        fontWeight: "bold",
-                        color: "navy",
-                      }}
-                    >
-                      Using: {formatNumber(historyData[0].USING_QTY)}đ
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={12} lg={4}>
-                    <Typography
-                      sx={{
-                        fontWeight: "bold",
-                        color: "orangered",
-                      }}
-                    >
-                      Remain: {formatNumber(historyData[0].REMAIN_QTY)}đ
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
-            </AppBar>
-          ) : null}
           <DateRangePicker
             cleanable={false}
             ranges={predefinedRanges}
@@ -244,6 +194,179 @@ export default function HistoryMedicalPage() {
             appearance="default"
             placeholder="Date Range Picker"
           />
+
+          {historyData && historyData.length > 0 ? (
+            <Paper
+              sx={{
+                marginTop: "5px",
+                borderWidth: "3px",
+                borderColor: "navy",
+                borderStyle: "dashed",
+                borderRadius: "10px",
+                padding: 1,
+              }}
+            >
+              <Grid container textAlign={"center"}>
+                <Grid item xs={4} md={4} lg={4}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      color: "navy",
+                      backgroundColor: "yellow",
+                    }}
+                  >
+                    Items
+                  </Typography>
+                </Grid>
+                <Grid item xs={4} md={4} lg={4}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      color: "navy",
+                      backgroundColor: "yellow",
+                    }}
+                  >
+                    VNĐ
+                  </Typography>
+                </Grid>
+                <Grid item xs={4} md={4} lg={4}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      color: "navy",
+                      backgroundColor: "yellow",
+                    }}
+                  >
+                    USD
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={12} lg={12}>
+                  <Grid container textAlign={"center"}>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: "green",
+                          backgroundColor: "#e9f2ed",
+                        }}
+                      >
+                        Budget
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: "green",
+                        }}
+                      >
+                        {formatNumber(historyData[0].BUDGET)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: "green",
+                        }}
+                      >
+                        {formatNumber(historyData[0].BUDGET_USD)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: "purple",
+                          backgroundColor: "#ece1ed",
+                        }}
+                      >
+                        Using
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: "purple",
+                        }}
+                      >
+                        {formatNumber(historyData[0].USING_QTY)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: "purple",
+                        }}
+                      >
+                        {formatNumber(historyData[0].USING_QTY_USD)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          backgroundColor: "#e1e2e3",
+                        }}
+                      >
+                        Remain
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {formatNumber(historyData[0].REMAIN_QTY)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4} md={4} lg={4}>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {formatNumber(historyData[0].REMAIN_QTY_USD)}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                {/* <Grid item xs={6} md={6} lg={4}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      color: "green",
+                    }}
+                  >
+                    Budget: {formatNumber(historyData[0].BUDGET)}đ
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} md={6} lg={4}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      color: "navy",
+                    }}
+                  >
+                    Using: {formatNumber(historyData[0].USING_QTY)}đ
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={12} lg={4}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      color: "orangered",
+                    }}
+                  >
+                    Remain: {formatNumber(historyData[0].REMAIN_QTY)}đ
+                  </Typography>
+                </Grid> */}
+              </Grid>
+            </Paper>
+          ) : null}
           <Grid container spacing={2}>
             {historyData && historyData.length > 0 ? (
               historyData.map(function (item, index) {
