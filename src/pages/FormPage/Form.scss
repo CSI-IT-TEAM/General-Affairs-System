@@ -258,11 +258,13 @@
             padding-left: 16px;
         }
     }
-
+    .MuiFormLabel-root{
+        z-index: 1;
+    }
     .MuiFormControlLabel-root{
         margin: 0;
         min-width: 140px;
-
+       
         @media screen and (max-width: 479px) {
             margin-top: 10px;
         }

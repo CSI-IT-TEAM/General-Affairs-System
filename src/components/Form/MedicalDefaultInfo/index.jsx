@@ -13,7 +13,7 @@ const FormMedicalDefaultInfo = ({ data }) => {
   const { t } = useTranslation();
   return (
     <>
-      <Grid container spacing={2} >
+      <Grid container spacing={2}>
         <Grid item xs={12} md={6} xl={3}>
           <TextInput
             title={t("frm_fty")}
@@ -53,7 +53,7 @@ const FormMedicalDefaultInfo = ({ data }) => {
         </Grid>
         <Grid item xs={12} md={6} xl={3}>
           <TextInput
-            title={t("frm_user_nm") } 
+            title={t("frm_user_nm")}
             placeholder=""
             value={data.EMP_NAME_EN}
             disable={true}
@@ -63,16 +63,18 @@ const FormMedicalDefaultInfo = ({ data }) => {
           />
           {/* <FormHelperText>{data.EMP_NAME_KOR}</FormHelperText> */}
         </Grid>
-        <Grid item xs={12} md={6} xl={3}>
-          <TextInput
-            title={t("frm_user_bithdate")}
-            placeholder=""
-            value={data.BIRTHDATE}
-            disable={true}
-            inputProp={{ inputMode: "text" }}
-            isDefault={true}
-          />
-        </Grid>
+        <Collapse in={false}>
+          <Grid item xs={12} md={6} xl={3}>
+            <TextInput
+              title={t("frm_user_bithdate")}
+              placeholder=""
+              value={data.BIRTHDATE}
+              disable={true}
+              inputProp={{ inputMode: "text" }}
+              isDefault={true}
+            />
+          </Grid>
+        </Collapse>
         <Collapse in={false}>
           <Grid item xs={12} md={6} xl={3}>
             {/* <TextInput

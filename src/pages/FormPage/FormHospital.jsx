@@ -68,6 +68,7 @@ import {
 import { DateBox } from "devextreme-react";
 import {
   ClinicListURL,
+  ExchangeRateSelectURL,
   HospitalTypeListURL,
   MedicalClinicSaveURL,
   MedicalClinicSaveWithImageURL,
@@ -80,7 +81,7 @@ import {
   uploadMedicalFormData,
 } from "../../data/uploadMedicalData";
 import { pink } from "@mui/material/colors";
-
+const krwExchangeRate = 18.79;
 const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
   props,
   ref
@@ -142,7 +143,7 @@ const FormHospital = () => {
   const langCookie = i18next.language;
   const [lang, setLang] = useState("kr"); //langCookie
   const [data, setData] = useState(medicalfreeData);
-
+  const [exChangeRateData, setexChangeRateData] = useState([]);
   const [ClinicListData, setClinicListData] = useState([]);
   const [UnitListData, setUnitListData] = useState([]);
   const [RelationListData, setRelationListData] = useState([]);
@@ -158,7 +159,8 @@ const FormHospital = () => {
   const fileInputRef = useRef();
 
   ///DATABASE SELECT
-  const fetchClinicListSelect = async () => {
+  const fetchClinicListSelect = (HOSPITAL_TYPE_CD) => {
+    console.log("Vào fetch hospital again...", HOSPITAL_TYPE_CD);
     fetch(ClinicListURL, {
       method: "POST",
       mode: "cors",
@@ -168,6 +170,7 @@ const FormHospital = () => {
       },
       body: JSON.stringify({
         ARG_TYPE: "Q",
+        ARG_HOSPITAL_TYPE: HOSPITAL_TYPE_CD,
         OUT_CURSOR: "",
       }),
     })
@@ -250,9 +253,35 @@ const FormHospital = () => {
       .catch((e) => console.log(e));
   };
 
+  const fetchExchangeRateSelect = async (ARG_CURRENCY) => {
+    fetch(ExchangeRateSelectURL, {
+      method: "POST",
+      mode: "cors",
+      dataType: "json",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ARG_TYPE: "Q",
+        ARG_CURRENCY: ARG_CURRENCY,
+        OUT_CURSOR: "",
+      }),
+    })
+      .then((response) => {
+        response.json().then(async (result) => {
+          if (result.length > 0) {
+            console.log(result);
+            setexChangeRateData(result[0]);
+          }
+        });
+      })
+      .catch((e) => console.log(e));
+  };
+
   const HandleDefault = () => {
     fetchHospitalTypeListSelect();
-    fetchClinicListSelect();
+    fetchClinicListSelect("T0001");
+    fetchExchangeRateSelect("USD");
     // fetchUnitListSelect();
     setData(medicalfreeData);
     setselectIndex(0);
@@ -279,8 +308,8 @@ const FormHospital = () => {
           BUDGET: empData.BUDGET,
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
-          MEDICAL_CD:"M00011",
-          HOSPITAL_TYPE_CD:"T0001",
+          MEDICAL_CD: "M00011",
+          HOSPITAL_TYPE_CD: "T0001",
           EXCHANGE_RATE: data.EXCHANGE_RATE ? data.EXCHANGE_RATE : 1,
           SERVICE_NAME_TL: "",
           QTY: 1,
@@ -337,6 +366,8 @@ const FormHospital = () => {
         [event.name]: event.label,
       };
     });
+    setClinicListData([]);
+    fetchClinicListSelect(event.value);
   };
 
   const HandleSelectChange = (event) => {
@@ -1075,7 +1106,7 @@ const FormHospital = () => {
                         onChange={(event) => HandleControlsChange(event)}
                       />
                     </Grid> */}
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} md={12}>
                       <TextField
                         multiline
                         maxRows={4}
@@ -1122,34 +1153,35 @@ const FormHospital = () => {
                         </Collapse>
                       </Grid>
                     )}
-
-                    <Grid item xs={12} md={4}>
-                      <TextField
-                        autoComplete="false"
-                        name="QTY"
-                        value={data.QTY}
-                        error={data.QTY === ""}
-                        label={t("frm_qty")}
-                        disabled={false}
-                        placeholder={t("frm_qty")}
-                        color="info"
-                        fullWidth
-                        inputProps={{
-                          inputMode: "numeric",
-                          pattern: "[0-9/,]*",
-                          maxLength: 10,
-                        }}
-                        InputProps={{
-                          inputComponent: NumericFormatThounsand,
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <ProductionQuantityLimitsIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                        onChange={(event) => HandleControlsChange(event)}
-                      />
-                    </Grid>
+                    <Collapse in={false}>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          autoComplete="false"
+                          name="QTY"
+                          value={data.QTY}
+                          error={data.QTY === ""}
+                          label={t("frm_qty")}
+                          disabled={false}
+                          placeholder={t("frm_qty")}
+                          color="info"
+                          fullWidth
+                          inputProps={{
+                            inputMode: "numeric",
+                            pattern: "[0-9/,]*",
+                            maxLength: 10,
+                          }}
+                          InputProps={{
+                            inputComponent: NumericFormatThounsand,
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <ProductionQuantityLimitsIcon />
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) => HandleControlsChange(event)}
+                        />
+                      </Grid>
+                    </Collapse>
 
                     {/* <Grid item xs={6} md={3}> */}
                     {/* <TextField
@@ -1223,6 +1255,9 @@ const FormHospital = () => {
                         bgcolor={"#829fbd"}
                         borderRadius={"5px"}
                       >
+                        {/* <Typography>
+                          {exChangeRateData.EXCHANGE_RATE}
+                        </Typography> */}
                         <FormLabel
                           sx={{
                             marginLeft: 1,
@@ -1249,9 +1284,9 @@ const FormHospital = () => {
                                 ...prevData,
                                 EXCHANGE_RATE:
                                   event.target.value === "USD"
-                                    ? 24.39
+                                    ? exChangeRateData.EXCHANGE_RATE
                                     : event.target.value === "WON"
-                                    ? 18.11
+                                    ? krwExchangeRate
                                     : 1,
                                 CURRENCY: event.target.value,
                               };

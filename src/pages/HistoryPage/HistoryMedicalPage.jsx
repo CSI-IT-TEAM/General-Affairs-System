@@ -1,4 +1,12 @@
-import { Box, Container, Grid, Paper, Stack, Typography } from "@mui/material";
+import {
+  AppBar,
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import i18next from "i18next";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +23,7 @@ import addDays from "date-fns/addDays";
 import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
 import addMonths from "date-fns/addMonths";
+import { formatNumber } from "devextreme/localization";
 
 const predefinedRanges = [
   {
@@ -104,7 +113,10 @@ export default function HistoryMedicalPage() {
   const { navigate } = useNavigate();
   const langCookie = i18next.language;
   const [historyData, sethistoryData] = useState([]);
-  const [date, setDate] = React.useState([new Date(), new Date()]);
+  const [date, setDate] = React.useState([
+    new Date(new Date().getFullYear(), 0, 1),
+    new Date(),
+  ]);
 
   const handleDateChange = (event) => {
     setDate(event);
@@ -135,6 +147,7 @@ export default function HistoryMedicalPage() {
       .then((response) => {
         response.json().then(async (result) => {
           if (result.length > 0) {
+            console.log(result);
             sethistoryData(result);
           }
         });
@@ -170,6 +183,56 @@ export default function HistoryMedicalPage() {
               </>
             )}
           </h3>
+          {historyData && historyData.length > 0 ? (
+            <AppBar
+              position="static"
+              sx={{
+                borderRadius: "10px",
+              }}
+            >
+              <Paper
+                sx={{
+                  borderWidth: "3px",
+                  borderColor: "navy",
+                  borderStyle: "solid",
+                  borderRadius: "10px",
+                }}
+              >
+                <Grid container textAlign={"center"}>
+                  <Grid item xs={6} md={6} lg={4}>
+                    <Typography
+                      sx={{
+                        fontWeight: "bold",
+                        color: "green",
+                      }}
+                    >
+                      Budget: {formatNumber(historyData[0].BUDGET)}đ
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} md={6} lg={4}>
+                    <Typography
+                      sx={{
+                        fontWeight: "bold",
+                        color: "navy",
+                      }}
+                    >
+                      Using: {formatNumber(historyData[0].USING_QTY)}đ
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={12} lg={4}>
+                    <Typography
+                      sx={{
+                        fontWeight: "bold",
+                        color: "orangered",
+                      }}
+                    >
+                      Remain: {formatNumber(historyData[0].REMAIN_QTY)}đ
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </AppBar>
+          ) : null}
           <DateRangePicker
             cleanable={false}
             ranges={predefinedRanges}

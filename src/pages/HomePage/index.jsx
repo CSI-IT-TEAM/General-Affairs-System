@@ -19,7 +19,8 @@ const HomePage = () => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
+  const [persType, setPersType] = useState("EMP");
+  const [emp_id, setEmp_id] = useState('')
   const colSpacing = width > 479 ? 2 : 1.5;
 
   /////// Check user Info
@@ -65,7 +66,7 @@ const HomePage = () => {
             sessionStorage.setItem("deptEmpList", JSON.stringify(result));
           } else if (type === "EXP") {
             sessionStorage.setItem("EXPList", JSON.stringify(result));
-          }else if (type === "DEPT") {
+          } else if (type === "DEPT") {
             sessionStorage.setItem("DeptList", JSON.stringify(result));
           }
         }
@@ -90,7 +91,8 @@ const HomePage = () => {
       sessionStorage.removeItem("departList");
       sessionStorage.removeItem("dropOffList");
       sessionStorage.removeItem("deptEmpList");
-
+      setEmp_id(empData.EMPID);
+      setPersType(empData.PERS_TYPE);
       handleReason("MAIN_REASON");
       handleReason("SUB_REASON");
       handleReason("DEPART");
@@ -119,7 +121,7 @@ const HomePage = () => {
       }
     }
   };
-
+  //300503005
   return (
     <>
       <Box className="s-home">
@@ -127,25 +129,42 @@ const HomePage = () => {
           <h3 className="s-home-title">
             {t("service")} <span>{t("provide")}</span>
           </h3>
-          <Grid container spacing={colSpacing}>
-            {optionData.map((item, index) => {
-              if (item.id === "001"  || item.id === "002") { //|| item.id === "002"
-                return (
-                  <Grid item md={4} xs={12} key={item.id}>
-                    <CardPrimary
-                      data={item}
-                      handleClick={() => handleNavigate(item.id)}
-                    />
-                  </Grid>
-                );
-              } else {
-                return (
-                  <Grid item md={4} xs={12} key={item.id}>
-                    <CardPrimary data={item} handleClick={handleOpen} />
-                  </Grid>
-                );
-              }
-            })}
+          <Grid justifyContent={"center"} container spacing={colSpacing}>
+            {persType === "EXP" || emp_id === "15050432" ? (
+              optionData.map((item, index) => {
+                if (item.id === "001" || item.id === "002") {
+                  //|| item.id === "002"
+                  return (
+                    <Grid item md={4} xs={12} key={item.id}>
+                      <CardPrimary
+                        data={item}
+                        handleClick={() => handleNavigate(item.id)}
+                      />
+                    </Grid>
+                  );
+                } else {
+                  return (
+                    <Grid item md={4} xs={12} key={item.id}>
+                      <CardPrimary data={item} handleClick={handleOpen} />
+                    </Grid>
+                  );
+                }
+              })
+            ) : (
+              <Grid
+                item
+                justifyItems={"center"}
+                alignItems={"center"}
+                md={4}
+                xs={12}
+                key={optionData[0].id}
+              >
+                <CardPrimary
+                  data={optionData[0]}
+                  handleClick={() => handleNavigate(optionData[0].id)}
+                />
+              </Grid>
+            )}
           </Grid>
         </Container>
       </Box>

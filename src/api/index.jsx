@@ -1,5 +1,4 @@
 const baseURL = "http://172.30.10.120/";
-
 const downloadURL = baseURL + "LMES/PKG_GA_SYSTEM_REQUEST.SMT_DOWNLOAD";
 const imageURL = baseURL + "HUBIC/SP_GET_EMP_PICTURE";
 const uploadURL =
@@ -32,6 +31,9 @@ const MedicalClinicSaveWithImageURL =
 //   "http://172.30.30.41:4000/MEDICAL_SYSTEM_WEB_SAVE";
 const MedicalHistoryDeleteURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_DELETE/SAVE";
+
+const ExchangeRateSelectURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.EXCHANGE_RATE_SELECT";
 export {
   downloadURL,
   uploadURL,
@@ -49,4 +51,5 @@ export {
   RelationListURL,
   MedicalHistoryDeleteURL,
   HospitalTypeListURL,
+  ExchangeRateSelectURL,
 };
