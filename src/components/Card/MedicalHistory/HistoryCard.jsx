@@ -203,25 +203,47 @@ export default function HistoryCard({ item }) {
 
                   <Divider textAlign="right">
                     <Chip
+                      sx={{
+                        paddingY: 3,
+                      }}
                       label={
                         <Stack direction={"row"} alignItems={"center"}>
                           <PriceChangeOutlinedIcon />
-                          <Typography
-                            sx={{
-                              paddingY: "5px",
-                              paddingX: "10px",
-                              // backgroundColor: "#4b50f0",
-                              // borderRadius: "5px",
-                              color: "#4b50f0",
-                              fontSize: "20px",
-                              fontWeight: "bold",
-                            }}
-                            variant="h5"
-                            color="text.secondary"
-                            component={"div"}
-                          >
-                            {formatNumber(item.AMOUNT_QTY)} VNĐ
-                          </Typography>
+                          <Stack>
+                            <Typography
+                              sx={{
+                                paddingY: "1px",
+                                paddingX: "10px",
+                                // backgroundColor: "#4b50f0",
+                                // borderRadius: "5px",
+                                color: "#4b50f0",
+                                fontSize: "14px",
+                                fontWeight: "bold",
+                              }}
+                              variant="h5"
+                              color="text.secondary"
+                              component={"div"}
+                            >
+                              {formatNumber(item.AMOUNT_QTY)} VNĐ
+                            </Typography>
+                            <Divider />
+                            <Typography
+                              sx={{
+                                paddingY: "1px",
+                                paddingX: "10px",
+                                // backgroundColor: "#4b50f0",
+                                // borderRadius: "5px",
+                                color: "#4b50f0",
+                                fontSize: "14px",
+                                fontWeight: "bold",
+                              }}
+                              variant="h5"
+                              color="navy"
+                              component={"div"}
+                            >
+                              {formatNumber(item.AMOUNT_QTY_USD)} $
+                            </Typography>
+                          </Stack>
                         </Stack>
                       }
                     />
