@@ -190,68 +190,45 @@ const SignIn = () => {
             let isExist = await result[0].IS_EXIST;
             if (isExist === 0 && !pwd) {
               //case : Chưa đăng ký
-              if (data === data1) {
-                const { value: password } = await Swal.fire({
-                  title: t("title_please_change_password"),
-                  text: t("title_please_change_password_text"),
-                  input: "password",
-                  inputLabel: t("label_input_new_password"),
-                  inputPlaceholder: t("input_new_password_place_holder"),
-                  inputAttributes: {
-                    maxlength: 50,
-                    autocapitalize: "off",
-                    autocorrect: "off",
-                  },
-                });
-                if (password) {
-                  // Swal.fire(JSON.stringify(password));
-                  if (password === data1) {
-                    Swal.fire(
-                      t("title_password_must_diff_with_empid"),
-                      t("text_password_must_diff_with_empid"),
-                      "error"
+              fetch(UserRegisterURL, {
+                method: "POST",
+                mode: "cors",
+                dataType: "json",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  ARG_TYPE: "S",
+                  ARG_EMPID: data, //user name
+                  ARG_PASSWORD: base64_encode(data1), //password
+                }),
+                signal: Timeout(5).signal,
+              }).then((response) => {
+                response.json().then(async (rs) => {
+                  //console.log(result);
+                  if (rs.Result === "OK") {
+                    //console.log("Đăng ký thành công!");
+                    // Swal.fire(
+                    //   t("title_password_change_successfully"),
+                    //   t("text_user_can_login_with_new_password"),
+                    //   "success"
+                    // );
+                    // setData1(pwd);
+                    sessionStorage.setItem(
+                      "userData",
+                      JSON.stringify(result[0])
                     );
-                    return;
+                    localStorage.setItem(
+                      "lastLogin",
+                      JSON.stringify({ data: data, data1: data1 })
+                    );
+                    sessionStorage.setItem("userImg", imgData);
+                    navigate("/");
                   } else {
-                    fetch(UserRegisterURL, {
-                      method: "POST",
-                      mode: "cors",
-                      dataType: "json",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        ARG_TYPE: "S",
-                        ARG_EMPID: data, //user name
-                        ARG_PASSWORD: base64_encode(password), //password
-                      }),
-                      signal: Timeout(5).signal,
-                    }).then((response) => {
-                      response.json().then(async (result) => {
-                        //console.log(result);
-                        if (result.Result === "OK") {
-                          //console.log("Đăng ký thành công!");
-                          Swal.fire(
-                            t("title_password_change_successfully"),
-                            t("text_user_can_login_with_new_password"),
-                            "success"
-                          );
-
-                          setData1(password);
-                        } else {
-                        }
-                      });
-                    });
+                    alert("Network Error!");
                   }
-                }
-              } else {
-                Swal.fire(
-                  t("title_wrong_password"),
-                  t("text_if_first_time_password"),
-                  "error"
-                );
-                return;
-              }
+                });
+              });
             } else if (isExist === 1 && !pwd) {
               //case : Có đăng ký nhưng nhập sai pass
               Swal.fire(
@@ -282,7 +259,7 @@ const SignIn = () => {
                     });
                   });
                   // makes sure the page reloads. changes are only visible after you refresh.
-                   window.location.reload(true);
+                  window.location.reload(true);
                 }
               }
             }
