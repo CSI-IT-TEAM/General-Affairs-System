@@ -12,6 +12,7 @@ const uploadMedicalData = async (data) => {
     ARG_CUSTOMER_CODE: data.CUSTOMER_CODE,
     ARG_BIRTHDAY: date_to_yyyymmdd(data.BIRTHDATE),
     ARG_PASSPORT: data.PASSPORT,
+    ARG_EMAIL_ADDRESS: data.EMAIL_ADDRESS,
     ARG_RELATIONSHIP: removeVietnamese(data.RELATIONSHIP),
     ARG_SERVICE_TYPE: removeVietnamese(data.SERVICE_TYPE),
     ARG_SERVICE_NAME: removeVietnamese(data.SERVICE_NAME),
@@ -21,15 +22,22 @@ const uploadMedicalData = async (data) => {
     ARG_UNIT_CD: data.UNIT_CD,
     ARG_QTY: data.QTY,
     ARG_CURRENCY: data.CURRENCY,
+    ARG_EXCHANGE_RATE: data.EXCHANGE_RATE,
+    ARG_SERVICE_NAME_TL: removeVietnamese(data.SERVICE_NAME_TL),
     ARG_UNIT_PRICE: data.UNIT_PRICE,
     ARG_DISCOUNT_QTY: data.DISCOUNT_QTY,
     ARG_AMOUNT_QTY: data.AMOUNT_QTY,
     ARG_REMARKS: removeVietnamese(data.REMARKS),
+    ARG_MEMO_TL: removeVietnamese(data.MEMO_TL),
+    ARG_HOSPITAL_TYPE_CD: data.HOSPITAL_TYPE_CD,
+    ARG_INVOICE_PIC_NAME: uuidv4(),
     ARG_CREATOR: data.CREATOR,
     ARG_CREATE_PC: data.CREATE_PC,
     ARG_CREATE_PROGRAM_ID: data.CREATE_PROGRAM_ID,
+    OUT_CURSOR: "",
   };
 };
+
 const uploadMedicalFormData = async (data) => {
   let _formData = new FormData();
   _formData.append("ARG_TYPE", "U");
@@ -51,7 +59,10 @@ const uploadMedicalFormData = async (data) => {
   _formData.append("ARG_QTY", data.QTY);
   _formData.append("ARG_CURRENCY", data.CURRENCY);
   _formData.append("ARG_EXCHANGE_RATE", data.EXCHANGE_RATE);
-  _formData.append("ARG_SERVICE_NAME_TL", removeVietnamese(data.SERVICE_NAME_TL));
+  _formData.append(
+    "ARG_SERVICE_NAME_TL",
+    removeVietnamese(data.SERVICE_NAME_TL)
+  );
   _formData.append("ARG_UNIT_PRICE", data.UNIT_PRICE);
   _formData.append("ARG_DISCOUNT_QTY", data.DISCOUNT_QTY);
   _formData.append("ARG_AMOUNT_QTY", data.AMOUNT_QTY);
@@ -67,4 +78,36 @@ const uploadMedicalFormData = async (data) => {
   return _formData;
 };
 
-export { uploadMedicalData, uploadMedicalFormData };
+const uploadMedicalImageFormData = async (data, file) => {
+  let _formData = new FormData();
+  _formData.append("ARG_TYPE", data.TYPE);
+  _formData.append("ARG_TREAT_DATE", data.TREAT_DATE);
+  _formData.append("ARG_TREAT_SEQ", data.TREAT_SEQ);
+  _formData.append("ARG_EMP_ID", data.EMP_ID);
+
+  _formData.append("ARG_CREATOR", data.CREATOR);
+  _formData.append("ARG_CREATE_PC", data.CREATE_PC);
+  _formData.append("ARG_CREATE_PROGRAM_ID", data.CREATE_PROGRAM_ID);
+  _formData.append("ARG_INVOICE_PIC", data.INVOICE_PIC);
+  _formData.append("ARG_PIC_NAME", data.INVOICE_PIC_NAME);
+  _formData.append("ARG_IMAGE", file.blobFile, file.blobFile.name);
+
+  return _formData;
+};
+
+const uploadImageListData = async (data) => {
+  return {
+    ARG_TYPE: "Q",
+    ARG_TREAT_DATE: data.TREAT_DATE,
+    ARG_TREAT_SEQ: data.TREAT_SEQ,
+    ARG_EMP_ID: data.EMP_ID,
+    OUT_CURSOR: "",
+  };
+};
+
+export {
+  uploadMedicalData,
+  uploadMedicalFormData,
+  uploadMedicalImageFormData,
+  uploadImageListData,
+};

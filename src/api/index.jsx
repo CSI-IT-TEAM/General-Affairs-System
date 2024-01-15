@@ -19,11 +19,12 @@ const UnitListURL = baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.UNIT_LIST_SELECT";
 const RelationListURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.RELATION_LIST_SELECT";
 const HistoryListURL =
-  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_LIST_SELECT";
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HISTORY_LIST_SELECT_V2";
 const HospitalTypeListURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.HOSPITAL_TYPE_LIST_SELECT";
+
 const MedicalClinicSaveURL =
-  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_CLINIC_SAVE/SAVE";
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_CLINIC_SAVE";
 
 const MedicalClinicSaveWithImageURL =
   "http://172.30.10.120:9000/MEDICAL_SYSTEM_WEB_SAVE";
@@ -34,6 +35,12 @@ const MedicalHistoryDeleteURL =
 
 const ExchangeRateSelectURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.EXCHANGE_RATE_SELECT";
+const MedicalImageUploadURL =
+  "http://172.30.30.41:4000/GA_MEDICAL_IMAGE_UPLOAD";
+
+  const MedicalImageListSelectURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_IMAGE_LIST_SELECT";
+
 export {
   downloadURL,
   uploadURL,
@@ -52,4 +59,6 @@ export {
   MedicalHistoryDeleteURL,
   HospitalTypeListURL,
   ExchangeRateSelectURL,
+  MedicalImageUploadURL,
+  MedicalImageListSelectURL,
 };

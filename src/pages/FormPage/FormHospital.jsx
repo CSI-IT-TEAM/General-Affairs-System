@@ -72,6 +72,7 @@ import {
   HospitalTypeListURL,
   MedicalClinicSaveURL,
   MedicalClinicSaveWithImageURL,
+  MedicalImageUploadURL,
   RelationListURL,
   UnitListURL,
 } from "../../api";
@@ -79,8 +80,11 @@ import Swal from "sweetalert2";
 import {
   uploadMedicalData,
   uploadMedicalFormData,
+  uploadMedicalImageFormData,
 } from "../../data/uploadMedicalData";
 import { pink } from "@mui/material/colors";
+import { Uploader } from "rsuite";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 const krwExchangeRate = 18.79;
 const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
   props,
@@ -152,7 +156,8 @@ const FormHospital = () => {
   const [TextTransMemo, setTextTransMemo] = useState("");
   const [selectIndex, setselectIndex] = useState(0);
   const [isMyself, setisMyself] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState([]);
+
   const today = dayjs();
   const yesterday = dayjs().subtract(1, "day");
   const todayStartOfTheDay = today.startOf("day");
@@ -419,19 +424,25 @@ const FormHospital = () => {
     let isValid = true;
     var formData = new FormData(event.target);
     for (var [key, value] of formData.entries()) {
-      if (key === "QTY" || key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
+      if (key === "QTY") {
         value = value.replace(",", "").replace(" VNĐ", "");
+      } else if (key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
+        value = Number(value.replace(",", "").replace(" VNĐ", "")).toFixed(2);
       }
-      if (key !== "REMARKS") {
+      if (key !== "REMARKS" && key !== "DISCOUNT_QTY") {
         if (value === "") {
           isValid = false;
         }
       }
       // console.log(key, value, "valuedated: ", value !== "");
     }
+
+    if (data.MEDICAL_CD === "" || data.HOSPITAL_TYPE_CD === "") {
+      isValid = false;
+    }
     if (isValid) {
       //Test View Data Again
-      // console.log(data);
+      //console.log(data);
       //Checking Data If OK All then Submit
       Swal.fire({
         title: t("swal_are_you_sure"),
@@ -445,7 +456,7 @@ const FormHospital = () => {
         if (result.isConfirmed) {
           //Upload Data
           uploadMedicalData(data).then((uploadData) => {
-            // console.log(uploadData);
+            //console.log(uploadData);
             fetch(MedicalClinicSaveURL, {
               method: "POST",
               mode: "cors",
@@ -458,15 +469,78 @@ const FormHospital = () => {
               .then((response) => {
                 // console.log(response);
                 if (response.status === 200) {
-                  Swal.fire(
-                    t("swal_success"),
-                    t("swal_your_data_uploaded"),
-                    "success"
-                  ).then(() => {
-                    setTimeout(() => {
-                      scrollToTop();
-                      HandleDefault();
-                    }, 500);
+                  response.json().then(async (result) => {
+                    if (result.length > 0) {
+                      if (selectedImage.length > 0) {
+                        selectedImage.map((item) => {
+                          uploadMedicalImageFormData(
+                            {
+                              TYPE: "U",
+                              TREAT_DATE: result[0].TREAT_DATE,
+                              TREAT_SEQ: result[0].TREAT_SEQ,
+                              EMP_ID: result[0].EMP_ID,
+                              INVOICE_PIC_NAME: result[0].INVOICE_PIC_NAME,
+                              CREATOR: result[0].CREATOR,
+                              CREATE_PC: result[0].CREATE_PC,
+                              CREATE_PROGRAM_ID: result[0].CREATE_PROGRAM_ID,
+                            },
+                            item
+                          ).then((uploadData) => {
+                            console.log(uploadData);
+                            // Display the key/value pairs
+                            fetch(MedicalImageUploadURL, {
+                              method: "POST",
+                              body: uploadData,
+                            }).then((response) => {
+                              if (response.status === 200) {
+                                // Swal.fire(
+                                //   t("swal_success"),
+                                //   t("swal_your_data_uploaded"),
+                                //   "success"
+                                // ).then(() => {
+                                //   setTimeout(() => {
+                                //     scrollToTop();
+                                //     HandleDefault();
+                                //   }, 500);
+                                // });
+                              } else {
+                                //   Swal.fire(
+                                //     t("swal_failed"),
+                                //     t("swal_image_upload_error"),
+                                //     "error"
+                                //   ).then(() => {
+                                //     setTimeout(() => {
+                                //       scrollToTop();
+                                //     }, 500);
+                                //   });
+                              }
+                            });
+                          });
+                        });
+
+                        Swal.fire(
+                          t("swal_success"),
+                          t("swal_your_data_uploaded"),
+                          "success"
+                        ).then(() => {
+                          setTimeout(() => {
+                            scrollToTop();
+                            HandleDefault();
+                          }, 500);
+                        });
+                      } else {
+                        Swal.fire(
+                          t("swal_success"),
+                          t("swal_your_data_uploaded"),
+                          "success"
+                        ).then(() => {
+                          setTimeout(() => {
+                            scrollToTop();
+                            HandleDefault();
+                          }, 500);
+                        });
+                      }
+                    }
                   });
                 } else {
                   Swal.fire(
@@ -664,7 +738,7 @@ const FormHospital = () => {
             {t("medical")} <span>{t("fee")}</span>
           </h3>
 
-          <form onSubmit={handleSubmitv2}>
+          <form onSubmit={handleSubmit}>
             <Stack direction="column" spacing={2}>
               <Stack direction="column">
                 <FormTitle order="1" title={t("title_first")} />
@@ -1551,7 +1625,7 @@ const FormHospital = () => {
                       </Grid>
                     )}
 
-                    <Grid item sx={12} md={12} width={"100%"}>
+                    {/* <Grid item sx={12} md={12} width={"100%"}>
                       {selectedImage ? (
                         <Box
                           borderRadius={"15px"}
@@ -1691,6 +1765,41 @@ const FormHospital = () => {
                           </Stack>
                         </Box>
                       )}
+                    </Grid> */}
+                    <Grid item xs={12} md={12} lg={12}>
+                      <Uploader
+                        fullWidth
+                        style={{
+                          width: "100%",
+                        }}
+                        action=""
+                        accept="image/*,application/pdf"
+                        acceptType={["jpg", "gif", "png", "JPG", "pdf"]}
+                        draggable
+                        autoUpload={false}
+                        listType="picture-text"
+                        multiple={true}
+                        fileList={selectedImage}
+                        onChange={setSelectedImage}
+                      >
+                        <div
+                          style={{
+                            height: 150,
+                            width: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "3px dashed #3e79f0",
+                            borderRadius: "5px",
+                          }}
+                        >
+                          <CloudUploadIcon
+                            sx={{ fontSize: 55, color: "#005abc" }}
+                          />
+                          <span>{t("plholder_upload_img")}</span>
+                        </div>
+                      </Uploader>
                     </Grid>
                   </Grid>
                 </Box>

@@ -134,7 +134,8 @@
 
     "title_user_cancel_request_question":"Bạn có muốn hủy yêu cầu này không?",
     "title_text_user_cancel_request_question":"Xác nhận hủy yêu cầu?",
-
+    "title_invoice_image_list": "Xem lại hóa đơn",
+    "title_click_to_view_pdf": "Bấm để xem tệp PDF",
     "error_required_department_select": "Hãy chọn bộ phận",
     "error_lack_of_information": "Hãy kiểm tra và nhập đủ thông tin.",
 
@@ -189,5 +190,6 @@
     "btn_delete_invoice":"Xóa hóa đơn",
     "frm_currency": "Đơn vị tiền tệ",
     "frm_translate_to_vietnamese": "Dịch sang tiếng Việt",
-    "frm_medical_type_nm":"Loại bệnh viện"
+    "frm_medical_type_nm":"Loại bệnh viện",
+    "plholder_upload_img":"Bấm vào đây để tải tệp tin."
 }

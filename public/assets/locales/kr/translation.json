@@ -144,6 +144,8 @@
     "title_medical": "Medical Fee",
     "title_relationship_second": "Relationship Information",
     "title_medical_third": "Medical Fee Information",
+    "title_invoice_image_list": "Invoice File List Viewer",
+    "title_click_to_view_pdf": "Click to view PDF",
     "frm_user_bithdate": "Date of Birth",
     "frm_customer_code": "Customer Code",
     "frm_relationship": "Relationship",
@@ -194,5 +196,6 @@
     "btn_delete_invoice":"Cancelation",
     "frm_currency": "Currency",
     "frm_translate_to_vietnamese": "Translation to Vietnamese",
-    "frm_medical_type_nm":"Types of Hospital"
+    "frm_medical_type_nm":"Types of Hospital",
+    "plholder_upload_img":"Click here to upload files."
 }

@@ -125,6 +125,7 @@
     "title_change_password":"Change Password",
     "title_log_out":"Log Out",
 
+
     "title_user_cancel_request_question":"Do you like to cancel?",
     "title_text_user_cancel_request_question":"Cancel this request?",
 
@@ -135,6 +136,8 @@
     "title_arrival": "Arrival",
     "title_pass_no": "Passenger",
     "title_confirm": "Status",
+    "title_invoice_image_list": "Invoice File List Viewer",
+    "title_click_to_view_pdf": "Click to view PDF",
     "error_required_department_select": "The department field is required",
     "error_lack_of_information": "Lack of Information",
 
@@ -194,5 +197,6 @@
     "btn_delete_invoice":"Cancelation",
     "frm_currency": "Currency",
     "frm_translate_to_vietnamese": "Translation to Vietnamese",
-    "frm_medical_type_nm":"Types of Hospital"
+    "frm_medical_type_nm":"Types of Hospital",
+    "plholder_upload_img":"Click here to upload files."
 }
