@@ -453,7 +453,42 @@ export default function HistoryCard({ item }) {
           >
             <Stack spacing={1}>
               <Grid container spacing={2}>
-                {FileList.length > 0 &&
+                {FileList && FileList.length === 1 ? (
+                  <Grid item xs={12} md={12} lg={12}>
+                    {FileList[0].IMAGE_PATH.toString()
+                      .toUpperCase()
+                      .includes(".PDF") ? (
+                      <Stack
+                        direction={"row"}
+                        spacing={1}
+                        alignItems={"center"}
+                      >
+                        <PictureAsPdfIcon
+                          sx={{
+                            fontSize: "2.5rem",
+                          }}
+                        />
+                        <Link
+                          href={FileList[0].IMAGE_PATH}
+                          target="_blank"
+                          variant="h5"
+                        >
+                          {t("title_click_to_view_pdf")}
+                        </Link>
+                      </Stack>
+                    ) : (
+                      <img
+                        alt="invoice"
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                        }}
+                        src={FileList[0].IMAGE_PATH}
+                      />
+                    )}
+                  </Grid>
+                ) : (
+                  FileList.length > 1 &&
                   FileList &&
                   FileList.map((item) => {
                     return (
@@ -491,7 +526,8 @@ export default function HistoryCard({ item }) {
                         )}
                       </Grid>
                     );
-                  })}
+                  })
+                )}
               </Grid>
             </Stack>
           </Box>

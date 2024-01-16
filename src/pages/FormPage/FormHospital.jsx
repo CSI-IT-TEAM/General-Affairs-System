@@ -314,6 +314,7 @@ const FormHospital = () => {
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
           MEDICAL_CD: "M00011",
+          MEDICAL_NAME: "BV Dong Nai",
           HOSPITAL_TYPE_CD: "T0001",
           EXCHANGE_RATE: data.EXCHANGE_RATE ? data.EXCHANGE_RATE : 1,
           SERVICE_NAME_TL: "",
@@ -442,7 +443,8 @@ const FormHospital = () => {
     }
     if (isValid) {
       //Test View Data Again
-      //console.log(data);
+      console.log(data);
+     
       //Checking Data If OK All then Submit
       Swal.fire({
         title: t("swal_are_you_sure"),
@@ -471,7 +473,7 @@ const FormHospital = () => {
                 if (response.status === 200) {
                   response.json().then(async (result) => {
                     if (result.length > 0) {
-                      if (selectedImage.length > 0) {
+                      if ( selectedImage && selectedImage.length > 0) {
                         selectedImage.map((item) => {
                           uploadMedicalImageFormData(
                             {
@@ -486,7 +488,7 @@ const FormHospital = () => {
                             },
                             item
                           ).then((uploadData) => {
-                            console.log(uploadData);
+                            // console.log(uploadData);
                             // Display the key/value pairs
                             fetch(MedicalImageUploadURL, {
                               method: "POST",
@@ -1229,7 +1231,7 @@ const FormHospital = () => {
                     )}
                     <Collapse in={false}>
                       <Grid item xs={12} md={4}>
-                        <TextField
+                        {/* <TextField
                           autoComplete="false"
                           name="QTY"
                           value={data.QTY}
@@ -1253,7 +1255,7 @@ const FormHospital = () => {
                             ),
                           }}
                           onChange={(event) => HandleControlsChange(event)}
-                        />
+                        /> */}
                       </Grid>
                     </Collapse>
 
