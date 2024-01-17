@@ -5,7 +5,7 @@
     "medical_order": "Register Medical Fee",
     "request": "Request",
     "vehicle": "Vehicle",
-
+    "text_uploader_infor":"Please select files with supported formats. (pdf,png,jpg,jpeg).",
 
     "history_bef": "Request",
     "history_aft": "History",

@@ -5,6 +5,7 @@ import { NumericFormat } from "react-number-format";
 import "../../components/Button/Primary/ButtonPrimary.scss";
 import moment from "moment";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -165,7 +166,7 @@ const FormHospital = () => {
 
   ///DATABASE SELECT
   const fetchClinicListSelect = (HOSPITAL_TYPE_CD) => {
-    console.log("Vào fetch hospital again...", HOSPITAL_TYPE_CD);
+    // console.log("Vào fetch hospital again...", HOSPITAL_TYPE_CD);
     fetch(ClinicListURL, {
       method: "POST",
       mode: "cors",
@@ -275,7 +276,8 @@ const FormHospital = () => {
       .then((response) => {
         response.json().then(async (result) => {
           if (result.length > 0) {
-            console.log(result);
+            // console.log(result);
+
             setexChangeRateData(result[0]);
           }
         });
@@ -443,8 +445,8 @@ const FormHospital = () => {
     }
     if (isValid) {
       //Test View Data Again
-      console.log(data);
-     
+      // console.log(data);
+
       //Checking Data If OK All then Submit
       Swal.fire({
         title: t("swal_are_you_sure"),
@@ -473,7 +475,7 @@ const FormHospital = () => {
                 if (response.status === 200) {
                   response.json().then(async (result) => {
                     if (result.length > 0) {
-                      if ( selectedImage && selectedImage.length > 0) {
+                      if (selectedImage && selectedImage.length > 0) {
                         selectedImage.map((item) => {
                           uploadMedicalImageFormData(
                             {
@@ -662,7 +664,7 @@ const FormHospital = () => {
           isValid = false;
         }
       }
-      console.log(key, value, "valuedated: ", value !== "");
+      // console.log(key, value, "valuedated: ", value !== "");
     }
 
     if (data.MEDICAL_CD === "" || data.HOSPITAL_TYPE_CD === "") {
@@ -687,7 +689,7 @@ const FormHospital = () => {
           //Upload Data
           //  alert(JSON.stringify(data));
           uploadMedicalFormData(data).then((uploadData) => {
-            console.log(data);
+            // console.log(data);
             // Display the key/value pairs
             fetch(MedicalClinicSaveWithImageURL, {
               method: "POST",
@@ -1769,8 +1771,8 @@ const FormHospital = () => {
                       )}
                     </Grid> */}
                     <Grid item xs={12} md={12} lg={12}>
+                      <Stack spacing={1}>  <Alert severity="info">{t('text_uploader_infor')}</Alert>
                       <Uploader
-                        
                         fullWidth
                         style={{
                           width: "100%",
@@ -1783,8 +1785,36 @@ const FormHospital = () => {
                         autoUpload={false}
                         listType="picture-text"
                         multiple={true}
+                        
                         fileList={selectedImage}
                         onChange={setSelectedImage}
+                        shouldQueueUpdate={(fileList) => {
+                          // console.log(fileList);
+                          var re = /(?:\.([^.]+))?$/;
+
+                          return new Promise((resolve) => {
+                            setTimeout(() => {
+                              if (fileList.length > 0) {
+                                fileList.map((file,index) => {
+                                 
+                                  if (
+                                    re.exec(file.name)[1] === "jpg" ||
+                                    re.exec(file.name)[1] === "png" ||
+                                    re.exec(file.name)[1] === "jpeg" ||
+                                    re.exec(file.name)[1] === "pdf"
+                                  ) {
+                                    resolve(true);
+                                  } else {
+                                   // console.log(re.exec(file.name)[1]);
+                                    alert("Please select the file with the required format.")
+                                    fileList.splice(index, 1)
+                                    resolve(false);
+                                  }
+                                });
+                              }
+                          });
+                        })
+                      }}
                       >
                         <div
                           style={{
@@ -1803,7 +1833,8 @@ const FormHospital = () => {
                           />
                           <span>{t("plholder_upload_img")}</span>
                         </div>
-                      </Uploader>
+                      </Uploader></Stack>
+                  
                     </Grid>
                   </Grid>
                 </Box>
