@@ -1770,12 +1770,14 @@ const FormHospital = () => {
                     </Grid> */}
                     <Grid item xs={12} md={12} lg={12}>
                       <Uploader
+                        
                         fullWidth
                         style={{
                           width: "100%",
                         }}
+                        type="file"
                         action=""
-                        accept="image/*,application/pdf"
+                        accept=".png, .jpeg,.jpg,application/pdf"
                         acceptType={["jpg", "gif", "png", "JPG", "pdf"]}
                         draggable
                         autoUpload={false}
