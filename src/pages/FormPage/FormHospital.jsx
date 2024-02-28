@@ -163,7 +163,8 @@ const FormHospital = () => {
   const yesterday = dayjs().subtract(1, "day");
   const todayStartOfTheDay = today.startOf("day");
   const fileInputRef = useRef();
-
+  const date = new Date();
+  var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
   ///DATABASE SELECT
   const fetchClinicListSelect = (HOSPITAL_TYPE_CD) => {
     // console.log("Vào fetch hospital again...", HOSPITAL_TYPE_CD);
@@ -904,6 +905,7 @@ const FormHospital = () => {
                         inputAttr={{
                           readonly: "true",
                         }}
+                        min={firstDay}
                         acceptCustomValue={false}
                         name="TREAT_DATE"
                         max={Date.now()}
@@ -1771,70 +1773,74 @@ const FormHospital = () => {
                       )}
                     </Grid> */}
                     <Grid item xs={12} md={12} lg={12}>
-                      <Stack spacing={1}>  <Alert severity="info">{t('text_uploader_infor')}</Alert>
-                      <Uploader
-                        fullWidth
-                        style={{
-                          width: "100%",
-                        }}
-                        type="file"
-                        action=""
-                        accept=".png, .jpeg,.jpg,application/pdf"
-                        acceptType={["jpg", "gif", "png", "JPG", "pdf"]}
-                        draggable
-                        autoUpload={false}
-                        listType="picture-text"
-                        multiple={true}
-                        
-                        fileList={selectedImage}
-                        onChange={setSelectedImage}
-                        shouldQueueUpdate={(fileList) => {
-                          // console.log(fileList);
-                          var re = /(?:\.([^.]+))?$/;
-
-                          return new Promise((resolve) => {
-                            setTimeout(() => {
-                              if (fileList.length > 0) {
-                                fileList.map((file,index) => {
-                                 
-                                  if (
-                                    re.exec(file.name)[1] === "jpg" ||
-                                    re.exec(file.name)[1] === "png" ||
-                                    re.exec(file.name)[1] === "jpeg" ||
-                                    re.exec(file.name)[1] === "pdf"
-                                  ) {
-                                    resolve(true);
-                                  } else {
-                                   // console.log(re.exec(file.name)[1]);
-                                    alert("Please select the file with the required format.")
-                                    fileList.splice(index, 1)
-                                    resolve(false);
-                                  }
-                                });
-                              }
-                          });
-                        })
-                      }}
-                      >
-                        <div
+                      <Stack spacing={1}>
+                        {" "}
+                        <Alert severity="info">
+                          {t("text_uploader_infor")}
+                        </Alert>
+                        <Uploader
+                          fullWidth
                           style={{
-                            height: 150,
                             width: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            border: "3px dashed #3e79f0",
-                            borderRadius: "5px",
+                          }}
+                          type="file"
+                          action=""
+                          accept="application/pdf"
+                          acceptType={["pdf"]}
+                          draggable
+                          autoUpload={false}
+                          listType="picture-text"
+                          multiple={true}
+                          fileList={selectedImage}
+                          onChange={setSelectedImage}
+                          shouldQueueUpdate={(fileList) => {
+                            // console.log(fileList);
+                            var re = /(?:\.([^.]+))?$/;
+
+                            return new Promise((resolve) => {
+                              setTimeout(() => {
+                                if (fileList.length > 0) {
+                                  fileList.map((file, index) => {
+                                    if (
+                                      // re.exec(file.name)[1] === "jpg" ||
+                                      // re.exec(file.name)[1] === "png" ||
+                                      // re.exec(file.name)[1] === "jpeg" ||
+                                      re.exec(file.name)[1] === "pdf"
+                                    ) {
+                                      resolve(true);
+                                    } else {
+                                      // console.log(re.exec(file.name)[1]);
+                                      alert(
+                                        "Please select the file with the required format."
+                                      );
+                                      fileList.splice(index, 1);
+                                      resolve(false);
+                                    }
+                                  });
+                                }
+                              });
+                            });
                           }}
                         >
-                          <CloudUploadIcon
-                            sx={{ fontSize: 55, color: "#005abc" }}
-                          />
-                          <span>{t("plholder_upload_img")}</span>
-                        </div>
-                      </Uploader></Stack>
-                  
+                          <div
+                            style={{
+                              height: 150,
+                              width: "100%",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              border: "3px dashed #3e79f0",
+                              borderRadius: "5px",
+                            }}
+                          >
+                            <CloudUploadIcon
+                              sx={{ fontSize: 55, color: "#005abc" }}
+                            />
+                            <span>{t("plholder_upload_img")}</span>
+                          </div>
+                        </Uploader>
+                      </Stack>
                     </Grid>
                   </Grid>
                 </Box>
