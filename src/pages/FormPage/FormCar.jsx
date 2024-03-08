@@ -63,6 +63,8 @@ import { uploadURL } from "../../api";
 
 import "./Form.scss";
 import React from "react";
+import { Base64 } from "js-base64";
+import { removeVietnamese } from "../../function/getFormat";
 
 const FormCar = () => {
   const navigate = useNavigate();
@@ -365,7 +367,7 @@ const FormCar = () => {
           ...prevData,
           [event.target.name]:
             event.target.value.length > 0
-              ? Buffer.from(event.target.value).toString("base64")
+              ?  Buffer.from(removeVietnamese(event.target.value)).toString("base64")
               : event.target.value,
         };
       });
