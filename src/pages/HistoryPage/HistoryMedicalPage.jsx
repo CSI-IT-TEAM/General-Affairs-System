@@ -21,8 +21,11 @@ import startOfWeek from "date-fns/startOfWeek";
 import endOfWeek from "date-fns/endOfWeek";
 import addDays from "date-fns/addDays";
 import startOfMonth from "date-fns/startOfMonth";
+import startOfYear from "date-fns/startOfYear";
 import endOfMonth from "date-fns/endOfMonth";
 import addMonths from "date-fns/addMonths";
+import isBefore from 'date-fns/isBefore';
+
 import { formatNumber } from "devextreme/localization";
 
 const predefinedRanges = [
@@ -186,6 +189,7 @@ export default function HistoryMedicalPage() {
           <DateRangePicker
             cleanable={false}
             ranges={predefinedRanges}
+            // shouldDisableDate={date => isBefore(date, new Date(new Date().getFullYear(), 0, 1))}
             showOneCalendar
             value={date}
             onChange={(event) => handleDateChange(event)}
