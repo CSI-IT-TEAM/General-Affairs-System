@@ -109,7 +109,7 @@
     "text_user_can_login_with_new_password":"Bạn có thể đăng nhập với mật khẩu mới!",
 
     "title_wrong_password": "Sai tài khoản hoặc mật khẩu!",
-    "text_if_first_time_password": "Nếu là lần đầu tiên đăng nhập mật khẩu là số thẻ.!",
+    "text_if_first_time_password": "Nếu là lần đầu tiên đăng nhập mật khẩu là số thẻ!",
 
     "title_success":"Thành công!",
     "title_change_password_sucessfully":"Mật khẩu mới thay đổi thành công!",
@@ -125,6 +125,11 @@
     "title_new_password_can_be_empty":"Mật khẩu mới không được để trống",
     "title_change_password":"Đổi mật khẩu",
     "title_log_out":"Đăng xuất",
+    "title_forgot_pass":"Quên mật khẩu?",
+    "title_reset":"Đặt lại ngay",
+    "title_have_account":"Đã có tài khoản?",
+    "title_continue":"Tiếp tục",
+    "title_reset_pass":"Đặt lại mật khẩu",
 
     "title_history":"Lịch sử yêu cầu",
     "title_medical_history": "Lịch sử chi phí",
@@ -193,5 +198,15 @@
     "frm_currency": "Đơn vị tiền tệ",
     "frm_translate_to_vietnamese": "Dịch sang tiếng Việt",
     "frm_medical_type_nm":"Loại bệnh viện",
-    "plholder_upload_img":"Bấm vào đây để tải tệp tin."
+    "plholder_upload_img":"Bấm vào đây để tải tệp tin.",
+    "plholder_email": "Chúng tôi đã gửi mã xác minh tới email của bạn",
+    "frm_id_required": "Mã nhân viên không hợp lệ",
+    "frm_otp_invalid": "Mã OTP không hợp lệ / hết hạn",
+    "swal_new_reset_pass": "Mật khẩu mới là mã nhân viên của bạn",
+
+    "mail_hello": "Xin chào",
+    "mail_system": "Hệ thống đã xác nhận yêu cầu đặt lại mật khẩu của bạn",
+    "mail_warn": "Vui lòng không cung cấp mã OTP này cho bất kỳ ai để bảo nật thông tin",
+    "mail_define": " là mã OTP kích hoạt đặt lại mật khẩu, hiệu lực trong 5 phút",
+    "mail_end": "Xin cảm ơn"
 }

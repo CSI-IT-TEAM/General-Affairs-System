@@ -41,6 +41,8 @@ const MedicalImageUploadURL =
   const MedicalImageListSelectURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_IMAGE_LIST_SELECT";
 
+  const SendEmailURL = "http://172.30.10.120/send-email";
+
 export {
   downloadURL,
   uploadURL,
@@ -61,4 +63,5 @@ export {
   ExchangeRateSelectURL,
   MedicalImageUploadURL,
   MedicalImageListSelectURL,
+  SendEmailURL
 };

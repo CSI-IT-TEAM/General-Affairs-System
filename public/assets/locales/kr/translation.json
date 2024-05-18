@@ -124,6 +124,11 @@
     "title_new_password_can_be_empty":"New Password Can Be Empty",
     "title_change_password":"Change Password",
     "title_log_out":"Log Out",
+    "title_forgot_pass":"Forgot password?",
+    "title_reset":"Reset now",
+    "title_have_account":"Already have an account?",
+    "title_continue":"Continue",
+    "title_reset_pass":"Reset Password",
 
     "title_user_cancel_request_question":"Do you like to cancel?",
     "title_text_user_cancel_request_question":"Cancel this request?",
@@ -197,5 +202,15 @@
     "frm_currency": "Currency",
     "frm_translate_to_vietnamese": "Translation to Vietnamese",
     "frm_medical_type_nm":"Types of Hospital",
-    "plholder_upload_img":"Click here to upload files."
+    "plholder_upload_img":"Click here to upload files.",
+    "plholder_email": "We have send the verification code to your email",
+    "frm_id_required": "Invalid User ID",
+    "frm_otp_invalid": "Invalid / Expired OTP",
+    "swal_new_reset_pass": "New password is your User ID",
+
+    "mail_hello": "Hello",
+    "mail_system": "The system has confirmed your request to reset password",
+    "mail_warn": "Please do not provide this OTP code to anyone for information security",
+    "mail_define": " is the OTP code that activates password reset, valid for 5 minutes",
+    "mail_end": "Thank you"
 }
