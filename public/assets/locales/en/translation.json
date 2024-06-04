@@ -77,6 +77,11 @@
     "frm_txt_total_passenger": "Total Passengers",
     "frm_memo_address_detail":"Detailed description & Destination address & Passenger List",
     "frm_select_clinic_helper": "If your hopsital dose not listed, please choose 'Add New Hospital' option.",
+    
+    "frm_account_name": "Account Name",
+    "frm_account_no": "Account No",
+    "frm_bank_nm":"Bank",
+    
     "btn_request": "Request Now",
     "btn_ok":"OK",
     "btn_close": "Close",
@@ -142,6 +147,9 @@
     "title_confirm": "Status",
     "title_invoice_image_list": "Invoice File List Viewer",
     "title_click_to_view_pdf": "Click to view PDF",
+
+    "title_medical_bank": "Bank Information",
+
     "error_required_department_select": "The department field is required",
     "error_lack_of_information": "Lack of Information",
 

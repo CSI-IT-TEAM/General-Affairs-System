@@ -43,6 +43,8 @@ import DiscountIcon from "@mui/icons-material/Discount";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import BadgeIcon from '@mui/icons-material/Badge';
 import i18next from "i18next";
 import { Translator, Translate } from "react-auto-translate";
 import {
@@ -87,6 +89,12 @@ import { pink } from "@mui/material/colors";
 import { Uploader } from "rsuite";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 const krwExchangeRate = 18.79;
+
+export const BankOptions = [
+  {code:"BANK_CD", value: "woori", label: "Woori Bank", color: "#00B8D9" },
+  {code:"BANK_NAME", value: "shinhan", label: "Shinhan Bank", color: "#0052CC" },
+];
+
 const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
   props,
   ref
@@ -323,6 +331,7 @@ const FormHospital = () => {
           SERVICE_NAME_TL: "",
           QTY: 1,
           CURRENCY: data.CURRENCY ? data.CURRENCY : "VND",
+          ACCOUNT_NAME: empData.EMP_NM,
           CREATOR: getLastName(empData.EMP_NM),
           CREATE_PROGRAM_ID: "MEDICAL_FEE",
         };
@@ -379,6 +388,16 @@ const FormHospital = () => {
     fetchClinicListSelect(event.value);
   };
 
+  const HandleBankSelectChange = (event) => {
+    setData((prevData) => {
+      return {
+        ...prevData,
+        BANK_CD: event.value,
+        BANK_NAME: event.label,
+      };
+    });
+  };
+
   const HandleSelectChange = (event) => {
     setData((prevData) => {
       return {
@@ -433,7 +452,7 @@ const FormHospital = () => {
       } else if (key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
         value = Number(value.replace(",", "").replace(" VNĐ", "")).toFixed(2);
       }
-      if (key !== "REMARKS" && key !== "DISCOUNT_QTY") {
+      if (key !== "REMARKS" && key !== "DISCOUNT_QTY" && key !== "ACCOUNT_NO" ) {
         if (value === "") {
           isValid = false;
         }
@@ -897,7 +916,142 @@ const FormHospital = () => {
               </Stack>
 
               <Stack direction="column">
-                <FormTitle order="3" title={t("title_medical_third")} />
+                <FormTitle order="3" title={t("title_medical_bank")} />
+                <Box className="s-form-content">
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={12} lg={12}>
+                      <TextField
+                        disabled
+                        name="ACCOUNT_NAME"
+                        // error={data.ACCOUNT_NAME === ""}
+                        value={data.ACCOUNT_NAME}
+                        label={t("frm_account_name")}
+                        placeholder={t("frm_account_name")}
+                        color="info"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <BadgeIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                        onChange={(event) => HandleControlsChange(event)}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6} lg={6}>
+                      <TextField
+                        name="ACCOUNT_NO"
+                        // error={data.ACCOUNT_NO === ""}
+                        value={data.ACCOUNT_NO}
+                        label={t("frm_account_no")}
+                        disabled={false}
+                        placeholder={t("frm_account_no")}
+                        color="info"
+                        fullWidth
+                        inputProps={{
+                          inputMode: "numeric",
+                          // pattern: "[0-9/,]*",
+                          maxLength: 20,
+                        }}
+                        InputProps={{
+                          inputComponent: NumericFormat,
+                          inputMode: "numeric",
+                          pattern: "[0-9]*",
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <AccountBalanceWalletIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                        onChange={(event) => HandleControlsChange(event)}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6} lg={6}>
+                      <Box
+                        sx={{
+                          paddingTop: "0px",
+                          marginTop: "-20px",
+                        }}
+                      >
+                        <FormLabel
+                          sx={{
+                            fontSize: "12px",
+                            top: "12px",
+                            left: "10px",
+                            backgroundColor: "white",
+                            zIndex: 999,
+                            paddingX: "2px",
+                          }}
+                        >
+                          {t("frm_bank_nm")}
+                        </FormLabel>
+                        <Select
+                          defaultValue={BankOptions[0]}
+                          value={BankOptions.filter(
+                            (item) => item.value === data.BANK_CD
+                          )}
+                          classNames={{
+                            control: (state) =>
+                              state.isFocused
+                                ? "border-red-600"
+                                : "border-grey-300",
+                          }}
+                          textFieldProps={{
+                            label: "Label",
+                            InputLabelProps: {
+                              shrink: true,
+                            },
+                          }}
+                          styles={{
+                            option: (
+                              base,
+                              { data, isDisabled, isFocused, isSelected }
+                            ) => ({
+                              ...base,
+                              backgroundColor: isSelected
+                                ? "navy"
+                                : isFocused
+                                ? "#00B2E2"
+                                : "#ffffff",
+                            }),
+                            control: (base, { isDisabled, isFocused }) => ({
+                              ...base,
+                              borderRadius: 5,
+                              border: `1px solid ${
+                                isFocused ? "#00B2E2" : "#CCCCCC"
+                              }`,
+                              "&:hover": {
+                                borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
+                                cursor: "pointer",
+                              },
+                              minHeight: 55,
+                              fontWeight: 500,
+                              background: isDisabled ? "#EBEBEB" : "#FFFFFF",
+                            }),
+                            // Fixes the overlapping problem of the component
+                            menu: (provided) => ({ ...provided, zIndex: 9999 }),
+                          }}
+                          options={BankOptions}
+                          theme={(theme) => ({
+                            ...theme,
+                            borderRadius: 0,
+                            colors: {
+                              ...theme.colors,
+                              primary25: "orangered",
+                              primary: "#0f005f",
+                            },
+                          })}
+                          onChange={(event) => HandleBankSelectChange(event)}
+                        />
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Stack>
+
+              <Stack direction="column">
+                <FormTitle order="4" title={t("title_medical_third")} />
                 <Box className="s-form-content">
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={12}>

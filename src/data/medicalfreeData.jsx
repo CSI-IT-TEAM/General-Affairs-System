@@ -33,6 +33,10 @@ const medicalfreeData = {
     "CREATE_PC": "",
     "CREATE_PROGRAM_ID": "",
     "CURRENCY_CD": "",
+    "ACCOUNT_NAME":"",
+    "ACCOUNT_NO":"",
+    "BANK_CD":"",
+    "BANK_NAME":""
 }
 
 
