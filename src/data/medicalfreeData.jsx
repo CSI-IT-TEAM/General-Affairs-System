@@ -36,7 +36,8 @@ const medicalfreeData = {
     "ACCOUNT_NAME":"",
     "ACCOUNT_NO":"",
     "BANK_CD":"",
-    "BANK_NAME":""
+    "BANK_NAME":"",
+    "ACC_BANK_DOC":"",
 }
 
 

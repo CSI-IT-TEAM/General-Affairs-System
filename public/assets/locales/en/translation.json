@@ -95,6 +95,9 @@
     "btn_change_password": "Change Password",
     "btn_confirm": "Confirm",
     "btn_back_to_home": "Back to Home",
+
+    "btn_already_upload_acc_bank_doc": "Document Already Uploaded! Click to View",
+
     "404_title": "Oops! Page not found",
     "no_passengers_error": "Oops! Please checking Passengers List Again!",
     "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable",

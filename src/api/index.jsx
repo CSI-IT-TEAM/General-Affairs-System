@@ -37,11 +37,13 @@ const ExchangeRateSelectURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.EXCHANGE_RATE_SELECT";
 const MedicalImageUploadURL =
   "http://vjweb.dskorea.com:9000/GA_MEDICAL_IMAGE_UPLOAD";
-
-  const MedicalImageListSelectURL =
+const MedicalBankImageUploadURL =
+  "http://vjweb.dskorea.com:9000/GA_MEDICAL_BANK_IMAGE_UPLOAD";
+const MedicalImageListSelectURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.MEDICAL_IMAGE_LIST_SELECT";
-
-  const SendEmailURL = "http://vjweb.dskorea.com/send-email";
+const MedicalAccountBankDocURL =
+  baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.ACC_BANK_DOC_SELECT";
+const SendEmailURL = "http://vjweb.dskorea.com/send-email";
 
 export {
   downloadURL,
@@ -62,6 +64,8 @@ export {
   HospitalTypeListURL,
   ExchangeRateSelectURL,
   MedicalImageUploadURL,
+  MedicalBankImageUploadURL,
   MedicalImageListSelectURL,
-  SendEmailURL
+  MedicalAccountBankDocURL,
+  SendEmailURL,
 };

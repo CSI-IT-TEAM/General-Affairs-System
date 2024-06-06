@@ -98,6 +98,20 @@ const uploadMedicalImageFormData = async (data, file) => {
 
   return _formData;
 };
+//Phuoc
+const uploadMedicalBankImageFormData = async (data, file) => {
+  let _formData = new FormData();
+  _formData.append("ARG_TYPE", data.TYPE);
+  _formData.append("ARG_EMP_ID", data.EMP_ID);
+
+  _formData.append("ARG_CREATOR", data.CREATOR);
+  _formData.append("ARG_CREATE_PC", data.CREATE_PC);
+  _formData.append("ARG_CREATE_PROGRAM_ID", data.CREATE_PROGRAM_ID);
+  _formData.append("ARG_IMAGE", file.blobFile);
+
+  return _formData;
+};
+
 
 const uploadImageListData = async (data) => {
   return {
@@ -114,4 +128,5 @@ export {
   uploadMedicalFormData,
   uploadMedicalImageFormData,
   uploadImageListData,
+  uploadMedicalBankImageFormData,
 };
