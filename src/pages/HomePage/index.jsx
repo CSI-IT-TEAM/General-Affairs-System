@@ -130,7 +130,7 @@ const HomePage = () => {
             {t("service")} <span>{t("provide")}</span>
           </h3>
           <Grid justifyContent={"center"} container spacing={colSpacing}>
-            {persType === "EXP" || emp_id === "15050432" ? (
+            {persType === "EXP" || emp_id === "15050432" || emp_id ==="99115447" ? (
               optionData.map((item, index) => {
                 if (item.id === "001" || item.id === "002") {
                   //|| item.id === "002"

@@ -96,7 +96,7 @@
     "btn_confirm": "Confirm",
     "btn_back_to_home": "Back to Home",
 
-    "btn_already_upload_acc_bank_doc": "Document Already Uploaded! Click to View",
+    "btn_already_upload_acc_bank_doc": "Letter Of Confirmation, click to view",
 
     "404_title": "Oops! Page not found",
     "no_passengers_error": "Oops! Please checking Passengers List Again!",
@@ -152,6 +152,9 @@
     "title_click_to_view_pdf": "Click to view PDF",
 
     "title_medical_bank": "Account No Information",
+
+
+    "text_uploader_once_infor": "You only need to register once",
 
     "error_required_department_select": "The department field is required",
     "error_lack_of_information": "Lack of Information",

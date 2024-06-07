@@ -103,12 +103,13 @@ const uploadMedicalBankImageFormData = async (data, file) => {
   let _formData = new FormData();
   _formData.append("ARG_TYPE", data.TYPE);
   _formData.append("ARG_EMP_ID", data.EMP_ID);
-
+  _formData.append("ARG_ACCOUNT_NO", data.ACCOUNT_NO);
+  _formData.append("ARG_BANK_CD", data.BANK_CD);
+  _formData.append("ARG_BANK_NAME", data.BANK_NAME);
   _formData.append("ARG_CREATOR", data.CREATOR);
   _formData.append("ARG_CREATE_PC", data.CREATE_PC);
   _formData.append("ARG_CREATE_PROGRAM_ID", data.CREATE_PROGRAM_ID);
   _formData.append("ARG_IMAGE", file.blobFile);
-
   return _formData;
 };
 

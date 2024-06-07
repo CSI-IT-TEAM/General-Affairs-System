@@ -4,6 +4,8 @@ import { IMaskInput } from "react-imask";
 import { NumericFormat } from "react-number-format";
 import "../../components/Button/Primary/ButtonPrimary.scss";
 import moment from "moment";
+import SendIcon from "@mui/icons-material/Send";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import {
   Alert,
   Box,
@@ -43,8 +45,8 @@ import DiscountIcon from "@mui/icons-material/Discount";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import BadgeIcon from '@mui/icons-material/Badge';
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import BadgeIcon from "@mui/icons-material/Badge";
 import i18next from "i18next";
 import { Translator, Translate } from "react-auto-translate";
 import {
@@ -73,6 +75,8 @@ import {
   ClinicListURL,
   ExchangeRateSelectURL,
   HospitalTypeListURL,
+  MedicalAccountBankDocURL,
+  MedicalBankImageUploadURL,
   MedicalClinicSaveURL,
   MedicalClinicSaveWithImageURL,
   MedicalImageUploadURL,
@@ -81,6 +85,7 @@ import {
 } from "../../api";
 import Swal from "sweetalert2";
 import {
+  uploadMedicalBankImageFormData,
   uploadMedicalData,
   uploadMedicalFormData,
   uploadMedicalImageFormData,
@@ -91,8 +96,13 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 const krwExchangeRate = 18.79;
 
 export const BankOptions = [
-  {code:"BANK_CD", value: "woori", label: "Woori Bank", color: "#00B8D9" },
-  {code:"BANK_NAME", value: "shinhan", label: "Shinhan Bank", color: "#0052CC" },
+  { code: "BANK_CD", value: "woori", label: "Woori Bank", color: "#00B8D9" },
+  {
+    code: "BANK_NAME",
+    value: "shinhan",
+    label: "Shinhan Bank",
+    color: "#0052CC",
+  },
 ];
 
 const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
@@ -166,14 +176,39 @@ const FormHospital = () => {
   const [selectIndex, setselectIndex] = useState(0);
   const [isMyself, setisMyself] = useState(true);
   const [selectedImage, setSelectedImage] = useState([]);
-
+  const [selectedBankImage, setSelectedBankImage] = useState([]);
+  const [fileType, setFileType] = useState(null);
   const today = dayjs();
   const yesterday = dayjs().subtract(1, "day");
   const todayStartOfTheDay = today.startOf("day");
   const fileInputRef = useRef();
+
   const date = new Date();
   var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+
+  const handleCheckFileType = async (url) => {
+    const type = await checkFileType(url);
+
+    setFileType(type);
+  };
+
+  const getFileTypeFromExtension = (url) => {
+    const extension = url.split(".").pop().toLowerCase();
+    if (extension === "pdf") {
+      setFileType("pdf");
+    } else if (
+      ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"].includes(extension)
+    ) {
+      setFileType("image");
+    } else {
+      setFileType("unknown");
+    }
+
+    console.log(extension);
+  };
+
   ///DATABASE SELECT
+
   const fetchClinicListSelect = (HOSPITAL_TYPE_CD) => {
     // console.log("Vào fetch hospital again...", HOSPITAL_TYPE_CD);
     fetch(ClinicListURL, {
@@ -303,6 +338,7 @@ const FormHospital = () => {
     setselectIndex(0);
     setisMyself(true);
     setSelectedImage(null);
+    setSelectedBankImage(null);
     setTextTransServicesName("");
     setTextTransMemo("");
     const empData = JSON.parse(sessionStorage.getItem("userData"));
@@ -332,9 +368,39 @@ const FormHospital = () => {
           QTY: 1,
           CURRENCY: data.CURRENCY ? data.CURRENCY : "VND",
           ACCOUNT_NAME: empData.EMP_NM,
+          // ACC_BANK_DOC: empData.ACC_BANK_DOC,
           CREATOR: getLastName(empData.EMP_NM),
           CREATE_PROGRAM_ID: "MEDICAL_FEE",
         };
+      });
+
+      fetch(MedicalAccountBankDocURL, {
+        method: "POST",
+        mode: "cors",
+        dataType: "json",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ARG_TYPE: "Q",
+          ARG_EMPID: empData.EMPID, //user name
+          OUT_CURSOR: "",
+        }),
+      }).then((response) => {
+        response.json().then(async (result1) => {
+          if (result1.length > 0) {
+            getFileTypeFromExtension(result1[0].ACC_BANK_DOC);
+            setData((prevData) => {
+              return {
+                ...prevData,
+                ACC_BANK_DOC: result1[0].ACC_BANK_DOC,
+                ACCOUNT_NO: result1[0].ACCOUNT_NO,
+                BANK_NAME:result1[0].BANK_NAME,
+                BANK_CD:result1[0].BANK_CD
+              };
+            });
+          }
+        });
       });
     } else {
       navigate("/signin");
@@ -418,6 +484,24 @@ const FormHospital = () => {
     });
   };
 
+  const checkFileType = async (url) => {
+    try {
+      const response = await fetch(url, { method: "HEAD" });
+      const contentType = response.headers.get("content-type");
+      if (contentType) {
+        if (contentType.includes("application/pdf")) {
+          return "pdf";
+        } else if (contentType.includes("image")) {
+          return "image";
+        }
+      }
+      return "unknown";
+    } catch (error) {
+      console.error("Error fetching the URL:", error);
+      return "error";
+    }
+  };
+
   const scrollToTop = () => {
     // window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     document
@@ -452,7 +536,7 @@ const FormHospital = () => {
       } else if (key === "UNIT_PRICE" || key === "DISCOUNT_QTY") {
         value = Number(value.replace(",", "").replace(" VNĐ", "")).toFixed(2);
       }
-      if (key !== "REMARKS" && key !== "DISCOUNT_QTY" && key !== "ACCOUNT_NO" ) {
+      if (key !== "REMARKS" && key !== "DISCOUNT_QTY" && key !== "ACCOUNT_NO") {
         if (value === "") {
           isValid = false;
         }
@@ -495,6 +579,64 @@ const FormHospital = () => {
                 if (response.status === 200) {
                   response.json().then(async (result) => {
                     if (result.length > 0) {
+                      //Upload Account Bank Image
+                      if (selectedBankImage && selectedBankImage.length > 0) {
+                        console.log(selectedBankImage);
+                        await uploadMedicalBankImageFormData(
+                          {
+                            TYPE: "U",
+                            EMP_ID: result[0].EMP_ID,
+                            ACCOUNT_NO: data.ACCOUNT_NO,
+                            BANK_CD: data.BANK_CD,
+                            BANK_NAME: data.BANK_NAME,
+                            CREATOR: result[0].CREATOR,
+                            CREATE_PC: result[0].CREATE_PC,
+                            CREATE_PROGRAM_ID: result[0].CREATE_PROGRAM_ID,
+                          },
+                          selectedBankImage[selectedBankImage.length - 1]
+                        ).then((uploadData) => {
+                          fetch(MedicalBankImageUploadURL, {
+                            method: "POST",
+                            body: uploadData,
+                          }).then((response) => {
+                            if (response.status === 200) {
+                              //Upload OK
+                              //Select Account Bank Document and Display for User
+                              fetch(MedicalAccountBankDocURL, {
+                                method: "POST",
+                                mode: "cors",
+                                dataType: "json",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                  ARG_TYPE: "Q",
+                                  ARG_EMPID: data.EMP_ID, //user name
+                                  OUT_CURSOR: "",
+                                }),
+                              }).then((response) => {
+                                response.json().then(async (result1) => {
+                                  console.log(result1);
+                                  if (result1.length > 0) {
+                                    setData((prevData) => {
+                                      getFileTypeFromExtension(
+                                        result1[0].ACC_BANK_DOC
+                                      );
+                                      return {
+                                        ...prevData,
+                                        ACC_BANK_DOC: result1[0].ACC_BANK_DOC,
+                                      };
+                                    });
+                                  }
+                                });
+                              });
+                            } else {
+                              //error
+                            }
+                          });
+                        });
+                      }
+
                       if (selectedImage && selectedImage.length > 0) {
                         selectedImage.map((item) => {
                           uploadMedicalImageFormData(
@@ -541,29 +683,29 @@ const FormHospital = () => {
                             });
                           });
                         });
-
-                        Swal.fire(
-                          t("swal_success"),
-                          t("swal_your_data_uploaded"),
-                          "success"
-                        ).then(() => {
-                          setTimeout(() => {
-                            scrollToTop();
-                            HandleDefault();
-                          }, 500);
-                        });
-                      } else {
-                        Swal.fire(
-                          t("swal_success"),
-                          t("swal_your_data_uploaded"),
-                          "success"
-                        ).then(() => {
-                          setTimeout(() => {
-                            scrollToTop();
-                            HandleDefault();
-                          }, 500);
-                        });
                       }
+
+                      Swal.fire(
+                        t("swal_success"),
+                        t("swal_your_data_uploaded"),
+                        "success"
+                      ).then(() => {
+                        setTimeout(() => {
+                          scrollToTop();
+                          HandleDefault();
+                        }, 500);
+                      });
+                    } else {
+                      Swal.fire(
+                        t("swal_success"),
+                        t("swal_your_data_uploaded"),
+                        "success"
+                      ).then(() => {
+                        setTimeout(() => {
+                          scrollToTop();
+                          HandleDefault();
+                        }, 500);
+                      });
                     }
                   });
                 } else {
@@ -945,7 +1087,7 @@ const FormHospital = () => {
                         // error={data.ACCOUNT_NO === ""}
                         value={data.ACCOUNT_NO}
                         label={t("frm_account_no")}
-                        disabled={false}
+                        
                         placeholder={t("frm_account_no")}
                         color="info"
                         fullWidth
@@ -968,6 +1110,24 @@ const FormHospital = () => {
                       />
                     </Grid>
                     <Grid item xs={12} md={6} lg={6}>
+                    {/* <TextField
+                        name="BANK_NAME"
+                        // error={data.ACCOUNT_NO === ""}
+                        value={data.BANK_NAME}
+                        label={t("frm_bank_nm")}
+                        disabled
+                        placeholder={t("frm_bank_nm")}
+                        color="info"
+                        fullWidth
+                       
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <AccountBalanceWalletIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                      /> */}
                       <Box
                         sx={{
                           paddingTop: "0px",
@@ -1045,6 +1205,103 @@ const FormHospital = () => {
                           onChange={(event) => HandleBankSelectChange(event)}
                         />
                       </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                      <Stack spacing={1}>
+                        {data.ACC_BANK_DOC !== "Not Found" &&
+                        fileType === "pdf" ? (
+                          <Button
+                            sx={{
+                              textTransform: "none",
+                            }}
+                            color="success"
+                            variant="outlined"
+                            endIcon={<AssignmentTurnedInIcon />}
+                            onClick={() =>
+                              window.open(
+                                `http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`,
+                                "_blank",
+                                "resizable=yes"
+                              )
+                            }
+                          >
+                            {t("btn_already_upload_acc_bank_doc")}
+                          </Button>
+                        ) : fileType === "image" ? (
+                          <img
+                            style={{
+                              borderRadius: "5px",
+                            }}
+                            alt="not found"
+                            width={"100%"}
+                            src={`http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`}
+                          />
+                        ) : null}
+                        <Alert severity="info">
+                          {t("text_uploader_once_infor")}
+                        </Alert>
+                        <Uploader
+                          fullWidth
+                          style={{
+                            width: "100%",
+                          }}
+                          type="file"
+                          action=""
+                          // accept="application/pdf"
+                          acceptType={["pdf,jpg,jpeg,png"]}
+                          draggable
+                          autoUpload={false}
+                          listType="picture-text"
+                          multiple={false}
+                          fileList={selectedBankImage}
+                          onChange={setSelectedBankImage}
+                          shouldQueueUpdate={(fileList) => {
+                            console.log(fileList[fileList.length - 1]);
+                            var re = /(?:\.([^.]+))?$/;
+                            return new Promise((resolve) => {
+                              setTimeout(() => {
+                                if (fileList.length > 0) {
+                                  fileList.map((file, index) => {
+                                    if (
+                                      re.exec(file.name)[1] === "jpg" ||
+                                      re.exec(file.name)[1] === "png" ||
+                                      re.exec(file.name)[1] === "jpeg" ||
+                                      re.exec(file.name)[1] === "pdf"
+                                    ) {
+                                      resolve(true);
+                                    } else {
+                                      // console.log(re.exec(file.name)[1]);
+                                      alert(
+                                        "Please select the file with the required format."
+                                      );
+                                      fileList.splice(index, 1);
+                                      resolve(false);
+                                    }
+                                  });
+                                }
+                              });
+                            });
+                          }}
+                        >
+                          <div
+                            style={{
+                              height: 150,
+                              width: "100%",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              border: "3px dashed #3e79f0",
+                              borderRadius: "5px",
+                            }}
+                          >
+                            <CloudUploadIcon
+                              sx={{ fontSize: 55, color: "#005abc" }}
+                            />
+                            <span>{t("plholder_upload_img")}</span>
+                          </div>
+                        </Uploader>
+                      </Stack>
                     </Grid>
                   </Grid>
                 </Box>
