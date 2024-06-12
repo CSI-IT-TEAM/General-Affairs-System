@@ -2007,8 +2007,14 @@ const FormHospital = () => {
               {!data.ACCOUNT_NO && (
                 <Stack direction="column">
                   <FormTitle order="4" title={t("title_medical_bank")} />
+
                   <Box className="s-form-content">
                     <Grid container spacing={2}>
+                      <Grid item xs={12} md={12} lg={12}>
+                        <Alert severity="info">
+                          {t("text_uploader_once_infor")}
+                        </Alert>
+                      </Grid>
                       <Grid item xs={12} md={12} lg={12}>
                         <TextField
                           disabled
@@ -2189,9 +2195,7 @@ const FormHospital = () => {
                               src={`http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`}
                             />
                           ) : null}
-                          <Alert severity="info">
-                            {t("text_uploader_once_infor")}
-                          </Alert>
+
                           <Uploader
                             fullWidth
                             style={{
