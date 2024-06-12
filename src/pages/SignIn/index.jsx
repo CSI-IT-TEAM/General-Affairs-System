@@ -284,16 +284,16 @@ const SignIn = () => {
 
                                 navigate("/");
 
-                                if ("caches" in window) {
-                                    caches.keys().then((names) => {
-                                        // delete all the cache files
-                                        names.foreach((name) => {
-                                            caches.delete(name);
-                                        });
-                                    });
-                                    // makes sure the page reloads. changes are only visible after you refresh.
-                                    window.location.reload(true);
-                                }
+                                // if ("caches" in window) {
+                                //     caches.keys().then((names) => {
+                                //         // delete all the cache files
+                                //         names.foreach((name) => {
+                                //             caches.delete(name);
+                                //         });
+                                //     });
+                                //     // makes sure the page reloads. changes are only visible after you refresh.
+                                //     window.location.reload(true);
+                                // }
                             }
                         }
                     } else {

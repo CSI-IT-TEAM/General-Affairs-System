@@ -395,8 +395,8 @@ const FormHospital = () => {
                 ...prevData,
                 ACC_BANK_DOC: result1[0].ACC_BANK_DOC,
                 ACCOUNT_NO: result1[0].ACCOUNT_NO,
-                BANK_NAME:result1[0].BANK_NAME,
-                BANK_CD:result1[0].BANK_CD
+                BANK_NAME: result1[0].BANK_NAME,
+                BANK_CD: result1[0].BANK_CD,
               };
             });
           }
@@ -912,7 +912,6 @@ const FormHospital = () => {
                   <FormMedicalDefaultInfo data={data} />
                 </Box>
               </Stack>
-
               <Stack direction="column">
                 <FormTitle order="2" title={t("title_relationship_second")} />
                 <Box className="s-form-content">
@@ -1056,259 +1055,8 @@ const FormHospital = () => {
                   </Grid>
                 </Box>
               </Stack>
-
               <Stack direction="column">
-                <FormTitle order="3" title={t("title_medical_bank")} />
-                <Box className="s-form-content">
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={12} lg={12}>
-                      <TextField
-                        disabled
-                        name="ACCOUNT_NAME"
-                        // error={data.ACCOUNT_NAME === ""}
-                        value={data.ACCOUNT_NAME}
-                        label={t("frm_account_name")}
-                        placeholder={t("frm_account_name")}
-                        color="info"
-                        fullWidth
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <BadgeIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                        onChange={(event) => HandleControlsChange(event)}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={6}>
-                      <TextField
-                        name="ACCOUNT_NO"
-                        // error={data.ACCOUNT_NO === ""}
-                        value={data.ACCOUNT_NO}
-                        label={t("frm_account_no")}
-                        
-                        placeholder={t("frm_account_no")}
-                        color="info"
-                        fullWidth
-                        inputProps={{
-                          inputMode: "numeric",
-                          // pattern: "[0-9/,]*",
-                          maxLength: 20,
-                        }}
-                        InputProps={{
-                          inputComponent: NumericFormat,
-                          inputMode: "numeric",
-                          pattern: "[0-9]*",
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <AccountBalanceWalletIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                        onChange={(event) => HandleControlsChange(event)}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={6}>
-                    {/* <TextField
-                        name="BANK_NAME"
-                        // error={data.ACCOUNT_NO === ""}
-                        value={data.BANK_NAME}
-                        label={t("frm_bank_nm")}
-                        disabled
-                        placeholder={t("frm_bank_nm")}
-                        color="info"
-                        fullWidth
-                       
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <AccountBalanceWalletIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                      /> */}
-                      <Box
-                        sx={{
-                          paddingTop: "0px",
-                          marginTop: "-20px",
-                        }}
-                      >
-                        <FormLabel
-                          sx={{
-                            fontSize: "12px",
-                            top: "12px",
-                            left: "10px",
-                            backgroundColor: "white",
-                            zIndex: 999,
-                            paddingX: "2px",
-                          }}
-                        >
-                          {t("frm_bank_nm")}
-                        </FormLabel>
-                        <Select
-                          defaultValue={BankOptions[0]}
-                          value={BankOptions.filter(
-                            (item) => item.value === data.BANK_CD
-                          )}
-                          classNames={{
-                            control: (state) =>
-                              state.isFocused
-                                ? "border-red-600"
-                                : "border-grey-300",
-                          }}
-                          textFieldProps={{
-                            label: "Label",
-                            InputLabelProps: {
-                              shrink: true,
-                            },
-                          }}
-                          styles={{
-                            option: (
-                              base,
-                              { data, isDisabled, isFocused, isSelected }
-                            ) => ({
-                              ...base,
-                              backgroundColor: isSelected
-                                ? "navy"
-                                : isFocused
-                                ? "#00B2E2"
-                                : "#ffffff",
-                            }),
-                            control: (base, { isDisabled, isFocused }) => ({
-                              ...base,
-                              borderRadius: 5,
-                              border: `1px solid ${
-                                isFocused ? "#00B2E2" : "#CCCCCC"
-                              }`,
-                              "&:hover": {
-                                borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
-                                cursor: "pointer",
-                              },
-                              minHeight: 55,
-                              fontWeight: 500,
-                              background: isDisabled ? "#EBEBEB" : "#FFFFFF",
-                            }),
-                            // Fixes the overlapping problem of the component
-                            menu: (provided) => ({ ...provided, zIndex: 9999 }),
-                          }}
-                          options={BankOptions}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: 0,
-                            colors: {
-                              ...theme.colors,
-                              primary25: "orangered",
-                              primary: "#0f005f",
-                            },
-                          })}
-                          onChange={(event) => HandleBankSelectChange(event)}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={12}>
-                      <Stack spacing={1}>
-                        {data.ACC_BANK_DOC !== "Not Found" &&
-                        fileType === "pdf" ? (
-                          <Button
-                            sx={{
-                              textTransform: "none",
-                            }}
-                            color="success"
-                            variant="outlined"
-                            endIcon={<AssignmentTurnedInIcon />}
-                            onClick={() =>
-                              window.open(
-                                `http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`,
-                                "_blank",
-                                "resizable=yes"
-                              )
-                            }
-                          >
-                            {t("btn_already_upload_acc_bank_doc")}
-                          </Button>
-                        ) : fileType === "image" ? (
-                          <img
-                            style={{
-                              borderRadius: "5px",
-                            }}
-                            alt="not found"
-                            width={"100%"}
-                            src={`http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`}
-                          />
-                        ) : null}
-                        <Alert severity="info">
-                          {t("text_uploader_once_infor")}
-                        </Alert>
-                        <Uploader
-                          fullWidth
-                          style={{
-                            width: "100%",
-                          }}
-                          type="file"
-                          action=""
-                          // accept="application/pdf"
-                          acceptType={["pdf,jpg,jpeg,png"]}
-                          draggable
-                          autoUpload={false}
-                          listType="picture-text"
-                          multiple={false}
-                          fileList={selectedBankImage}
-                          onChange={setSelectedBankImage}
-                          shouldQueueUpdate={(fileList) => {
-                            console.log(fileList[fileList.length - 1]);
-                            var re = /(?:\.([^.]+))?$/;
-                            return new Promise((resolve) => {
-                              setTimeout(() => {
-                                if (fileList.length > 0) {
-                                  fileList.map((file, index) => {
-                                    if (
-                                      re.exec(file.name)[1] === "jpg" ||
-                                      re.exec(file.name)[1] === "png" ||
-                                      re.exec(file.name)[1] === "jpeg" ||
-                                      re.exec(file.name)[1] === "pdf"
-                                    ) {
-                                      resolve(true);
-                                    } else {
-                                      // console.log(re.exec(file.name)[1]);
-                                      alert(
-                                        "Please select the file with the required format."
-                                      );
-                                      fileList.splice(index, 1);
-                                      resolve(false);
-                                    }
-                                  });
-                                }
-                              });
-                            });
-                          }}
-                        >
-                          <div
-                            style={{
-                              height: 150,
-                              width: "100%",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              border: "3px dashed #3e79f0",
-                              borderRadius: "5px",
-                            }}
-                          >
-                            <CloudUploadIcon
-                              sx={{ fontSize: 55, color: "#005abc" }}
-                            />
-                            <span>{t("plholder_upload_img")}</span>
-                          </div>
-                        </Uploader>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-
-              <Stack direction="column">
-                <FormTitle order="4" title={t("title_medical_third")} />
+                <FormTitle order="3" title={t("title_medical_third")} />
                 <Box className="s-form-content">
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={12}>
@@ -2256,6 +2004,262 @@ const FormHospital = () => {
                   </Grid>
                 </Box>
               </Stack>
+              {!data.ACCOUNT_NO && (
+                <Stack direction="column">
+                  <FormTitle order="4" title={t("title_medical_bank")} />
+                  <Box className="s-form-content">
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={12} lg={12}>
+                        <TextField
+                          disabled
+                          name="ACCOUNT_NAME"
+                          // error={data.ACCOUNT_NAME === ""}
+                          value={data.ACCOUNT_NAME}
+                          label={t("frm_account_name")}
+                          placeholder={t("frm_account_name")}
+                          color="info"
+                          fullWidth
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <BadgeIcon />
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) => HandleControlsChange(event)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6} lg={6}>
+                        <TextField
+                          name="ACCOUNT_NO"
+                          // error={data.ACCOUNT_NO === ""}
+                          value={data.ACCOUNT_NO}
+                          label={t("frm_account_no")}
+                          placeholder={t("frm_account_no")}
+                          color="info"
+                          fullWidth
+                          inputProps={{
+                            inputMode: "numeric",
+                            // pattern: "[0-9/,]*",
+                            maxLength: 20,
+                          }}
+                          InputProps={{
+                            inputComponent: NumericFormat,
+                            inputMode: "numeric",
+                            pattern: "[0-9]*",
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <AccountBalanceWalletIcon />
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) => HandleControlsChange(event)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6} lg={6}>
+                        {/* <TextField
+                        name="BANK_NAME"
+                        // error={data.ACCOUNT_NO === ""}
+                        value={data.BANK_NAME}
+                        label={t("frm_bank_nm")}
+                        disabled
+                        placeholder={t("frm_bank_nm")}
+                        color="info"
+                        fullWidth
+                       
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <AccountBalanceWalletIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                      /> */}
+                        <Box
+                          sx={{
+                            paddingTop: "0px",
+                            marginTop: "-20px",
+                          }}
+                        >
+                          <FormLabel
+                            sx={{
+                              fontSize: "12px",
+                              top: "12px",
+                              left: "10px",
+                              backgroundColor: "white",
+                              zIndex: 999,
+                              paddingX: "2px",
+                            }}
+                          >
+                            {t("frm_bank_nm")}
+                          </FormLabel>
+                          <Select
+                            defaultValue={BankOptions[0]}
+                            value={BankOptions.filter(
+                              (item) => item.value === data.BANK_CD
+                            )}
+                            classNames={{
+                              control: (state) =>
+                                state.isFocused
+                                  ? "border-red-600"
+                                  : "border-grey-300",
+                            }}
+                            textFieldProps={{
+                              label: "Label",
+                              InputLabelProps: {
+                                shrink: true,
+                              },
+                            }}
+                            styles={{
+                              option: (
+                                base,
+                                { data, isDisabled, isFocused, isSelected }
+                              ) => ({
+                                ...base,
+                                backgroundColor: isSelected
+                                  ? "navy"
+                                  : isFocused
+                                  ? "#00B2E2"
+                                  : "#ffffff",
+                              }),
+                              control: (base, { isDisabled, isFocused }) => ({
+                                ...base,
+                                borderRadius: 5,
+                                border: `1px solid ${
+                                  isFocused ? "#00B2E2" : "#CCCCCC"
+                                }`,
+                                "&:hover": {
+                                  borderColor: isFocused
+                                    ? "#00B2E2"
+                                    : "#CCCCCC",
+                                  cursor: "pointer",
+                                },
+                                minHeight: 55,
+                                fontWeight: 500,
+                                background: isDisabled ? "#EBEBEB" : "#FFFFFF",
+                              }),
+                              // Fixes the overlapping problem of the component
+                              menu: (provided) => ({
+                                ...provided,
+                                zIndex: 9999,
+                              }),
+                            }}
+                            options={BankOptions}
+                            theme={(theme) => ({
+                              ...theme,
+                              borderRadius: 0,
+                              colors: {
+                                ...theme.colors,
+                                primary25: "orangered",
+                                primary: "#0f005f",
+                              },
+                            })}
+                            onChange={(event) => HandleBankSelectChange(event)}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={12} lg={12}>
+                        <Stack spacing={1}>
+                          {data.ACC_BANK_DOC !== "Not Found" &&
+                          fileType === "pdf" ? (
+                            <Button
+                              sx={{
+                                textTransform: "none",
+                              }}
+                              color="success"
+                              variant="outlined"
+                              endIcon={<AssignmentTurnedInIcon />}
+                              onClick={() =>
+                                window.open(
+                                  `http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`,
+                                  "_blank",
+                                  "resizable=yes"
+                                )
+                              }
+                            >
+                              {t("btn_already_upload_acc_bank_doc")}
+                            </Button>
+                          ) : fileType === "image" ? (
+                            <img
+                              style={{
+                                borderRadius: "5px",
+                              }}
+                              alt="not found"
+                              width={"100%"}
+                              src={`http://vjweb.dskorea.com:9000/${data.ACC_BANK_DOC}`}
+                            />
+                          ) : null}
+                          <Alert severity="info">
+                            {t("text_uploader_once_infor")}
+                          </Alert>
+                          <Uploader
+                            fullWidth
+                            style={{
+                              width: "100%",
+                            }}
+                            type="file"
+                            action=""
+                            accept="application/pdf"
+                            acceptType={["pdf"]}
+                            draggable
+                            autoUpload={false}
+                            listType="picture-text"
+                            multiple={false}
+                            fileList={selectedBankImage}
+                            onChange={setSelectedBankImage}
+                            shouldQueueUpdate={(fileList) => {
+                              console.log(fileList[fileList.length - 1]);
+                              var re = /(?:\.([^.]+))?$/;
+                              return new Promise((resolve) => {
+                                setTimeout(() => {
+                                  if (fileList.length > 0) {
+                                    fileList.map((file, index) => {
+                                      if (
+                                        // re.exec(file.name)[1] === "jpg" ||
+                                        // re.exec(file.name)[1] === "png" ||
+                                        // re.exec(file.name)[1] === "jpeg" ||
+                                        re.exec(file.name)[1] === "pdf"
+                                      ) {
+                                        resolve(true);
+                                      } else {
+                                        // console.log(re.exec(file.name)[1]);
+                                        alert(
+                                          "Please select the file with the required pdf format."
+                                        );
+                                        fileList.splice(index, 1);
+                                        resolve(false);
+                                      }
+                                    });
+                                  }
+                                });
+                              });
+                            }}
+                          >
+                            <div
+                              style={{
+                                height: 150,
+                                width: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                border: "3px dashed #3e79f0",
+                                borderRadius: "5px",
+                              }}
+                            >
+                              <CloudUploadIcon
+                                sx={{ fontSize: 55, color: "#005abc" }}
+                              />
+                              <span>{t("plholder_upload_img")}</span>
+                            </div>
+                          </Uploader>
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Stack>
+              )}
+              ;
             </Stack>
             <Box className="s-form-bot">
               <button className="btn-primary" type="submit">
