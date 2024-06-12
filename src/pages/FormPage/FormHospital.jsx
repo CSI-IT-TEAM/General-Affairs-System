@@ -2004,8 +2004,9 @@ const FormHospital = () => {
                   </Grid>
                 </Box>
               </Stack>
-              {!data.ACCOUNT_NO && (
+              {data.ACC_BANK_DOC === "Not Found" && (
                 <Stack direction="column">
+                  {/* <TextField value={data.ACC_BANK_DOC}></TextField> */}
                   <FormTitle order="4" title={t("title_medical_bank")} />
 
                   <Box className="s-form-content">
