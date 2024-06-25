@@ -204,7 +204,7 @@ const FormHospital = () => {
       setFileType("unknown");
     }
 
-    console.log(extension);
+   // console.log(extension);
   };
 
   ///DATABASE SELECT
@@ -547,7 +547,8 @@ const FormHospital = () => {
     if (data.MEDICAL_CD === "" || data.HOSPITAL_TYPE_CD === "") {
       isValid = false;
     }
-    if (isValid) {
+    //phuoc modified 2024-06-25 bắt buộc phải chọn files
+    if (isValid && (selectedImage && selectedImage.length > 0)) {
       //Test View Data Again
       // console.log(data);
 
