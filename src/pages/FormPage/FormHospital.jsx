@@ -204,7 +204,7 @@ const FormHospital = () => {
       setFileType("unknown");
     }
 
-   // console.log(extension);
+    // console.log(extension);
   };
 
   ///DATABASE SELECT
@@ -721,7 +721,7 @@ const FormHospital = () => {
                   });
                 }
               })
-              .catch((error) => {});
+              .catch((error) => { });
           });
         }
       });
@@ -882,7 +882,7 @@ const FormHospital = () => {
                   });
                 }
               })
-              .catch((error) => {});
+              .catch((error) => { });
           });
         }
       });
@@ -1011,13 +1011,12 @@ const FormHospital = () => {
                                 control: (base, { isDisabled, isFocused }) => ({
                                   ...base,
                                   borderRadius: 5,
-                                  border: `1px solid ${
-                                    isFocused
-                                      ? "#00B2E2"
-                                      : data.RELATIONSHIP === ""
+                                  border: `1px solid ${isFocused
+                                    ? "#00B2E2"
+                                    : data.RELATIONSHIP === ""
                                       ? "#CB2D2D"
                                       : "#CCCCCC"
-                                  }`,
+                                    }`,
                                   "&:hover": {
                                     borderColor: isFocused
                                       ? "#00B2E2"
@@ -1132,24 +1131,23 @@ const FormHospital = () => {
                               backgroundColor: isSelected
                                 ? "navy"
                                 : isFocused
-                                ? "#00B2E2"
-                                : "#ffffff",
+                                  ? "#00B2E2"
+                                  : "#ffffff",
                               color: isSelected
                                 ? "white"
                                 : isFocused
-                                ? "white"
-                                : data.TEXT_COLOR,
+                                  ? "white"
+                                  : data.TEXT_COLOR,
                             }),
                             control: (base, { isDisabled, isFocused }) => ({
                               ...base,
                               borderRadius: 5,
-                              border: `1px solid ${
-                                isFocused
-                                  ? "#00B2E2"
-                                  : data.HOSPITAL_TYPE_CD === ""
+                              border: `1px solid ${isFocused
+                                ? "#00B2E2"
+                                : data.HOSPITAL_TYPE_CD === ""
                                   ? "#CB2D2D"
                                   : "#CCCCCC"
-                              }`,
+                                }`,
                               "&:hover": {
                                 borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
                                 cursor: "pointer",
@@ -1242,29 +1240,28 @@ const FormHospital = () => {
                                     ? "navy"
                                     : "#e65522"
                                   : isSelected
-                                  ? "navy"
-                                  : isFocused
-                                  ? "#00B2E2"
-                                  : "#ffffff",
+                                    ? "navy"
+                                    : isFocused
+                                      ? "#00B2E2"
+                                      : "#ffffff",
                               color:
                                 data.label === "Add New Hospital"
                                   ? "white"
                                   : isSelected
-                                  ? "white"
-                                  : isFocused
-                                  ? "white"
-                                  : "black",
+                                    ? "white"
+                                    : isFocused
+                                      ? "white"
+                                      : "black",
                             }),
                             control: (base, { isDisabled, isFocused }) => ({
                               ...base,
                               borderRadius: 5,
-                              border: `1px solid ${
-                                isFocused
-                                  ? "#00B2E2"
-                                  : data.MEDICAL_CD === ""
+                              border: `1px solid ${isFocused
+                                ? "#00B2E2"
+                                : data.MEDICAL_CD === ""
                                   ? "#CB2D2D"
                                   : "#CCCCCC"
-                              }`,
+                                }`,
                               "&:hover": {
                                 borderColor: isFocused ? "#00B2E2" : "#CCCCCC",
                                 cursor: "pointer",
@@ -1488,12 +1485,14 @@ const FormHospital = () => {
                         />
                       </FormControl>
                     </Grid> */}
-                    <Grid item xs={12} md={12}>
+                    <Grid item xs={12} md={6}>
                       <Box
                         fullWidth
-                        // alignItems={"center"}
-                        bgcolor={"#829fbd"}
                         borderRadius={"5px"}
+                        sx={{
+                          borderWidth: "1px",
+                          borderStyle: "solid"
+                        }}
                       >
                         {/* <Typography>
                           {exChangeRateData.EXCHANGE_RATE}
@@ -1501,7 +1500,6 @@ const FormHospital = () => {
                         <FormLabel
                           sx={{
                             marginLeft: 1,
-                            color: "white",
                             textAlign: "center",
                           }}
                           id="demo-row-radio-buttons-group-label"
@@ -1513,10 +1511,8 @@ const FormHospital = () => {
                           value={data.CURRENCY}
                           row
                           sx={{
-                            border: "2px dashed #4b50f0",
                             borderRadius: "5px",
-                            // justifyContent: "center",
-                            backgroundColor: "#e6f2ff",
+                            borderWidth: "1px",
                           }}
                           onChange={(event) => {
                             setData((prevData) => {
@@ -1526,8 +1522,8 @@ const FormHospital = () => {
                                   event.target.value === "USD"
                                     ? exChangeRateData.EXCHANGE_RATE
                                     : event.target.value === "WON"
-                                    ? krwExchangeRate
-                                    : 1,
+                                      ? krwExchangeRate
+                                      : 1,
                                 CURRENCY: event.target.value,
                               };
                             });
@@ -1618,8 +1614,11 @@ const FormHospital = () => {
                           inputMode: "numeric",
                           // pattern: "[0-9/,]*",
                           maxLength: 20,
+
                         }}
+                       
                         InputProps={{
+
                           inputMode: "numeric",
                           pattern: "[0-9]*",
                           inputComponent: NumericFormatThounsand,
@@ -1632,10 +1631,10 @@ const FormHospital = () => {
                             <Typography
                               sx={{
                                 px: 2,
-                                py: 0.5,
                                 backgroundColor: "navy",
                                 fontWeight: "bold",
                                 color: "white",
+                                paddingY: "21px",
                               }}
                             >
                               {data.CURRENCY}
@@ -1645,20 +1644,18 @@ const FormHospital = () => {
                         onChange={(event) => HandleControlsChange(event)}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    {/* <Grid item xs={12} md={6}>
                       <TextField
                         autoComplete="false"
-                        // inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                        disabled
                         name="DISCOUNT_QTY"
                         value={data.DISCOUNT_QTY}
                         label={t("frm_discount_price")}
-                        disabled={false}
                         placeholder={t("frm_discount_price")}
                         color="info"
                         fullWidth
                         inputProps={{
                           inputMode: "numeric",
-                          // pattern: "[0-9/,]*",
                           maxLength: 20,
                         }}
                         InputProps={{
@@ -1684,7 +1681,7 @@ const FormHospital = () => {
                         }}
                         onChange={(event) => HandleControlsChange(event)}
                       />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12} md={12}>
                       <TextField
                         sx={{
@@ -1700,7 +1697,7 @@ const FormHospital = () => {
                           data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY < 0
                             ? 0
                             : (data.UNIT_PRICE * data.QTY - data.DISCOUNT_QTY) *
-                              data.EXCHANGE_RATE
+                            data.EXCHANGE_RATE
                         }
                         label={t("frm_amount_price")}
                         disabled
@@ -2127,15 +2124,14 @@ const FormHospital = () => {
                                 backgroundColor: isSelected
                                   ? "navy"
                                   : isFocused
-                                  ? "#00B2E2"
-                                  : "#ffffff",
+                                    ? "#00B2E2"
+                                    : "#ffffff",
                               }),
                               control: (base, { isDisabled, isFocused }) => ({
                                 ...base,
                                 borderRadius: 5,
-                                border: `1px solid ${
-                                  isFocused ? "#00B2E2" : "#CCCCCC"
-                                }`,
+                                border: `1px solid ${isFocused ? "#00B2E2" : "#CCCCCC"
+                                  }`,
                                 "&:hover": {
                                   borderColor: isFocused
                                     ? "#00B2E2"
@@ -2169,7 +2165,7 @@ const FormHospital = () => {
                       <Grid item xs={12} md={12} lg={12}>
                         <Stack spacing={1}>
                           {data.ACC_BANK_DOC !== "Not Found" &&
-                          fileType === "pdf" ? (
+                            fileType === "pdf" ? (
                             <Button
                               sx={{
                                 textTransform: "none",
