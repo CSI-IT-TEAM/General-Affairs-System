@@ -3,6 +3,7 @@ import ButtonRound from "./Button/Round";
 import ModalWarning from "./Modal/Warning";
 import ModalInfo from "./Modal/Info";
 import CardPrimary from "./Card/Primary";
+import NoticeCard from "./Card/Notice/NoticeCard";
 
 import SelectModal from "./SelectModal";
 import PassengersSelect from "./SelectModal/PassengersSelect";
@@ -14,11 +15,13 @@ import TimeModal from "./TimeModal/Desktop";
 import TimeModalMobile from "./TimeModal/Mobile";
 import FormTitle from "./Title/Form";
 import FormDefaultInfo from "./Form/DefaultInfo";
+import FormMedicalDefaultInfo from "./Form/MedicalDefaultInfo";
 import PassengerInfo from "./Form/PassengerInfo";
 import MainPassengerInfo from "./Form/PassengerInfo/Main";
 import KoreaPassengerInfo from "./Form/PassengerInfo/Main/Korea";
 import VietnamPassengerInfo from "./Form/PassengerInfo/Main/Vietnam";
 import ResponsiveDateTime from "./ResponsiveDateTime";
+import BottomNavigation from "./Bottom/Navigation/BottomNavigation"
 export {
   CardPrimary,
   ButtonPrimary,
@@ -35,9 +38,12 @@ export {
   TimeModalMobile,
   FormTitle,
   FormDefaultInfo,
+  FormMedicalDefaultInfo,
   PassengerInfo,
   MainPassengerInfo,
   ResponsiveDateTime,
   KoreaPassengerInfo,
   VietnamPassengerInfo,
+  NoticeCard,
+  BottomNavigation,
 };

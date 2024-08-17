@@ -1,19 +1,15 @@
-import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom/client';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React, { Suspense } from "react";
+import ReactDOM from "react-dom/client";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from 'i18next-browser-languagedetector';
-import HttpApi from 'i18next-http-backend';
-import App from './App';
-
+import LanguageDetector from "i18next-browser-languagedetector";
+import HttpApi from "i18next-http-backend";
+import App from "./App";
 const theme = createTheme({
-    typography: {
-        fontFamily: [
-            'Poppins',
-            'sans-serif',
-        ].join(','),
-    },
+  typography: {
+    fontFamily: ["Poppins", "sans-serif"].join(","),
+  },
 });
 
 i18n
@@ -21,28 +17,31 @@ i18n
   .use(LanguageDetector)
   .use(HttpApi)
   .init({
-    supportedLngs: ['en','vn'],
+    supportedLngs: ["en", "vn", "kr"],
     fallbackLng: "en",
     detection: {
-        order: ['cookie', 'htmlTag', 'localStorage', 'path', 'subdomain'],
-        // cache user language on
-        caches: ['cookie'],
+      order: ["cookie", "htmlTag", "localStorage", "path", "subdomain"],
+      // cache user language on
+      caches: ["cookie"],
     },
     backend: {
-        loadPath: '/assets/locales/{{lng}}/translation.json',
+      loadPath: "/assets/locales/{{lng}}/translation.json",
+      requestOptions: {
+        cache: 'no-store',
+      },
     },
     react: {
-        useSuspense: false,
-    }
-});
+      useSuspense: false,
+    },
+  });
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <Suspense>
-        <React.StrictMode>
-            <ThemeProvider theme={theme}>
-                <App />
-            </ThemeProvider>
-        </React.StrictMode>
-    </Suspense>
+  <Suspense>
+    <React.StrictMode>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </React.StrictMode>
+  </Suspense>
 );

@@ -45,7 +45,7 @@
         padding: 65px 55px 55px 55px;
 
         @media screen and (max-width: 479px) {
-            padding: 40px 25px 40px 25px;
+            padding: 30px 25px 40px 20px;
         }
     
         .b-thumb {
@@ -53,7 +53,7 @@
             margin: 0 auto 40px;
 
             @media screen and (max-width: 479px) {
-                max-width: 300px;
+                max-width: 200px;
                 margin-bottom: 20px;
             }
         }
@@ -106,6 +106,24 @@
 
         .s-mid{
             margin-top: 25px;
+        }
+
+        .p-desc{
+            color: rgba(0, 0, 0, 0.6);
+            font-family: Poppins, sans-serif;
+            font-weight: 500;
+            font-size: 13px;
+            line-height: 1.66;
+            
+            span {
+                color: #0171D3;
+                cursor: pointer;    
+            }
+        }
+
+        .align-center{
+            margin-top: 10px;
+            text-align: center;
         }
     }
 }

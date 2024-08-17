@@ -1,10 +1,12 @@
 @import "../../styles/color.scss";
 @import "../../styles/mixin.scss";
-
+.MuiGrid-container{
+    margin-top: 0 !important;
+}
 .s-form {
     padding: 40px 0;
     padding-top: 120px;
-    background-image: url("../../assets/images/bg-02.png");
+    // background-image: url("../../assets/images/bg-02.png");
     background-repeat: repeat;
     background-position: center;
 
@@ -50,9 +52,10 @@
     &-content{
         border-radius: 10px;
         background-color: $color-white;
-        overflow: hidden;
+        // overflow: hidden;
         border: 1px solid $color-border;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        // box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        box-shadow:-5px 10px 10px -10px rgba(0,0,0,0.6);
         padding: 30px 50px 40px;
 
         @media screen and (max-width: 991px) {
@@ -64,9 +67,9 @@
         }
 
         @media screen and (max-width: 479px) {
-            padding: 0;
-            box-shadow: none;
-            border: none;
+            padding: 15px 15px 20px;
+            // box-shadow: none;
+            // border: none;
         }
     }
 
@@ -81,8 +84,8 @@
         &__title{
             color: $color-text-gray;
             font-size: 17px !important;
-            min-width: 170px;
-            max-width: 170px;
+            // min-width: 400px;
+            // max-width: 550px;
 
             @media screen and (max-width: 991px) {
                 min-width: 160px;
@@ -114,19 +117,19 @@
             }
         }
     
-        input{
-            padding: 12px 15px !important;
-            background-color: $color-bg-white;
+        // input{
+        //     padding: 12px 15px !important;
+        //     background-color: $color-bg-white;
 
-            @media screen and (max-width: 767px) {
-                max-height: 43px;
-            }
+        //     @media screen and (max-width: 767px) {
+        //         max-height: 43px;
+        //     }
 
-            @media screen and (max-width: 479px) {
-                padding: 10px !important;
-                font-size: 16px !important;
-            }
-        }
+        //     @media screen and (max-width: 479px) {
+        //         padding: 10px !important;
+        //         font-size: 16px !important;
+        //     }
+        // }
     }
 
     textarea{
@@ -195,9 +198,9 @@
             padding-top: 10px !important;
         }
 
-        .MuiGrid-container{
-            margin-top: 0 !important;
-        }
+        // .MuiGrid-container{
+        //     margin-top: 0 !important;
+        // }
 
         .MuiSelect-select{
             padding:  10px !important;
@@ -215,9 +218,12 @@
             }
         }
     }
+    
 
     @media screen and (max-width: 479px) {
-
+        // .MuiGrid-container{
+        //     margin-top: 0 !important;
+        // }
         .b-spec{
 
             .b-text-input__title{
@@ -252,11 +258,13 @@
             padding-left: 16px;
         }
     }
-
+    .MuiFormLabel-root{
+        z-index: 1;
+    }
     .MuiFormControlLabel-root{
         margin: 0;
         min-width: 140px;
-
+       
         @media screen and (max-width: 479px) {
             margin-top: 10px;
         }
@@ -282,3 +290,7 @@
 .MuiInputBase-multiline{
     font-weight: 500 !important;
 }
+
+// .dx-texteditor-input{
+//     readonly:true,
+// }

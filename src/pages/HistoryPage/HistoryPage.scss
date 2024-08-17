@@ -1,0 +1,116 @@
+.b-table{
+    margin-top: 15px !important;
+    border-radius: 5px;
+    overflow: hidden;
+
+    &-cs-cell{
+        padding: 12px 3px;
+        border-bottom: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+        text-align: center;
+    }
+
+    &-cs-cell--first{
+        border-left: 1px solid #e0e0e0;
+    }
+
+    &-cell{
+        border-bottom: 1px solid #e0e0e0;
+
+        @media screen and (max-width: 479px) {
+            font-size: 17px !important;
+        }
+    }
+
+    &-cell--active{
+        border-bottom: none !important;
+        padding-bottom: 5px !important;
+    }
+
+    &-measure{
+        height: 20px;
+        overflow: hidden;
+        display: flex;
+        gap: 3px;
+    }
+
+    .b-table-mesure__title{
+        white-space: nowrap;
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &-bot{
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px 10px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 15px;
+        background-color: #fff;
+
+        @media screen and (max-width: 479px) {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        span{
+            font-weight: 700;
+        }
+    }
+
+    &-bot--end{
+        justify-content: end;
+    }
+
+    &-item{
+
+        &__title{
+            padding-left: 5px;
+            font-weight: 500;
+        }
+
+        &__checkbox{
+            padding: 0 !important;
+        }
+
+        &__measure{
+            min-height: 35px;
+            width: 100%;
+            background-color: #f8f6f7;
+            border-radius: 5px;
+            border: 1px solid #eaedf1;
+            display: flex;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            align-items: center;
+            overflow: hidden;
+            padding: 0 5px;
+            cursor: pointer;
+        }
+    }
+
+    .Mui-checked {
+        color: green!important;
+    }
+}
+
+.s-empty-box{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+
+    img{
+        width: 120px;
+    }
+
+    &__desc{
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        font-size: 20px !important;
+        color: #444;
+        margin-top: 10px !important;
+    }
+}

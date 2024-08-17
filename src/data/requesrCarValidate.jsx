@@ -39,6 +39,11 @@ const reqCarValidate = {
         message: 'The depart name field is required',
         messageVN: 'Dữ liệu không được rỗng',
     },     
+    "ADDRESS_MEMO": {
+        validate: true,
+        message: 'The address memo field is required',
+        messageVN: 'Dữ liệu không được rỗng',
+    }
     // "MAN_QTY": {
     //     validate: true,
     //     message: 'The passengers field must be greater than 0',

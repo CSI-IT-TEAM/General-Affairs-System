@@ -10,7 +10,7 @@ const FormDefaultInfo = ({data}) => {
     return (
         <>
             <Grid container spacing={2}>
-                <Grid item xs={12} md={6} xl={4}>
+                <Grid item xs={12} md={6} xl={3}>
                     <TextInput 
                         title={t('frm_fty')}
                         placeholder="" 
@@ -19,7 +19,7 @@ const FormDefaultInfo = ({data}) => {
                         inputProp={{ inputMode: 'text' }}
                         isDefault={true} />
                 </Grid>
-                <Grid item xs={12} md={6} xl={8}>
+                <Grid item xs={12} md={6} xl={3}>
                     <TextInput 
                         title={t('frm_depart')}
                         placeholder="" 
@@ -28,9 +28,7 @@ const FormDefaultInfo = ({data}) => {
                         inputProp={{ inputMode: 'text' }}
                         isDefault={true} />
                 </Grid>
-            </Grid>
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={6} xl={4}>
+                <Grid item xs={12} md={6} xl={3}>
                     <TextInput 
                         title={t('frm_user_id')}
                         placeholder="" 
@@ -39,7 +37,7 @@ const FormDefaultInfo = ({data}) => {
                         inputProp={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                         isDefault={true} />
                 </Grid>
-                <Grid item xs={12} md={6} xl={8}>
+                <Grid item xs={12} md={6} xl={3}>
                     <TextInput 
                         title={t('frm_user_nm')}
                         placeholder="" 

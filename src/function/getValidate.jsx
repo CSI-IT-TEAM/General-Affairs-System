@@ -1,23 +1,22 @@
-import moment from 'moment';
+import moment from "moment";
 moment().format();
 
 const isCombackDate_Validate = (value1, value2) => {
+  const format = "YYYY-MM-DD HH:mm:ss";
 
-    const format = "YYYY-MM-DD HH:mm:ss";
+  let dateTime1 = moment(value1).format(format);
+  let dateTime2 = moment(value2).format(format);
 
-    let dateTime1 = moment(value1).format(format);
-    let dateTime2 = moment(value2).format(format);
-
-    return dateTime1 <= dateTime2 ? true : false;
-}
+  return dateTime1 <= dateTime2 ? true : false;
+};
 
 const timeDifference = (value) => {
-    const format = "YYYY-MM-DD HH:mm:ss";
+  const format = "YYYY-MM-DD HH:mm:ss";
 
-    let dateTime1 = moment().add(2, 'hours').format(format);
-    let dateTime2 = moment(value).format(format);
+  let dateTime1 = moment().add(3, "hours").format(format);
+  let dateTime2 = moment(value).format(format);
+  console.log("Date" + dateTime1 + " Time" + dateTime2);
+  return dateTime1 <= dateTime2 ? true : false;
+};
 
-    return dateTime1 <= dateTime2 ? true : false;
-}
-
-export { isCombackDate_Validate, timeDifference }
+export { isCombackDate_Validate, timeDifference };
