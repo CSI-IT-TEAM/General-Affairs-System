@@ -360,8 +360,8 @@ const FormHospital = () => {
           BUDGET: empData.BUDGET,
           PASSPORT: empData.PASSPORT,
           EMAIL_ADDRESS: empData.EMAIL,
-          MEDICAL_CD: "M00011",
-          MEDICAL_NAME: "BV Dong Nai",
+          MEDICAL_CD: "",
+          MEDICAL_NAME: "",
           HOSPITAL_TYPE_CD: "T0001",
           EXCHANGE_RATE: data.EXCHANGE_RATE ? data.EXCHANGE_RATE : 1,
           SERVICE_NAME_TL: "",
@@ -537,7 +537,7 @@ const FormHospital = () => {
         value = Number(value.replace(",", "").replace(" VNĐ", "")).toFixed(2);
       }
       if (key !== "REMARKS" && key !== "DISCOUNT_QTY" && key !== "ACCOUNT_NO") {
-        if (value === "") {
+        if (value === "" ) {
           isValid = false;
         }
       }
@@ -1251,7 +1251,7 @@ const FormHospital = () => {
                                     ? "white"
                                     : isFocused
                                       ? "white"
-                                      : "black",
+                                      : data.TEXT_COLOR,
                             }),
                             control: (base, { isDisabled, isFocused }) => ({
                               ...base,
@@ -1616,7 +1616,7 @@ const FormHospital = () => {
                           maxLength: 20,
 
                         }}
-                       
+
                         InputProps={{
 
                           inputMode: "numeric",
