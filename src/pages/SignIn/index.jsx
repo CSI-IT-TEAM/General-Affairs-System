@@ -23,7 +23,7 @@ import { LoginURL, UserRegisterURL, downloadURL, imageURL, SendEmailURL } from "
 import "./SignIn.scss";
 import loginImage from "../../assets/images/sign-in.png";
 import otpImage from "../../assets/images/logos/otp.png";
-
+import AvatarImage from "../../assets/images/avatar.png";
 const height = window.innerHeight + "px";
 const width = window.innerWidth;
 
@@ -45,7 +45,7 @@ const SignIn = () => {
     const [dataOTP, setDataOTP] = useState("");
     const [email, setEmail] = useState("");
 
-    const size = width > 479 ? 500 - 110 - 9*5 : width * 0.9 - 50 - 9*5;
+    const size = width > 479 ? 500 - 110 - 9 * 5 : width * 0.9 - 50 - 9 * 5;
 
     /////// Handle Warning Modal
     const [openWarn, setOpenWarn] = useState(false);
@@ -218,7 +218,14 @@ const SignIn = () => {
             .then((response) => {
                 response.json().then(async (result) => {
                     if (result.length > 0) {
-                        let imgData = await arrayBufferToBase64(result[0].PHOTO.data);
+                        //let imgData = await arrayBufferToBase64(result[0].PHOTO.data);
+                        let imgData = null;
+                        if (result[0].PHOTO && result[0].PHOTO.data) {
+                            imgData = await arrayBufferToBase64(result[0].PHOTO.data);
+                        } else {
+                            console.warn("PHOTO.data is null");
+                            imgData = AvatarImage; // Hoặc gán ảnh mặc định nếu cần
+                        }
                         let pwd = await result[0].PASSWORD;
                         let isExist = await result[0].IS_EXIST;
                         if (isExist === 0 && !pwd) {
@@ -330,7 +337,7 @@ const SignIn = () => {
             },
         });
 
-        if(email === ""){    
+        if (email === "") {
             fetch(LoginURL, {
                 method: "POST",
                 mode: "cors",
@@ -346,131 +353,132 @@ const SignIn = () => {
                 }),
                 signal: Timeout(5).signal,
             })
-            .then((response) => {
-                response.json().then(async (result) => {
-                    if (result.length > 0) {
-                        if(result[0].REGISTER_YN === "N"){
-                            Swal.fire({
-                                position: "center",
-                                icon: "success",
-                                title: t("title_success"),
-                                text: t("text_if_first_time_password"),
-                                showConfirmButton: false,
-                                timer: 1500,
-                            }).then(() => {
-                                handleShowReset();
-                            });
-                        }else{
-                            if(result[0].EMAIL !== null && result[0].EMAIL !== ""){
-                                let _emailData = result[0].EMAIL;
-
-                                fetch(UserRegisterURL, {
-                                    method: "POST",
-                                    mode: "cors",
-                                    dataType: "json",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({
-                                        ARG_TYPE: "Q_OTP",
-                                        ARG_EMPID: data, //user name
-                                        ARG_PASSWORD: "", //password
-                                    }),
-                                    signal: Timeout(5).signal,
-                                }).then((response) => {
-                                    response.json().then(async (rs) => {
-                                        if (rs.Result === "OK") {
-
-                                            fetch(LoginURL, {
-                                                method: "POST",
-                                                mode: "cors",
-                                                dataType: "json",
-                                                headers: {
-                                                    "Content-Type": "application/json",
-                                                },
-                                                body: JSON.stringify({
-                                                    ARG_TYPE: "Q_OTP",
-                                                    ARG_EMPID: data, //user name
-                                                    ARG_PASSWORD: "", //password
-                                                    OUT_CURSOR: "",
-                                                }),
-                                                signal: Timeout(5).signal,
-                                            })
-                                            .then((response) => {
-                                                response.json().then(async (result) => {
-                                                    let _sendEmailPrams = {
-                                                        "to": [_emailData],
-                                                        "subject": "General Affairs System - Reset Password",
-                                                        "html":
-                                                            "<html>" +
-                                                            "<head><style>.text{ font-family: 'Consolas', Times, serif; font-size: '14'; }</style></head>" +
-                                                            "<body class='text'>" +
-                                                            t('mail_hello') + ",<br />- " + t('mail_system') +".<br />" +
-                                                            "- " + t('mail_warn') + ".<br/>" +
-                                                            "- <b>" + result[0].OTP_CD + "</b>" + t('mail_define') + ".<br />" +
-                                                            t('mail_end') + "." + 
-                                                            "</body>" +
-                                                            "</html>"
-                                                    }
-        
-                                                    const response = await fetch(SendEmailURL, {
-                                                        method: "POST",
-                                                        mode: "cors",
-                                                        dataType: "json",
-                                                        headers: {
-                                                            "Content-Type": "application/json",
-                                                        },
-                                                        body: JSON.stringify(_sendEmailPrams),
-                                                    });
-                                            
-                                                    if(response.status === 200){
-                                                        setTimeout(() => {
-                                                            setEmail(email => _emailData);
-                                                            Swal.close();
-                                                        }, 1000);
-                                                    }else{
-                                                        Swal.close();
-                                                        alert("Network Error!");
-                                                    }
-                                                }
-                                            )});
-                                        } else {
-                                            Swal.close();
-                                            alert("Network Error!");
-                                        }
-                                    });
-                                });
-                            }
-                            else{
-                                Swal.close();
+                .then((response) => {
+                    response.json().then(async (result) => {
+                        if (result.length > 0) {
+                            if (result[0].REGISTER_YN === "N") {
                                 Swal.fire({
                                     position: "center",
-                                    icon: "error",
-                                    title: t("warn"),
-                                    text: t("frm_id_required"),
+                                    icon: "success",
+                                    title: t("title_success"),
+                                    text: t("text_if_first_time_password"),
                                     showConfirmButton: false,
                                     timer: 1500,
-                                })
+                                }).then(() => {
+                                    handleShowReset();
+                                });
+                            } else {
+                                if (result[0].EMAIL !== null && result[0].EMAIL !== "") {
+                                    let _emailData = result[0].EMAIL;
+
+                                    fetch(UserRegisterURL, {
+                                        method: "POST",
+                                        mode: "cors",
+                                        dataType: "json",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            ARG_TYPE: "Q_OTP",
+                                            ARG_EMPID: data, //user name
+                                            ARG_PASSWORD: "", //password
+                                        }),
+                                        signal: Timeout(5).signal,
+                                    }).then((response) => {
+                                        response.json().then(async (rs) => {
+                                            if (rs.Result === "OK") {
+
+                                                fetch(LoginURL, {
+                                                    method: "POST",
+                                                    mode: "cors",
+                                                    dataType: "json",
+                                                    headers: {
+                                                        "Content-Type": "application/json",
+                                                    },
+                                                    body: JSON.stringify({
+                                                        ARG_TYPE: "Q_OTP",
+                                                        ARG_EMPID: data, //user name
+                                                        ARG_PASSWORD: "", //password
+                                                        OUT_CURSOR: "",
+                                                    }),
+                                                    signal: Timeout(5).signal,
+                                                })
+                                                    .then((response) => {
+                                                        response.json().then(async (result) => {
+                                                            let _sendEmailPrams = {
+                                                                "to": [_emailData],
+                                                                "subject": "General Affairs System - Reset Password",
+                                                                "html":
+                                                                    "<html>" +
+                                                                    "<head><style>.text{ font-family: 'Consolas', Times, serif; font-size: '14'; }</style></head>" +
+                                                                    "<body class='text'>" +
+                                                                    t('mail_hello') + ",<br />- " + t('mail_system') + ".<br />" +
+                                                                    "- " + t('mail_warn') + ".<br/>" +
+                                                                    "- <b>" + result[0].OTP_CD + "</b>" + t('mail_define') + ".<br />" +
+                                                                    t('mail_end') + "." +
+                                                                    "</body>" +
+                                                                    "</html>"
+                                                            }
+
+                                                            const response = await fetch(SendEmailURL, {
+                                                                method: "POST",
+                                                                mode: "cors",
+                                                                dataType: "json",
+                                                                headers: {
+                                                                    "Content-Type": "application/json",
+                                                                },
+                                                                body: JSON.stringify(_sendEmailPrams),
+                                                            });
+
+                                                            if (response.status === 200) {
+                                                                setTimeout(() => {
+                                                                    setEmail(email => _emailData);
+                                                                    Swal.close();
+                                                                }, 1000);
+                                                            } else {
+                                                                Swal.close();
+                                                                alert("Network Error!");
+                                                            }
+                                                        }
+                                                        )
+                                                    });
+                                            } else {
+                                                Swal.close();
+                                                alert("Network Error!");
+                                            }
+                                        });
+                                    });
+                                }
+                                else {
+                                    Swal.close();
+                                    Swal.fire({
+                                        position: "center",
+                                        icon: "error",
+                                        title: t("warn"),
+                                        text: t("frm_id_required"),
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                    })
+                                }
                             }
+                        } else {
+                            Swal.close();
+                            Swal.fire({
+                                position: "center",
+                                icon: "error",
+                                title: t("warn"),
+                                text: t("frm_id_required"),
+                                showConfirmButton: false,
+                                timer: 1500,
+                            });
                         }
-                    } else {
-                        Swal.close();
-                        Swal.fire({
-                            position: "center",
-                            icon: "error",
-                            title: t("warn"),
-                            text: t("frm_id_required"),
-                            showConfirmButton: false,
-                            timer: 1500,
-                        });
-                    }
+                    });
+                })
+                .catch((error) => {
+                    Swal.close();
+                    setOpenInfo(true);
                 });
-            })
-            .catch((error) => {
-                Swal.close();
-                setOpenInfo(true);
-            });
-        }else{
+        } else {
             fetch(LoginURL, {
                 method: "POST",
                 mode: "cors",
@@ -486,60 +494,62 @@ const SignIn = () => {
                 }),
                 signal: Timeout(5).signal,
             })
-            .then((response) => {
-                response.json().then(async (result) => {
-                    if(result !== null && result.length > 0){
-                        if(result[0].OTP_YN === "Y"){
-                            fetch(UserRegisterURL, {
-                                method: "POST",
-                                mode: "cors",
-                                dataType: "json",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    ARG_TYPE: "Q_DELETE",
-                                    ARG_EMPID: data, //user name
-                                    ARG_PASSWORD: "", //password
-                                }),
-                                signal: Timeout(5).signal,
-                            }).then((response) => {
-                                response.json().then(async (rs) => {
-                                    if (rs.Result === "OK") {
-                                        Swal.close();
-                                        Swal.fire({
-                                            position: "center",
-                                            icon: "success",
-                                            title: t('title_success'),
-                                            text: t('swal_new_reset_pass'),
-                                            showConfirmButton: false,
-                                            timer: 3500,
-                                        }).then(() => {
-                                            handleShowReset();
-                                        });
-                                    }else{
-                                        Swal.close();
-                                        alert("Network Error!");
+                .then((response) => {
+                    response.json().then(async (result) => {
+                        if (result !== null && result.length > 0) {
+                            if (result[0].OTP_YN === "Y") {
+                                fetch(UserRegisterURL, {
+                                    method: "POST",
+                                    mode: "cors",
+                                    dataType: "json",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        ARG_TYPE: "Q_DELETE",
+                                        ARG_EMPID: data, //user name
+                                        ARG_PASSWORD: "", //password
+                                    }),
+                                    signal: Timeout(5).signal,
+                                }).then((response) => {
+                                    response.json().then(async (rs) => {
+                                        if (rs.Result === "OK") {
+                                            Swal.close();
+                                            Swal.fire({
+                                                position: "center",
+                                                icon: "success",
+                                                title: t('title_success'),
+                                                text: t('swal_new_reset_pass'),
+                                                showConfirmButton: false,
+                                                timer: 3500,
+                                            }).then(() => {
+                                                handleShowReset();
+                                            });
+                                        } else {
+                                            Swal.close();
+                                            alert("Network Error!");
+                                        }
                                     }
-                                }
-                            )});
-                        }else{
+                                    )
+                                });
+                            } else {
+                                Swal.close();
+                                Swal.fire({
+                                    position: "center",
+                                    icon: "error",
+                                    title: t("warn"),
+                                    text: t("frm_otp_invalid"),
+                                    showConfirmButton: false,
+                                    timer: 1500,
+                                });
+                            }
+                        } else {
                             Swal.close();
-                            Swal.fire({
-                                position: "center",
-                                icon: "error",
-                                title: t("warn"),
-                                text: t("frm_otp_invalid"),
-                                showConfirmButton: false,
-                                timer: 1500,
-                            });
+                            alert("Network Error!");
                         }
-                    }else{
-                        Swal.close();
-                        alert("Network Error!");
                     }
-                }
-            )});
+                    )
+                });
         }
     }
 
@@ -559,7 +569,7 @@ const SignIn = () => {
                             <Typography variant="h1" className="p-title">
                                 Reset Password
                             </Typography>
-                            <Box className="b-thumb" sx={{margin: '0 auto !important'}}>
+                            <Box className="b-thumb" sx={{ margin: '0 auto !important' }}>
                                 <img src={otpImage} alt="OTP" />
                             </Box>
                             <form>
@@ -598,7 +608,7 @@ const SignIn = () => {
                                                 inputType="number"
                                                 renderSeparator={<span>-</span>}
                                                 renderInput={(props) => <input {...props} />}
-                                                inputStyle={{ width: (size/6) + 'px', height: '65px', fontWeight: '600' }}
+                                                inputStyle={{ width: (size / 6) + 'px', height: '65px', fontWeight: '600' }}
                                             />
                                         </>
                                     )}
