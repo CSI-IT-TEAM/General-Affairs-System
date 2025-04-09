@@ -17,7 +17,7 @@
     "vehicle_title": "Request Vehicle",
     "vehicle_desc": "Choose from a variety of vehicles to take you from A to B safely",
     "medical_title": "Medical Fee",
-    "medical_desc": "Get everyday protection and take care of your health",
+    "medical_desc": "의료비 등록은 매월 27일까지 등록 바랍니다.\n(월 마감 관계로 이후 등록된 내용은 차월로 이월 됩니다.)",
     "flight_title": "Flight Ticket",
     "flight_desc": "Book and manage flights for employees and their family members",
 

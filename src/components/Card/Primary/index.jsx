@@ -38,30 +38,39 @@ const CardPrimary = ({ data, handleClick }) => {
 
   return (
     <>
-      <Card className="b-card" onClick={handleClick}>
-        <Box
-          
-          className={`b-thumb b-thumb--first`}
-          sx={{
-            backgroundColor: data.bgColor,
-          }}
-        />
-        <Box className={`b-image b-image--first`}>
-          <img src={data.thumb} alt={data.title} />
-        </Box>
-        <CardContent className="b-content">
+      <Card className="b-card" onClick={handleClick} sx={{ height: '100%' }}>
+        {/* TITLE TRÊN CÙNG */}
+        <Box className="b-title-top">
           <Typography
-            gutterBottom
             variant="h5"
             component="div"
             className="b-title"
           >
             {cardTitle}
           </Typography>
-          <Typography variant="body2" color="text.secondary" className="b-desc">
+        </Box>
+
+        {/* THUMB + IMAGE */}
+        <Box
+          className="b-thumb b-thumb--first"
+          sx={{ backgroundColor: data.bgColor }}
+        />
+        <Box className="b-image b-image--first">
+          <img src={data.thumb} alt={data.title} />
+        </Box>
+
+        {/* NỘI DUNG MÔ TẢ */}
+        <CardContent className="b-content">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            className={`b-desc ${data.id === "002" ? "b-desc--red" : ""}`}
+          >
             {cardDesc}
           </Typography>
         </CardContent>
+
+        {/* BUTTON ĐẶT */}
         <Box className="b-bot">
           <ButtonSecondary title={t(data.btn_order_text)} />
         </Box>

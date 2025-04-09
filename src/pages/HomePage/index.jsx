@@ -26,7 +26,7 @@ const HomePage = () => {
   /////// Check user Info
   const userIsActive =
     sessionStorage.getItem("userData") === null ||
-    sessionStorage.getItem("userData").length === 0
+      sessionStorage.getItem("userData").length === 0
       ? true
       : false;
   const navigate = useNavigate();
@@ -129,13 +129,13 @@ const HomePage = () => {
           <h3 className="s-home-title">
             {t("service")} <span>{t("provide")}</span>
           </h3>
-          <Grid justifyContent={"center"} container spacing={colSpacing}>
-            {persType === "EXP" || emp_id === "15050432" || emp_id ==="99115447" ? (
+          <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing}>
+            {persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" ? (
               optionData.map((item, index) => {
                 if (item.id === "001" || item.id === "002") {
                   //|| item.id === "002"
                   return (
-                    <Grid item md={4} xs={12} key={item.id}>
+                    <Grid item md={4} xs={12} key={item.id} style={{ height: "100%" }}>
                       <CardPrimary
                         data={item}
                         handleClick={() => handleNavigate(item.id)}
@@ -144,7 +144,7 @@ const HomePage = () => {
                   );
                 } else {
                   return (
-                    <Grid item md={4} xs={12} key={item.id}>
+                    <Grid item md={4} xs={12} key={item.id} style={{ height: "100%" }}>
                       <CardPrimary data={item} handleClick={handleOpen} />
                     </Grid>
                   );
