@@ -508,7 +508,7 @@ const SignIn = () => {
                                     body: JSON.stringify({
                                         ARG_TYPE: "Q_DELETE",
                                         ARG_EMPID: data, //user name
-                                        ARG_PASSWORD: "", //password
+                                        ARG_PASSWORD: base64_encode(data), //password
                                     }),
                                     signal: Timeout(5).signal,
                                 }).then((response) => {
