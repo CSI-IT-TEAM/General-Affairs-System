@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import carImage from "../assets/images/icons/car.png";
 import hospitalImage from "../assets/images/icons/hospital.png";
 import planeImage from "../assets/images/icons/plane.png";
+import pickleballImage from "../assets/images/icons/pickleball.png";
 const optionData = [
     {
         id: '001',
@@ -30,6 +31,16 @@ const optionData = [
         desc: 'Book and manage flights for employees and their family members',
         desc_color: "#000000",
         bgColor: '#6abfff',
+        link: '',
+        btn_order_text: "order",
+    },
+    {
+        id: '004',
+        title: 'Pickle Ball Booking',
+        thumb: pickleballImage,
+        desc: 'Đặt lịch chơi Pickleball tại các sân thể thao',
+        desc_color: "#000000",
+        bgColor: '#4ade80',
         link: '',
         btn_order_text: "order",
     }

@@ -175,11 +175,11 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    padding: 35px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #e8ebed;
     z-index: 999;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    height: 50px;
+    min-height: 64px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -189,15 +189,17 @@ body {
     border: none;
 
     @media screen and (max-width: 479px) {
-        padding: 10px 0;
+        padding: 8px 0;
+        min-height: 56px;
     }
 
     &-title{
         font-style: italic;
         font-weight: 700 !important;
-        font-size: 26px !important;
+        font-size: 22px !important;
         text-shadow: 2px 0 1px $color-shadow;
         letter-spacing: 0.5px;
+        line-height: 1.2;
 
         &__top{
             // margin-bottom: 3px !important;
@@ -205,13 +207,14 @@ body {
         }
 
         &__bot{
-            font-size: 14px !important;
+            font-size: 12px !important;
             font-style: normal;
             letter-spacing: 1px;
             font-weight: 600 !important;
             text-align: center;
             position: relative;
             letter-spacing: 1px;
+            line-height: 1.2;
 
             &:before{
                 content: '';
@@ -275,14 +278,14 @@ body {
     }
 
     .s-avatar{
-        width: 55px;
-        height: 55px;
+        width: 40px;
+        height: 40px;
         border: 2px solid $color-white;
         cursor: pointer;
 
         @media screen and (max-width: 479px) {
-            width: 50px;
-            height: 50px;
+            width: 36px;
+            height: 36px;
         }
     }
 

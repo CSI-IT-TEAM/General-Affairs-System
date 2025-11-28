@@ -7,11 +7,12 @@ import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import Layout from "./components/Layout";
 import ErrorPage from "./pages/ErrorPage";
 import "rsuite/dist/rsuite-no-reset.css"; 
-import "./App.scss";
 import 'devextreme/dist/css/dx.light.css';
+import "./App.scss";
 import FormChangePass from "./pages/FormPage/FormChangePass";
 import FormHospital from "./pages/FormPage/FormHospital";
 import HistoryMedicalPage from "./pages/HistoryPage/HistoryMedicalPage";
+import PickleballBooking from "./pages/PickleballBooking";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -69,6 +70,15 @@ const router = createBrowserRouter([
         element: (
             <Layout>
                 <FormChangePass />
+            </Layout>
+        ),
+    },
+    {
+        path: "/booking/pickleball",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <PickleballBooking />
             </Layout>
         ),
     },

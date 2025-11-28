@@ -26,6 +26,10 @@ const CardPrimary = ({ data, handleClick }) => {
         title = t("flight_title");
         desc = t("flight_desc");
         break;
+      case "004":
+        title = t("pickleball_title");
+        desc = t("pickleball_desc");
+        break;
       default:
         break;
     }

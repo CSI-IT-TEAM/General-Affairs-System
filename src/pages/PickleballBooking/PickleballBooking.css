@@ -1,0 +1,44 @@
+/* Import Tailwind CSS */
+@import '../../index.css';
+
+/* Styles for Pickleball Booking Page */
+.pickleball-booking-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* React Big Calendar styles */
+.rbc-month-row .rbc-row-content {
+  max-height: 110px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #60a5fa #f1f5f9;
+}
+
+.rbc-month-row .rbc-row-content::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.rbc-month-row .rbc-row-content::-webkit-scrollbar-thumb {
+  background: #60a5fa;
+  border-radius: 4px;
+}
+
+.rbc-month-row .rbc-row-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+/* Custom scrollbar for event cells */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-blue-200::-webkit-scrollbar-thumb {
+  background-color: #bfdbfe;
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}

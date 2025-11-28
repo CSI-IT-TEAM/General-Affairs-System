@@ -115,6 +115,9 @@ const HomePage = () => {
       case "003":
         navigate("/request/plane");
         break;
+      case "004":
+        navigate("/booking/pickleball");
+        break;
       default: {
         navigate("/");
         break;
@@ -132,10 +135,10 @@ const HomePage = () => {
           <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing}>
             {persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" ? (
               optionData.map((item, index) => {
-                if (item.id === "001" || item.id === "002") {
+                if (item.id === "001" || item.id === "002" || item.id === "004") {
                   //|| item.id === "002"
                   return (
-                    <Grid item md={4} xs={12} key={item.id} style={{ height: "100%" }}>
+                    <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                       <CardPrimary
                         data={item}
                         handleClick={() => handleNavigate(item.id)}
@@ -144,7 +147,7 @@ const HomePage = () => {
                   );
                 } else {
                   return (
-                    <Grid item md={4} xs={12} key={item.id} style={{ height: "100%" }}>
+                    <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                       <CardPrimary data={item} handleClick={handleOpen} />
                     </Grid>
                   );
@@ -155,7 +158,8 @@ const HomePage = () => {
                 item
                 justifyItems={"center"}
                 alignItems={"center"}
-                md={4}
+                lg={3}
+                md={6}
                 xs={12}
                 key={optionData[0].id}
               >
