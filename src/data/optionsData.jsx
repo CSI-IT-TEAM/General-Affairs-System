@@ -17,7 +17,7 @@ const optionData = [
         id: '002',
         title: 'Medical Fee',
         thumb: hospitalImage,
-        desc: '의료비 등록은 매월 27일까지 등록 바랍니다.\n(월 마감 관계로 이후 등록된 내용은 차월로 이월 됩니다.)',
+        desc: '의료비 등록은 매월 27에 마감합니다.',
         desc_color: "#ff0000",
         bgColor: '#e04f5f',
         link: '',
