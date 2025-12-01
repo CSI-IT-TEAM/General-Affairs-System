@@ -21,6 +21,7 @@ const HomePage = () => {
   const handleClose = () => setOpen(false);
   const [persType, setPersType] = useState("EMP");
   const [emp_id, setEmp_id] = useState('')
+  const [jobPosition, setJobPosition] = useState(null);
   const colSpacing = width > 479 ? 2 : 1.5;
 
   /////// Check user Info
@@ -93,6 +94,8 @@ const HomePage = () => {
       sessionStorage.removeItem("deptEmpList");
       setEmp_id(empData.EMPID);
       setPersType(empData.PERS_TYPE);
+      // Lưu JOB_POSITION nếu có
+      setJobPosition(empData.JOB_POSITION || null);
       handleReason("MAIN_REASON");
       handleReason("SUB_REASON");
       handleReason("DEPART");
@@ -135,6 +138,15 @@ const HomePage = () => {
           <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing}>
             {persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" ? (
               optionData.map((item, index) => {
+                // Kiểm tra điều kiện hiển thị Pickleball Booking
+                // Chỉ hiển thị nếu PERS_TYPE === "EXP" hoặc JOB_POSITION <= 200
+                const canViewPickleball = persType === "EXP" || (jobPosition !== null && Number(jobPosition) <= 200);
+                
+                // Nếu là Pickleball Booking (id === "004") và không đủ điều kiện, không hiển thị
+                if (item.id === "004" && !canViewPickleball) {
+                  return null;
+                }
+                
                 if (item.id === "001" || item.id === "002" || item.id === "004") {
                   //|| item.id === "002"
                   return (

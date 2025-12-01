@@ -45,6 +45,12 @@ const MedicalAccountBankDocURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.ACC_BANK_DOC_SELECT";
 const SendEmailURL = "http://vjweb.dskorea.com/send-email";
 
+// Pickleball Booking API URLs
+const PickleballCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+const PickleballSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-procedure";
+const PickleballDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
+const PickleballEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
+
 export {
   downloadURL,
   uploadURL,
@@ -68,4 +74,8 @@ export {
   MedicalImageListSelectURL,
   MedicalAccountBankDocURL,
   SendEmailURL,
+  PickleballCallProcedureURL,
+  PickleballSaveProcedureURL,
+  PickleballDeleteProcedureURL,
+  PickleballEmployeeInfoURL,
 };
