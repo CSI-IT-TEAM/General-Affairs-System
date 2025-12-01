@@ -131,7 +131,7 @@ const HomePage = () => {
   return (
     <>
       <Box className="s-home">
-        <Container>
+        <Container maxWidth="xl">
           <h3 className="s-home-title">
             {t("service")} <span>{t("provide")}</span>
           </h3>

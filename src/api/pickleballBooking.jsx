@@ -416,3 +416,83 @@ export const getPickleballUserLoginInfo = async (empId, langCd = 'ENG') => {
   }
 };
 
+/**
+ * Check if a date is a holiday by calling CALENDAR_DAY_CHECK_SELECT procedure
+ * Procedure có thể nằm trong package khác, nên tạo hàm riêng
+ * @param {string} dateStr - Date in format YYYY-MM-DD
+ * @returns {Promise<{isHoliday: boolean, data: object|null}>}
+ */
+export const checkCalendarDay = async (dateStr) => {
+  try {
+    // Convert YYYY-MM-DD to YYYYMMDD
+    const dateFormatted = dateStr.replace(/-/g, '');
+    
+    // Gọi procedure - có thể cần package name khác, tạm thời dùng PW_PICKLE_BALL_EVENT
+    // Nếu procedure nằm trong package khác, cần cập nhật packageName
+    const body = {
+      dbName: 'HUBIC',
+      packageName: 'PW_PICKLE_BALL_EVENT', // Có thể cần thay đổi nếu procedure nằm trong package khác
+      procedureName: 'CALENDAR_DAY_CHECK_SELECT',
+      params: {
+        P_DATE: { value: dateFormatted, type: "IN" },
+        OUT_CURSOR: { type: "OUT", dataType: "CURSOR" }
+      },
+    };
+
+    const response = await fetch(PickleballCallProcedureURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      // Return error object instead of throwing for graceful handling
+      const errorText = await response.text();
+      let errorData = null;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        // If response is not JSON, use error text
+      }
+
+      if (process.env.NODE_ENV === 'development' && response.status !== 400) {
+        console.warn(`API call failed for CALENDAR_DAY_CHECK_SELECT:`, response.status, errorData || errorText);
+      }
+
+      // Default to regular day if error
+      return {
+        isHoliday: false,
+        data: null
+      };
+    }
+
+    const data = await response.json();
+
+    // Response structure: { success: true, data: { OUT_CURSOR: [...] } }
+    if (data && data.success && data.data && data.data.OUT_CURSOR && Array.isArray(data.data.OUT_CURSOR) && data.data.OUT_CURSOR.length > 0) {
+      const calendarData = data.data.OUT_CURSOR[0];
+      const isHoliday = calendarData.OFF_YN === 'Y';
+      return {
+        isHoliday: isHoliday,
+        data: calendarData
+      };
+    }
+
+    // If no data found, assume it's a regular day
+    return {
+      isHoliday: false,
+      data: null
+    };
+  } catch (error) {
+    // Network errors or other issues
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error checking calendar day:', error);
+    }
+    // Default to regular day if error
+    return {
+      isHoliday: false,
+      data: null
+    };
+  }
+};
+

@@ -17,6 +17,29 @@
         }
     }
 
+    // Đảm bảo Grid items có cùng height
+    .MuiGrid-container {
+        align-items: stretch;
+    }
+
+    .MuiGrid-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // Tăng độ rộng Container và card trên màn hình lớn
+    @media screen and (min-width: 1280px) {
+        .MuiContainer-root {
+            max-width: 1400px !important;
+        }
+    }
+
+    @media screen and (min-width: 1920px) {
+        .MuiContainer-root {
+            max-width: 1600px !important;
+        }
+    }
+
     @media screen and (max-width: 479px) {
         padding: 30px 0;
         padding-top: 95px;

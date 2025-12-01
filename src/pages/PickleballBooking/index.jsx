@@ -19,6 +19,7 @@ import {
     savePickleballEvent,
     deletePickleballEvent,
     getPickleballCourtList,
+    checkCalendarDay,
 } from '../../api/pickleballBooking';
 
 dayjs.extend(isSameOrBefore);
@@ -38,10 +39,64 @@ const localizer = dateFnsLocalizer({
 const PickleballBooking = () => {
     const { t } = useTranslation();
     
+    // Danh sách 20 màu cho booking events
     const colorSwatches = [
-        '#FFB6C1', '#FFD700', '#90EE90', '#87CEFA', '#FFA07A', '#DDA0DD', '#00CED1', '#FF69B4', '#B0E0E6', '#F08080',
-        '#FFDAB9', '#E6E6FA', '#FFFACD', '#C1FFC1', '#ADD8E6', '#A0522D', '#40E0D0', '#FF6347', '#7B68EE', '#FF8C00'
+        '#FFB6C1', // Light Pink - Màu 1
+        '#FFD700', // Gold - Màu 2
+        '#90EE90', // Light Green - Màu 3
+        '#87CEFA', // Light Sky Blue - Màu 4
+        '#FFA07A', // Light Salmon - Màu 5
+        '#DDA0DD', // Plum - Màu 6
+        '#00CED1', // Dark Turquoise - Màu 7
+        '#FF69B4', // Hot Pink - Màu 8
+        '#B0E0E6', // Powder Blue - Màu 9
+        '#F08080', // Light Coral - Màu 10
+        '#FFDAB9', // Peach Puff - Màu 11
+        '#E6E6FA', // Lavender - Màu 12
+        '#FFFACD', // Lemon Chiffon - Màu 13
+        '#C1FFC1', // Honeydew - Màu 14
+        '#ADD8E6', // Light Blue - Màu 15
+        '#A0522D', // Sienna - Màu 16
+        '#40E0D0', // Turquoise - Màu 17
+        '#FF6347', // Tomato - Màu 18
+        '#7B68EE', // Medium Slate Blue - Màu 19
+        '#FF8C00'  // Dark Orange - Màu 20
     ];
+
+    // Hàm gán màu cho events dựa trên thứ tự trong cùng một ngày
+    const assignColorsToEvents = (eventsList) => {
+        if (!eventsList || eventsList.length === 0) return eventsList;
+
+        // Nhóm events theo ngày (start date)
+        const eventsByDate = {};
+        eventsList.forEach(event => {
+            const dateKey = format(event.start, 'yyyy-MM-dd');
+            if (!eventsByDate[dateKey]) {
+                eventsByDate[dateKey] = [];
+            }
+            eventsByDate[dateKey].push(event);
+        });
+
+        // Sắp xếp và gán màu cho events trong mỗi ngày
+        Object.keys(eventsByDate).forEach(dateKey => {
+            const dayEvents = eventsByDate[dateKey];
+            
+            // Sắp xếp events theo thời gian bắt đầu (start time)
+            dayEvents.sort((a, b) => {
+                const timeA = format(a.start, 'HH:mm');
+                const timeB = format(b.start, 'HH:mm');
+                return timeA.localeCompare(timeB);
+            });
+
+            // Gán màu theo thứ tự: event đầu tiên = màu 0, event thứ 2 = màu 1, ...
+            dayEvents.forEach((event, index) => {
+                const colorIndex = index % colorSwatches.length; // Lặp lại nếu > 20 events
+                event.bgColor = colorSwatches[colorIndex];
+            });
+        });
+
+        return eventsList;
+    };
     
     // Lấy EMPID và user info từ sessionStorage
     const getCurrentUserInfo = () => {
@@ -67,6 +122,9 @@ const PickleballBooking = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false);
+    const [selectedDayEvents, setSelectedDayEvents] = useState([]);
+    const [selectedDayDate, setSelectedDayDate] = useState(null);
     const [currentView, setCurrentView] = useState('month');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [startDate, setStartDate] = useState(() => {
@@ -79,6 +137,7 @@ const PickleballBooking = () => {
     });
     const [startTime, setStartTime] = useState('07:30');
     const [endTime, setEndTime] = useState('16:30');
+    const [isHoliday, setIsHoliday] = useState(false); // Lưu thông tin ngày nghỉ từ API
 
     // Load events and courts on mount and when date changes
     useEffect(() => {
@@ -96,7 +155,9 @@ const PickleballBooking = () => {
                 const fromDate = format(subMonths(selectedDate, 1), 'yyyy-MM-dd');
                 const toDate = format(addMonths(selectedDate, 1), 'yyyy-MM-dd');
                 const eventsData = await getPickleballEvents(fromDate, toDate);
-                setEvents(eventsData || []);
+                // Gán màu cho events dựa trên thứ tự trong cùng một ngày
+                const eventsWithColors = assignColorsToEvents(eventsData || []);
+                setEvents(eventsWithColors);
             } catch (error) {
                 // This should rarely happen now since API functions handle errors gracefully
                 if (process.env.NODE_ENV === 'development') {
@@ -118,9 +179,22 @@ const PickleballBooking = () => {
         loadData();
     }, [selectedDate]);
 
-    const handleSelectSlot = ({ start, end }) => {
+    const handleSelectSlot = async ({ start, end }) => {
         const startDateStr = format(start, 'yyyy-MM-dd');
         const endDateStr = format(end, 'yyyy-MM-dd');
+        
+        // Gọi API để kiểm tra ngày nghỉ trước khi mở dialog
+        try {
+            const calendarCheck = await checkCalendarDay(startDateStr);
+            setIsHoliday(calendarCheck.isHoliday);
+        } catch (error) {
+            // Nếu lỗi, mặc định là ngày thường
+            setIsHoliday(false);
+            if (process.env.NODE_ENV === 'development') {
+                console.warn('Error checking calendar day:', error);
+            }
+        }
+        
         setStartDate(startDateStr);
         setEndDate(endDateStr);
         
@@ -167,9 +241,22 @@ const PickleballBooking = () => {
         setEndTime(finalEndTime);
         setIsDialogOpen(true);
     };
-    const openAddEventDialog = () => {
+    const openAddEventDialog = async () => {
         const now = new Date();
         const dateStr = format(now, 'yyyy-MM-dd');
+        
+        // Gọi API để kiểm tra ngày nghỉ trước khi mở dialog
+        try {
+            const calendarCheck = await checkCalendarDay(dateStr);
+            setIsHoliday(calendarCheck.isHoliday);
+        } catch (error) {
+            // Nếu lỗi, mặc định là ngày thường
+            setIsHoliday(false);
+            if (process.env.NODE_ENV === 'development') {
+                console.warn('Error checking calendar day:', error);
+            }
+        }
+        
         setStartDate(dateStr);
         setEndDate(dateStr);
         
@@ -235,7 +322,9 @@ const PickleballBooking = () => {
             const fromDate = format(subMonths(selectedDate, 1), 'yyyy-MM-dd');
             const toDate = format(addMonths(selectedDate, 1), 'yyyy-MM-dd');
             const reloadedEvents = await getPickleballEvents(fromDate, toDate);
-            setEvents(reloadedEvents);
+            // Gán màu cho events dựa trên thứ tự trong cùng một ngày
+            const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+            setEvents(eventsWithColors);
         } catch (error) {
             console.error('Error saving event:', error);
             
@@ -276,9 +365,16 @@ const PickleballBooking = () => {
                 const result = await deletePickleballEvent(selectedEvent.id);
                 
                 if (result && result.success) {
-                    setEvents(prev => prev.filter(event => event.id !== selectedEvent.id));
                     setIsEventDetailOpen(false);
                     setSelectedEvent(null);
+                    
+                    // Reload events to ensure consistency and reassign colors
+                    const fromDate = format(subMonths(selectedDate, 1), 'yyyy-MM-dd');
+                    const toDate = format(addMonths(selectedDate, 1), 'yyyy-MM-dd');
+                    const reloadedEvents = await getPickleballEvents(fromDate, toDate);
+                    // Gán màu cho events dựa trên thứ tự trong cùng một ngày
+                    const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+                    setEvents(eventsWithColors);
                 } else {
                     alert('Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
                 }
@@ -316,7 +412,8 @@ const PickleballBooking = () => {
                     </div>
                 )}
                 <div className="font-mono font-bold truncate text-[9px] sm:text-xs">
-                    <span className="hidden sm:inline">{event.court}: </span>
+                    {/* <span className="hidden sm:inline">{event.court}: </span> */}
+                    <span className="hidden sm:inline">{t('pickleball_booker')} </span>
                     <span className="sm:hidden">{event.court?.substring(0, 2) || ''}: </span>
                     {event.title}
                 </div>
@@ -324,11 +421,46 @@ const PickleballBooking = () => {
         );
     };
 
-    const DateCellWrapper = ({ children }) => (
-        <div className="scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent" style={{ maxHeight: 110, overflowY: 'auto' }}>
-            {children}
-        </div>
-    );
+    const DateCellWrapper = ({ children, value }) => {
+        // React-big-calendar có thể truyền value hoặc không
+        // Nếu không có value, vẫn render nhưng không có dấu ...
+        const dateKey = value ? format(value, 'yyyy-MM-dd') : null;
+        const dayEvents = dateKey ? events.filter(event => {
+            const eventDateKey = format(event.start, 'yyyy-MM-dd');
+            return eventDateKey === dateKey;
+        }) : [];
+        
+        const hasMoreEvents = dayEvents.length > 2;
+        
+        const handleShowMoreClick = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (!value) return;
+            
+            // Sắp xếp events theo thời gian
+            const sortedEvents = [...dayEvents].sort((a, b) => {
+                const timeA = format(a.start, 'HH:mm');
+                const timeB = format(b.start, 'HH:mm');
+                return timeA.localeCompare(timeB);
+            });
+            setSelectedDayEvents(sortedEvents);
+            setSelectedDayDate(value);
+            setIsDayEventsDialogOpen(true);
+        };
+        
+        return (
+            <div 
+                className="scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent" 
+                style={{ 
+                    maxHeight: 110, 
+                    overflowY: 'auto',
+                    position: 'relative'
+                }}
+            >
+                {children}
+            </div>
+        );
+    };
 
     const CustomToolbar = (toolbar) => {
         const goToToday = () => {
@@ -474,6 +606,7 @@ const PickleballBooking = () => {
                 colorSwatches={colorSwatches}
                 events={events}
                 courts={pickleballCourts}
+                isHoliday={isHoliday}
             />
 
             {/* Popup chi tiết event */}
@@ -578,6 +711,78 @@ const PickleballBooking = () => {
                                         {t('btn_close')}
                                     </Button>
                                 </div>
+                            </Card>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Dialog hiển thị tất cả events trong ngày */}
+            <AnimatePresence>
+                {isDayEventsDialogOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 shadow-lg"
+                        onClick={() => setIsDayEventsDialogOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="w-full max-w-md md:max-w-lg lg:max-w-xl max-h-[80vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <Card>
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-lg md:text-xl">
+                                            {selectedDayDate && format(selectedDayDate, 'dd/MM/yyyy')} - {t('pickleball_booking')}
+                                        </CardTitle>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setIsDayEventsDialogOpen(false)}
+                                            className="h-8 w-8 p-0"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-2 p-4">
+                                    {selectedDayEvents.map((event, index) => (
+                                        <div
+                                            key={event.id || index}
+                                            className="p-3 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border"
+                                            style={{ 
+                                                backgroundColor: event.bgColor || 'hsl(var(--primary))',
+                                                borderColor: event.bgColor || 'hsl(var(--primary))',
+                                                opacity: 0.9
+                                            }}
+                                            onClick={() => {
+                                                setSelectedEvent(event);
+                                                setIsDayEventsDialogOpen(false);
+                                                setIsEventDetailOpen(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col gap-1">
+                                                <div className="text-sm font-bold text-gray-900">
+                                                    {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
+                                                </div>
+                                                <div className="text-xs font-semibold text-gray-800">
+                                                    {t('pickleball_booker')} {event.title}
+                                                </div>
+                                                {event.court && (
+                                                    <div className="text-xs text-gray-700">
+                                                        {event.court}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </CardContent>
                             </Card>
                         </motion.div>
                     </motion.div>

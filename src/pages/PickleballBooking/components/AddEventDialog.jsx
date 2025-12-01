@@ -28,7 +28,8 @@ const AddEventDialog = ({
     initialEndTime,
     colorSwatches,
     events = [],
-    courts = []
+    courts = [],
+    isHoliday = false // Nhận thông tin ngày nghỉ từ props
 }) => {
     const { t } = useTranslation();
     const [startDate, setStartDate] = useState(initialStartDate);
@@ -38,30 +39,53 @@ const AddEventDialog = ({
     const [color, setColor] = useState(colorSwatches[0]);
     const [isEndTimeManual, setIsEndTimeManual] = useState(false); // Flag để theo dõi người dùng có chỉnh thủ công endTime không
 
-    // Tính toán thời gian bắt đầu dựa trên ngày: Chủ nhật = 07:00, ngày thường = 17:00
+    // Tính toán thời gian bắt đầu dựa trên ngày: Chủ nhật/ngày nghỉ = 07:00, ngày thường = 17:00
     const getDefaultStartTime = (dateStr) => {
         if (!dateStr) return '17:00'; // Default cho ngày thường
-        const date = dayjs(dateStr);
-        const dayOfWeek = date.day(); // 0 = Sunday, 1-6 = Monday-Saturday
-        return dayOfWeek === 0 ? '07:00' : '17:00'; // Sunday = 07:00, Others = 17:00
+        if (isWeekendOrHoliday(dateStr)) {
+            return '07:00'; // Chủ nhật/ngày nghỉ = 07:00
+        }
+        return '17:00'; // Ngày thường = 17:00
     };
 
-    // Tính toán max time cho endTime (startTime + 2 giờ)
+    // Tính toán max time cho endTime (startTime + 2 giờ, nhưng tối đa là 23:59)
+    // Nếu startTime từ 22:00 (10:00 PM) trở đi, maxEndTime luôn là 23:59
     const getMaxEndTime = () => {
         if (!startTime) return '23:59';
         const [hours, minutes] = startTime.split(':').map(Number);
+        
+        // Nếu startTime từ 22:00 (10:00 PM) trở đi, maxEndTime luôn là 23:59
+        if (hours >= 22) {
+            return '23:59';
+        }
+        
         const maxTime = dayjs().hour(hours).minute(minutes).add(2, 'hour');
         const maxHour = maxTime.hour();
         const maxMinute = maxTime.minute();
+        
+        // Giới hạn tối đa là 23:59 để tránh tràn sang ngày hôm sau
+        if (maxHour >= 24 || (maxHour === 23 && maxMinute >= 59)) {
+            return '23:59';
+        }
+        
         return `${String(maxHour).padStart(2, '0')}:${String(maxMinute).padStart(2, '0')}`;
     };
 
     // Xử lý khi startTime thay đổi - tự động tính endTime = startTime + 2 giờ (chỉ khi người dùng chưa chỉnh thủ công)
+    // Không validate khi nhập, chỉ validate khi submit
     const handleStartTimeChange = (newStartTime) => {
+        if (!newStartTime) {
+            setStartTime(newStartTime);
+            return;
+        }
+
+        // Cập nhật state ngay lập tức - không validate
         setStartTime(newStartTime);
 
         // Chỉ tự động tính endTime nếu người dùng chưa chỉnh thủ công
-        if (newStartTime && newStartTime.trim() !== '' && !isEndTimeManual) {
+        // Validate format trước khi tính toán
+        const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (newStartTime && newStartTime.trim() !== '' && timePattern.test(newStartTime) && !isEndTimeManual) {
             const calculatedEndTime = calculateEndTime(newStartTime);
             if (calculatedEndTime) {
                 setEndTime(calculatedEndTime);
@@ -69,7 +93,7 @@ const AddEventDialog = ({
         }
     };
 
-    // Xử lý khi endTime thay đổi thủ công - kiểm tra không vượt quá 2 giờ
+    // Xử lý khi endTime thay đổi thủ công - kiểm tra không vượt quá 2 giờ và tối đa 23:59
     const handleEndTimeChange = (newEndTime) => {
         setIsEndTimeManual(true); // Đánh dấu người dùng đã chỉnh thủ công
 
@@ -78,16 +102,40 @@ const AddEventDialog = ({
             return;
         }
 
-        const start = dayjs(`2000-01-01T${startTime}`, 'YYYY-MM-DDTHH:mm');
+        const [startHours] = startTime.split(':').map(Number);
+        const [endHours, endMinutes] = newEndTime.split(':').map(Number);
+        
+        // Nếu startTime từ 22:00 (10:00 PM) trở đi, maxEndTime luôn là 23:59
+        const maxEndTime2359 = dayjs(`2000-01-01T23:59`, 'YYYY-MM-DDTHH:mm');
+        let actualMaxEnd;
+        
+        if (startHours >= 22) {
+            // Nếu startTime >= 22:00, maxEndTime luôn là 23:59
+            actualMaxEnd = maxEndTime2359;
+        } else {
+            // Nếu startTime < 22:00, tính maxEndTime = startTime + 2 giờ, tối đa 23:59
+            const start = dayjs(`2000-01-01T${startTime}`, 'YYYY-MM-DDTHH:mm');
+            const maxEnd = start.add(2, 'hour');
+            actualMaxEnd = maxEnd.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEnd;
+        }
+        
         const end = dayjs(`2000-01-01T${newEndTime}`, 'YYYY-MM-DDTHH:mm');
-        const maxEnd = start.add(2, 'hour');
+        
+        // Kiểm tra nếu endTime là 00:00 (12:00 AM) và startTime >= 22:00, giới hạn lại 23:59
+        if (endHours === 0 && startHours >= 22) {
+            setEndTime('23:59');
+            return;
+        }
 
-        // Nếu vượt quá 2 giờ (lớn hơn, không bằng), giới hạn ở startTime + 2 giờ
-        // Cho phép bằng đúng 2 giờ (isAfter thay vì isSameOrAfter)
-        if (end.isAfter(maxEnd)) {
-            const maxTime = maxEnd.format('HH:mm');
+        // Nếu vượt quá maxEndTime, giới hạn ở giá trị thấp hơn
+        if (end.isAfter(actualMaxEnd)) {
+            const maxTime = actualMaxEnd.format('HH:mm');
             setEndTime(maxTime);
-            alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu!');
+            if (startHours >= 22) {
+                alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59!');
+            } else {
+                alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu!');
+            }
         } else {
             setEndTime(newEndTime);
         }
@@ -111,33 +159,77 @@ const AddEventDialog = ({
         }
     };
 
+    // Lấy EMP_NM từ sessionStorage
+    const getCurrentEmpName = () => {
+        try {
+            const userData = JSON.parse(sessionStorage.getItem("userData"));
+            return userData?.EMP_NM || '--';
+        } catch (error) {
+            console.error('Error getting EMP_NM:', error);
+            return '--';
+        }
+    };
+
+    // Kiểm tra ngày được chọn có phải ngày nghỉ hoặc chủ nhật không
+    // Sử dụng isHoliday từ props (lấy từ API) thay vì từ userData
+    const isWeekendOrHoliday = (dateStr) => {
+        if (!dateStr) return false;
+        const date = dayjs(dateStr);
+        const dayOfWeek = date.day(); // 0 = Sunday, 1-6 = Monday-Saturday
+        // Kiểm tra nếu là ngày được chọn (startDate) thì dùng isHoliday từ props
+        // Nếu là ngày khác trong vòng lặp, cần gọi API riêng (tạm thời dùng isHoliday từ props)
+        return dayOfWeek === 0 || isHoliday; // Chủ nhật hoặc ngày nghỉ (từ API)
+    };
+
+    // Lấy min time cho startTime dựa trên ngày được chọn
+    const getMinStartTime = (dateStr) => {
+        if (isWeekendOrHoliday(dateStr)) {
+            return null; // Không giới hạn cho ngày nghỉ/chủ nhật
+        }
+        return '17:00'; // Ngày thường: từ 17:00 trở đi
+    };
+
     const formik = useFormik({
         initialValues: {
-            title: '',
+            title: getCurrentEmpName(), // Lấy EMP_NM từ userData
             cardNumber: getCurrentEmpId(),
-            court: courts.length > 0 ? courts[0].value : '',
-            description: ''
+            court: courts.length > 0 ? courts[0].value : '', // Mặc định Court 1
+            description: '' // Mặc định rỗng
         },
         onSubmit: (values, { resetForm }) => {
             if (!values.title) {
-                alert('Vui lòng điền đầy đủ thông tin!');
+                alert(t('pickleball_please_fill_all_fields'));
                 return;
             }
+            
+            // Kiểm tra startTime cho ngày thường: phải >= 17:00
+            if (!isWeekendOrHoliday(startDate)) {
+                const minTime = dayjs(`2000-01-01T17:00`, 'YYYY-MM-DDTHH:mm');
+                const selectedStartTime = dayjs(`2000-01-01T${startTime}`, 'YYYY-MM-DDTHH:mm');
+                if (selectedStartTime.isBefore(minTime)) {
+                    alert(t('pickleball_weekday_time_error'));
+                    return;
+                }
+            }
+            
             // Kiểm tra thời gian kết thúc phải sau thời gian bắt đầu (chỉ kiểm tra cho cùng một ngày)
             // Nếu startDate và endDate khác nhau, không cần kiểm tra này vì mỗi ngày sẽ được kiểm tra riêng trong vòng lặp
             if (startDate === endDate) {
                 const startDay = dayjs(`${startDate}T${startTime}`, 'YYYY-MM-DDTHH:mm');
                 const endDay = dayjs(`${endDate}T${endTime}`, 'YYYY-MM-DDTHH:mm');
                 if (endDay.isBefore(startDay)) {
-                    alert('Thời gian kết thúc phải sau thời gian bắt đầu!');
+                    alert(t('pickleball_end_time_after_start_error'));
                     return;
                 }
 
-                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu (chỉ cho cùng một ngày)
+                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59 (chỉ cho cùng một ngày)
                 // Cho phép bằng đúng 2 giờ (chỉ báo lỗi nếu lớn hơn 2 giờ)
                 const maxEndTime = startDay.add(2, 'hour');
-                if (endDay.isAfter(maxEndTime)) {
-                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu!');
+                const maxEndTime2359 = dayjs(`${startDate}T23:59`, 'YYYY-MM-DDTHH:mm');
+                const actualMaxEnd = maxEndTime.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEndTime;
+                
+                if (endDay.isAfter(actualMaxEnd)) {
+                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59!');
                     return;
                 }
             }
@@ -170,13 +262,28 @@ const AddEventDialog = ({
                 const eventStart = current.hour(Number(startTime.split(':')[0])).minute(Number(startTime.split(':')[1])).second(0).millisecond(0);
                 const eventEnd = current.hour(Number(endTime.split(':')[0])).minute(Number(endTime.split(':')[1])).second(0).millisecond(0);
 
-                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu
+                // Kiểm tra startTime cho ngày thường: phải >= 17:00
+                const currentDateStr = current.format('YYYY-MM-DD');
+                if (!isWeekendOrHoliday(currentDateStr)) {
+                    const minTime = current.hour(17).minute(0).second(0).millisecond(0);
+                    if (eventStart.isBefore(minTime)) {
+                        hasConflict = true;
+                        conflictDate = current.format('DD/MM/YYYY');
+                        alert(t('pickleball_weekday_time_error_with_date', { date: conflictDate }));
+                        break;
+                    }
+                }
+
+                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59
                 // Cho phép bằng đúng 2 giờ (chỉ báo lỗi nếu lớn hơn 2 giờ)
                 const maxEndTime = eventStart.add(2, 'hour');
-                if (eventEnd.isAfter(maxEndTime)) {
+                const maxEndTime2359 = current.hour(23).minute(59).second(0).millisecond(0);
+                const actualMaxEnd = maxEndTime.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEndTime;
+                
+                if (eventEnd.isAfter(actualMaxEnd)) {
                     hasConflict = true;
                     conflictDate = current.format('DD/MM/YYYY');
-                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu!');
+                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59!');
                     break;
                 }
 
@@ -255,13 +362,27 @@ const AddEventDialog = ({
         }
     });
 
-    // Tính toán endTime = startTime + 2 giờ
+    // Tính toán endTime = startTime + 2 giờ, nhưng tối đa là 23:59
+    // Nếu startTime từ 22:00 (10:00 PM) trở đi, endTime luôn là 23:59
     const calculateEndTime = (startTimeStr) => {
         if (!startTimeStr) return '19:00'; // Default fallback
         const [hours, minutes] = startTimeStr.split(':').map(Number);
+        
+        // Nếu startTime từ 22:00 (10:00 PM) trở đi, endTime luôn là 23:59
+        if (hours >= 22) {
+            return '23:59';
+        }
+        
         const endTimeObj = dayjs().hour(hours).minute(minutes).add(2, 'hour');
-        const endHour = endTimeObj.hour();
-        const endMinute = endTimeObj.minute();
+        let endHour = endTimeObj.hour();
+        let endMinute = endTimeObj.minute();
+        
+        // Giới hạn tối đa là 23:59 để tránh tràn sang ngày hôm sau
+        if (endHour >= 24 || (endHour === 23 && endMinute >= 59)) {
+            endHour = 23;
+            endMinute = 59;
+        }
+        
         return `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
     };
 
@@ -305,11 +426,24 @@ const AddEventDialog = ({
             if (initialStartTime && initialStartTime !== '00:00') {
                 const defaultTime = dayjs(`2000-01-01T${defaultStartTimeForDate}`, 'YYYY-MM-DDTHH:mm');
                 const initialTime = dayjs(`2000-01-01T${initialStartTime}`, 'YYYY-MM-DDTHH:mm');
-                // Nếu initialStartTime >= defaultStartTime, dùng nó
-                if (initialTime.isSameOrAfter(defaultTime)) {
-                    finalStartTime = initialStartTime;
+                
+                // Kiểm tra thêm: nếu là ngày thường và initialStartTime < 17:00, dùng defaultStartTime
+                if (!isWeekendOrHoliday(initialStartDate)) {
+                    const minTime = dayjs(`2000-01-01T17:00`, 'YYYY-MM-DDTHH:mm');
+                    if (initialTime.isBefore(minTime)) {
+                        finalStartTime = defaultStartTimeForDate;
+                    } else if (initialTime.isSameOrAfter(defaultTime)) {
+                        finalStartTime = initialStartTime;
+                    } else {
+                        finalStartTime = defaultStartTimeForDate;
+                    }
                 } else {
-                    finalStartTime = defaultStartTimeForDate;
+                    // Ngày nghỉ/chủ nhật: chỉ cần >= defaultStartTime
+                    if (initialTime.isSameOrAfter(defaultTime)) {
+                        finalStartTime = initialStartTime;
+                    } else {
+                        finalStartTime = defaultStartTimeForDate;
+                    }
                 }
             } else {
                 finalStartTime = defaultStartTimeForDate;
@@ -340,12 +474,13 @@ const AddEventDialog = ({
             setColor(colorSwatches[0]);
             setIsEndTimeManual(false); // Reset flag khi dialog mở
             const currentEmpId = getCurrentEmpId();
+            const currentEmpName = getCurrentEmpName();
             formik.resetForm({
                 values: {
-                    title: '',
+                    title: currentEmpName, // Lấy EMP_NM từ userData
                     cardNumber: currentEmpId,
-                    court: courts.length > 0 ? courts[0].value : '',
-                    description: ''
+                    court: courts.length > 0 ? courts[0].value : '', // Mặc định Court 1
+                    description: '' // Mặc định rỗng
                 }
             });
             if (courts.length > 0) {
@@ -376,10 +511,17 @@ const AddEventDialog = ({
                         <Card className="flex flex-col max-h-full overflow-hidden">
                             <CardHeader className="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-4">
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                        <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                                        <span className="truncate">{t('pickleball_add_booking')}</span>
-                                    </CardTitle>
+                                    <div className="flex flex-col gap-1">
+                                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                                            <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                                            <span className="truncate">{t('pickleball_add_booking')}</span>
+                                        </CardTitle>
+                                        {/* Hiển thị EMP_NM */}
+                                        <div className="flex items-center gap-2 text-sm text-gray-600 ml-6">
+                                            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                            <span className="font-medium">{getCurrentEmpName()}</span>
+                                        </div>
+                                    </div>
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -392,7 +534,8 @@ const AddEventDialog = ({
                             </CardHeader>
                             <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
                                 <CardContent className="space-y-3 sm:space-y-4 overflow-y-auto flex-1 min-h-0 px-4 py-3 sm:px-6 sm:py-4">
-                                    <div className="space-y-1.5 sm:space-y-2">
+                                    {/* Tạm ẩn Title */}
+                                    {/* <div className="space-y-1.5 sm:space-y-2">
                                         <Label htmlFor="title" className="flex items-center gap-2 text-sm sm:text-base">
                                             <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                                             {t('pickleball_booking_title')}
@@ -405,8 +548,10 @@ const AddEventDialog = ({
                                             placeholder={t('pickleball_booking_title_placeholder')}
                                             className="text-sm sm:text-base h-9 sm:h-10"
                                         />
-                                    </div>
-                                    <div className="space-y-1.5 sm:space-y-2">
+                                    </div> */}
+                                    
+                                    {/* Tạm ẩn Select Pickleball Court */}
+                                    {/* <div className="space-y-1.5 sm:space-y-2">
                                         <Label htmlFor="court" className="flex items-center gap-2 text-sm sm:text-base">
                                             <CalendarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                                             {t('pickleball_court_select')}
@@ -456,9 +601,10 @@ const AddEventDialog = ({
                                                 </Command>
                                             </PopoverContent>
                                         </Popover>
-                                    </div>
-                                    {/* Dòng 1: Ngày bắt đầu - Ngày kết thúc */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
+                                    </div> */}
+                                    
+                                    {/* Tạm ẩn Start Date và End Date */}
+                                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
                                         <div className="space-y-1.5 sm:space-y-2">
                                             <Label htmlFor="startDate" className="flex items-center gap-2 text-sm sm:text-base">
                                                 <CalendarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
@@ -481,7 +627,7 @@ const AddEventDialog = ({
                                                 id="endDate"
                                             />
                                         </div>
-                                    </div>
+                                    </div> */}
                                     {/* Dòng 2: Giờ bắt đầu - Giờ kết thúc */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
                                         <div className="space-y-1.5 sm:space-y-2">
@@ -497,6 +643,7 @@ const AddEventDialog = ({
                                                 lang="en-GB"  // ép 24h
                                                 value={startTime}
                                                 onChange={e => handleStartTimeChange(e.target.value)}
+                                                min={getMinStartTime(startDate)} // Giới hạn min time cho ngày thường (chỉ hiển thị, không validate)
                                                 className="text-sm sm:text-base h-9 sm:h-10"
                                                 style={{ fontVariantNumeric: 'tabular-nums' }}
                                             />
@@ -520,7 +667,8 @@ const AddEventDialog = ({
                                             />
                                         </div>
                                     </div>
-                                    <div className="mb-2 sm:mb-4">
+                                    {/* Tạm ẩn Select Color */}
+                                    {/* <div className="mb-2 sm:mb-4">
                                         <Card className=''>
                                             <CardHeader className="px-3 py-2 sm:px-6 sm:py-4">
                                                 <div className="flex items-center justify-between">
@@ -546,8 +694,10 @@ const AddEventDialog = ({
                                                 ))}
                                             </CardContent>
                                         </Card>
-                                    </div>
-                                    <div className="space-y-1.5 sm:space-y-2">
+                                    </div> */}
+                                    
+                                    {/* Tạm ẩn Description */}
+                                    {/* <div className="space-y-1.5 sm:space-y-2">
                                         <Label htmlFor="description" className="flex items-center gap-2 text-sm sm:text-base">
                                             <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                                             {t('pickleball_description')}
@@ -560,7 +710,7 @@ const AddEventDialog = ({
                                             placeholder={t('pickleball_description_placeholder')}
                                             className="text-sm sm:text-base min-h-[80px] sm:min-h-[100px]"
                                         />
-                                    </div>
+                                    </div> */}
                                 </CardContent>
                                 <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 p-3 sm:p-6 pt-3 sm:pt-4 flex-shrink-0 border-t bg-background sticky bottom-0">
                                     <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10">{t('btn_cancel')}</Button>

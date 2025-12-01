@@ -1,12 +1,114 @@
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import ButtonSecondary from "../../Button/Secondary";
 import { useTranslation } from "react-i18next";
+import { useState, useEffect, useRef } from "react";
 
 import "./CardPrimary.scss";
+
+// Hàm lấy màu dominant từ ảnh
+const getDominantColor = (imageSrc, callback) => {
+  const img = new Image();
+  
+  // Chỉ set crossOrigin nếu ảnh từ domain khác
+  if (imageSrc.startsWith('http') && !imageSrc.includes(window.location.hostname)) {
+    img.crossOrigin = "anonymous";
+  }
+  
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      
+      // Giảm kích thước để tăng tốc xử lý (tối đa 100x100)
+      const maxSize = 100;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      canvas.width = Math.max(1, Math.floor(img.width * scale));
+      canvas.height = Math.max(1, Math.floor(img.height * scale));
+      
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Đếm màu theo bucket (nhóm màu tương tự)
+      const colorMap = {};
+      const bucketSize = 15; // Nhóm màu trong khoảng 15 để giảm độ chi tiết
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const r = Math.floor(data[i] / bucketSize) * bucketSize;
+        const g = Math.floor(data[i + 1] / bucketSize) * bucketSize;
+        const b = Math.floor(data[i + 2] / bucketSize) * bucketSize;
+        const a = data[i + 3];
+        
+        // Bỏ qua pixel trong suốt hoặc quá tối/sáng
+        if (a < 100) continue;
+        const brightness = (r + g + b) / 3;
+        if (brightness < 40 || brightness > 220) continue;
+        
+        const colorKey = `${r},${g},${b}`;
+        colorMap[colorKey] = (colorMap[colorKey] || 0) + 1;
+      }
+      
+      // Tìm màu xuất hiện nhiều nhất
+      let maxCount = 0;
+      let dominantColor = { r: 245, g: 247, b: 250 }; // Màu mặc định
+      
+      for (const [color, count] of Object.entries(colorMap)) {
+        if (count > maxCount) {
+          maxCount = count;
+          const [r, g, b] = color.split(",").map(Number);
+          dominantColor = { r, g, b };
+        }
+      }
+      
+      // Đảm bảo màu không quá tối hoặc quá sáng
+      const avgBrightness = (dominantColor.r + dominantColor.g + dominantColor.b) / 3;
+      if (avgBrightness < 50) {
+        // Nếu quá tối, làm sáng lên một chút
+        dominantColor.r = Math.min(255, dominantColor.r + 30);
+        dominantColor.g = Math.min(255, dominantColor.g + 30);
+        dominantColor.b = Math.min(255, dominantColor.b + 30);
+      } else if (avgBrightness > 230) {
+        // Nếu quá sáng, làm tối đi một chút
+        dominantColor.r = Math.max(0, dominantColor.r - 20);
+        dominantColor.g = Math.max(0, dominantColor.g - 20);
+        dominantColor.b = Math.max(0, dominantColor.b - 20);
+      }
+      
+      callback(dominantColor);
+    } catch (error) {
+      console.error("Error extracting color:", error);
+      callback({ r: 245, g: 247, b: 250 }); // Màu mặc định nếu lỗi
+    }
+  };
+  
+  img.onerror = () => {
+    callback({ r: 245, g: 247, b: 250 }); // Màu mặc định nếu lỗi load ảnh
+  };
+  
+  img.src = imageSrc;
+};
 
 const CardPrimary = ({ data, handleClick }) => {
   /////// Translate Lang
   const { t } = useTranslation();
+  
+  // State để lưu màu dominant - tạm thời dùng màu cố định
+  const [dominantColor, setDominantColor] = useState({ r: 245, g: 247, b: 250 });
+  const imgRef = useRef(null);
+  
+  // Tạm thời: Gán màu cố định dựa trên data.id
+  useEffect(() => {
+    const colorMap = {
+      "001": { r: 100, g: 181, b: 246 },   // Xanh dương nhạt (Vehicle)
+      "002": { r: 239, g: 154, b: 154 },   // Đỏ nhạt (Medical)
+      "003": { r: 129, g: 199, b: 132 },   // Xanh lá nhạt (Flight)
+      "004": { r: 255, g: 183, b: 77 },    // Cam nhạt (Pickleball)
+    };
+    
+    const color = colorMap[data.id] || { r: 245, g: 247, b: 250 };
+    setDominantColor(color);
+  }, [data.id]);
 
   /////// Handle Content
   const handleContent = (type) => {
@@ -40,34 +142,56 @@ const CardPrimary = ({ data, handleClick }) => {
   const cardTitle = handleContent("title");
   const cardDesc = handleContent("desc");
 
+  // Tạm thời comment lại logic lấy màu từ ảnh
+  // useEffect(() => {
+  //   if (data.thumb) {
+  //     getDominantColor(data.thumb, (color) => {
+  //       setDominantColor(color);
+  //     });
+  //   }
+  // }, [data.thumb]);
+
+  // Sử dụng bgColor từ data cho dải màu
+  const accentColor = data.bgColor || '#00c0c0';
+
   return (
     <>
       <Card className="b-card" onClick={handleClick} sx={{ height: '100%' }}>
-        {/* TITLE TRÊN CÙNG */}
-        <Box className="b-title-top">
+        {/* TITLE SECTION */}
+        <Box className="b-header">
           <Typography
             variant="h5"
-            component="div"
+            component="h3"
             className="b-title"
           >
             {cardTitle}
           </Typography>
+          {/* Accent Line */}
+          <Box 
+            className="b-accent-line"
+            sx={{ backgroundColor: accentColor }}
+          />
         </Box>
 
-        {/* THUMB + IMAGE */}
-        <Box
-          className="b-thumb b-thumb--first"
-          sx={{ backgroundColor: data.bgColor }}
-        />
-        <Box className="b-image b-image--first">
-          <img src={data.thumb} alt={data.title} />
+        {/* IMAGE SECTION với dải màu */}
+        <Box 
+          className="b-image-container"
+          sx={{ backgroundColor: accentColor }}
+        >
+          <Box className="b-image-wrapper">
+            <img 
+              ref={imgRef}
+              src={data.thumb} 
+              alt={data.title} 
+              className="b-image"
+            />
+          </Box>
         </Box>
 
-        {/* NỘI DUNG MÔ TẢ */}
+        {/* DESCRIPTION */}
         <CardContent className="b-content">
           <Typography
             variant="body2"
-            color="text.secondary"
             className={`b-desc ${data.id === "002" ? "b-desc--red" : ""}`}
           >
             {cardDesc}
