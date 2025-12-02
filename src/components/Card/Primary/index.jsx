@@ -157,23 +157,7 @@ const CardPrimary = ({ data, handleClick }) => {
   return (
     <>
       <Card className="b-card" onClick={handleClick} sx={{ height: '100%' }}>
-        {/* TITLE SECTION */}
-        <Box className="b-header">
-          <Typography
-            variant="h5"
-            component="h3"
-            className="b-title"
-          >
-            {cardTitle}
-          </Typography>
-          {/* Accent Line */}
-          <Box 
-            className="b-accent-line"
-            sx={{ backgroundColor: accentColor }}
-          />
-        </Box>
-
-        {/* IMAGE SECTION với dải màu */}
+        {/* IMAGE SECTION với background màu - ở trên cùng */}
         <Box 
           className="b-image-container"
           sx={{ backgroundColor: accentColor }}
@@ -188,7 +172,18 @@ const CardPrimary = ({ data, handleClick }) => {
           </Box>
         </Box>
 
-        {/* DESCRIPTION */}
+        {/* TITLE SECTION - ở dưới image */}
+        <Box className="b-header">
+          <Typography
+            variant="h5"
+            component="h3"
+            className="b-title"
+          >
+            {cardTitle}
+          </Typography>
+        </Box>
+
+        {/* DESCRIPTION - ở dưới title */}
         <CardContent className="b-content">
           <Typography
             variant="body2"
@@ -198,7 +193,7 @@ const CardPrimary = ({ data, handleClick }) => {
           </Typography>
         </CardContent>
 
-        {/* BUTTON ĐẶT */}
+        {/* BUTTON - ở dưới cùng */}
         <Box className="b-bot">
           <ButtonSecondary title={t(data.btn_order_text)} />
         </Box>

@@ -140,7 +140,7 @@ const HomePage = () => {
               optionData.map((item, index) => {
                 // Kiểm tra điều kiện hiển thị Pickleball Booking
                 // Chỉ hiển thị nếu PERS_TYPE === "EXP" hoặc JOB_POSITION <= 200
-                const canViewPickleball = persType === "EXP" || (jobPosition !== null && Number(jobPosition) <= 180) || Number(jobPosition) === 300 || emp_id === '15050432';
+                const canViewPickleball = persType === "EXP" || (jobPosition !== null && Number(jobPosition) <= 200);
                 
                 // Nếu là Pickleball Booking (id === "004") và không đủ điều kiện, không hiển thị
                 if (item.id === "004" && !canViewPickleball) {
@@ -195,3 +195,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+

@@ -148,6 +148,138 @@ const AddEventDialog = ({
         court.label.toLowerCase().includes(courtInput.toLowerCase())
     );
 
+    // State cho time pickers
+    const [openStartTime, setOpenStartTime] = useState(false);
+    const [openEndTime, setOpenEndTime] = useState(false);
+    const [selectedStartHour, setSelectedStartHour] = useState(null);
+    const [selectedStartMinute, setSelectedStartMinute] = useState(null);
+    const [selectedEndHour, setSelectedEndHour] = useState(null);
+    const [selectedEndMinute, setSelectedEndMinute] = useState(null);
+
+    // Tạo danh sách giờ dựa trên ngày
+    const getAvailableHours = () => {
+        if (isWeekendOrHoliday(startDate)) {
+            // Ngày nghỉ: từ 7:00 đến 23:00
+            return Array.from({ length: 17 }, (_, i) => i + 7);
+        } else {
+            // Ngày thường: từ 17:00 đến 23:00
+            return Array.from({ length: 7 }, (_, i) => i + 17);
+        }
+    };
+
+    // Tạo danh sách phút (cách nhau 15 phút)
+    const availableMinutes = [0, 15, 30, 45];
+
+    // Format time để hiển thị
+    const formatTimeDisplay = (timeStr) => {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    };
+
+    // Xử lý chọn giờ cho start time
+    const handleStartHourSelect = (hour) => {
+        setSelectedStartHour(hour);
+        // Lấy phút từ startTime hiện tại hoặc mặc định là 0
+        const currentMinute = startTime ? parseInt(startTime.split(':')[1]) : (selectedStartMinute !== null ? selectedStartMinute : 0);
+        const newTime = `${String(hour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+        handleStartTimeChange(newTime);
+        setSelectedStartMinute(currentMinute);
+    };
+
+    // Xử lý chọn phút cho start time
+    const handleStartMinuteSelect = (minute) => {
+        setSelectedStartMinute(minute);
+        // Lấy giờ từ startTime hiện tại hoặc mặc định
+        const currentHour = startTime ? parseInt(startTime.split(':')[0]) : (selectedStartHour !== null ? selectedStartHour : (isWeekendOrHoliday(startDate) ? 7 : 17));
+        const newTime = `${String(currentHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        handleStartTimeChange(newTime);
+        setSelectedStartHour(currentHour);
+    };
+
+    // Xử lý chọn giờ cho end time
+    const handleEndHourSelect = (hour) => {
+        setSelectedEndHour(hour);
+        // Lấy phút từ endTime hiện tại hoặc mặc định là 0
+        const currentMinute = endTime ? parseInt(endTime.split(':')[1]) : (selectedEndMinute !== null ? selectedEndMinute : 0);
+        const newTime = `${String(hour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+        handleEndTimeChange(newTime);
+        setSelectedEndMinute(currentMinute);
+    };
+
+    // Xử lý chọn phút cho end time
+    const handleEndMinuteSelect = (minute) => {
+        setSelectedEndMinute(minute);
+        // Lấy giờ từ endTime hiện tại hoặc mặc định
+        const currentHour = endTime ? parseInt(endTime.split(':')[0]) : (selectedEndHour !== null ? selectedEndHour : (startTime ? parseInt(startTime.split(':')[0]) + 1 : 17));
+        const newTime = `${String(currentHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        handleEndTimeChange(newTime);
+        setSelectedEndHour(currentHour);
+    };
+
+    // Lấy danh sách giờ cho end time
+    const getAvailableEndHours = () => {
+        if (!startTime) return [];
+        const slots = getAvailableEndTimeSlots();
+        const hours = [...new Set(slots.map(s => s.hour))].sort((a, b) => a - b);
+        return hours;
+    };
+
+    // Lấy danh sách phút cho end time dựa trên giờ đã chọn
+    const getAvailableEndMinutes = (selectedHour) => {
+        if (!startTime || selectedHour === null) return availableMinutes;
+        const slots = getAvailableEndTimeSlots();
+        const minutes = slots.filter(s => s.hour === selectedHour).map(s => s.minute).sort((a, b) => a - b);
+        return minutes.length > 0 ? minutes : availableMinutes;
+    };
+
+    // Lấy danh sách time slots hợp lệ cho end time (dựa trên startTime)
+    const getAvailableEndTimeSlots = () => {
+        if (!startTime) return [];
+        
+        const startTimeObj = dayjs(`2000-01-01T${startTime}`, 'YYYY-MM-DDTHH:mm');
+        const maxEndTime = startTimeObj.add(2, 'hour');
+        const maxEndTime2359 = dayjs(`2000-01-01T23:59`, 'YYYY-MM-DDTHH:mm');
+        const actualMaxEnd = maxEndTime.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEndTime;
+        
+        const slots = [];
+        let current = startTimeObj.add(15, 'minute'); // Bắt đầu từ startTime + 15 phút
+        
+        while (current.isSameOrBefore(actualMaxEnd)) {
+            const hour = current.hour();
+            const minute = current.minute();
+            
+            // Chỉ thêm nếu phút là bội số của 15
+            if (minute % 15 === 0) {
+                slots.push({ hour, minute });
+            }
+            
+            current = current.add(15, 'minute');
+        }
+        
+        // Nếu maxEndTime là 23:59, thêm nó vào
+        if (actualMaxEnd.hour() === 23 && actualMaxEnd.minute() === 59) {
+            const exists = slots.some(s => s.hour === 23 && s.minute === 59);
+            if (!exists) {
+                slots.push({ hour: 23, minute: 59 });
+            }
+        }
+        
+        return slots;
+    };
+
+    // Nhóm time slots theo giờ
+    const groupTimeSlotsByHour = (slots) => {
+        const grouped = {};
+        slots.forEach(slot => {
+            if (!grouped[slot.hour]) {
+                grouped[slot.hour] = [];
+            }
+            grouped[slot.hour].push(slot.minute);
+        });
+        return grouped;
+    };
+
     // Lấy EMPID từ sessionStorage
     const getCurrentEmpId = () => {
         try {
@@ -392,10 +524,30 @@ const AddEventDialog = ({
             const calculatedEndTime = calculateEndTime(startTime);
             if (calculatedEndTime) {
                 setEndTime(calculatedEndTime);
+                // Cập nhật selected end hour và minute
+                const [endHour, endMinute] = calculatedEndTime.split(':').map(Number);
+                setSelectedEndHour(endHour);
+                setSelectedEndMinute(endMinute);
             }
+        }
+        // Cập nhật selected start hour và minute khi startTime thay đổi
+        if (startTime) {
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            setSelectedStartHour(startHour);
+            setSelectedStartMinute(startMinute);
         }
         // eslint-disable-next-line
     }, [startTime]);
+    
+    // Cập nhật selected end hour và minute khi endTime thay đổi
+    React.useEffect(() => {
+        if (endTime) {
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            setSelectedEndHour(endHour);
+            setSelectedEndMinute(endMinute);
+        }
+        // eslint-disable-next-line
+    }, [endTime]);
 
     // Cập nhật thời gian khi startDate thay đổi
     React.useEffect(() => {
@@ -450,6 +602,11 @@ const AddEventDialog = ({
             }
 
             setStartTime(finalStartTime);
+            
+            // Set selected hour và minute cho start time
+            const [startHour, startMinute] = finalStartTime.split(':').map(Number);
+            setSelectedStartHour(startHour);
+            setSelectedStartMinute(startMinute);
 
             // Tính toán endTime
             let defaultEndTime;
@@ -471,6 +628,12 @@ const AddEventDialog = ({
             }
 
             setEndTime(defaultEndTime);
+            
+            // Set selected hour và minute cho end time
+            const [endHour, endMinute] = defaultEndTime.split(':').map(Number);
+            setSelectedEndHour(endHour);
+            setSelectedEndMinute(endMinute);
+            
             setColor(colorSwatches[0]);
             setIsEndTimeManual(false); // Reset flag khi dialog mở
             const currentEmpId = getCurrentEmpId();
@@ -521,6 +684,13 @@ const AddEventDialog = ({
                                             <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                             <span className="font-medium">{getCurrentEmpName()}</span>
                                         </div>
+                                        {/* Hiển thị ngày được chọn */}
+                                        {startDate && (
+                                            <div className="flex items-center gap-2 text-sm text-primary font-semibold ml-6">
+                                                <CalendarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                                <span>{t('pickleball_booking_for')} {dayjs(startDate).format('DD/MM/YYYY')}</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <Button
                                         variant="ghost"
@@ -635,36 +805,134 @@ const AddEventDialog = ({
                                                 <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                                                 <span className="text-xs sm:text-sm">{t('pickleball_start_time')}</span>
                                             </Label>
-                                            <Input
-                                                id="startTime"
-                                                format="HH:mm"
-                                                type="time"
-                                                step="900"
-                                                lang="en-GB"  // ép 24h
-                                                value={startTime}
-                                                onChange={e => handleStartTimeChange(e.target.value)}
-                                                min={getMinStartTime(startDate)} // Giới hạn min time cho ngày thường (chỉ hiển thị, không validate)
-                                                className="text-sm sm:text-base h-9 sm:h-10"
-                                                style={{ fontVariantNumeric: 'tabular-nums' }}
-                                            />
+                                            <Popover open={openStartTime} onOpenChange={setOpenStartTime}>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="w-full justify-between h-9 sm:h-10 text-sm sm:text-base font-normal"
+                                                        type="button"
+                                                    >
+                                                        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                                            {startTime ? formatTimeDisplay(startTime) : '--:--'}
+                                                        </span>
+                                                        <Clock className="h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-0">
+                                                    <div className="flex border-t">
+                                                        {/* Cột giờ */}
+                                                        <div className="w-20 border-r max-h-[300px] overflow-y-auto">
+                                                            <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
+                                                                {t('pickleball_hour') || 'Giờ'}
+                                                            </div>
+                                                            {getAvailableHours().map(hour => (
+                                                                <div
+                                                                    key={hour}
+                                                                    onClick={() => handleStartHourSelect(hour)}
+                                                                    className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                        selectedStartHour === hour ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                    }`}
+                                                                >
+                                                                    {String(hour).padStart(2, '0')}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        {/* Cột phút */}
+                                                        <div className="w-20 max-h-[300px] overflow-y-auto">
+                                                            <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
+                                                                {t('pickleball_minute') || 'Phút'}
+                                                            </div>
+                                                            {availableMinutes.map(minute => (
+                                                                <div
+                                                                    key={minute}
+                                                                    onClick={() => handleStartMinuteSelect(minute)}
+                                                                    className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                        selectedStartMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                    }`}
+                                                                >
+                                                                    {String(minute).padStart(2, '0')}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                         <div className="space-y-1.5 sm:space-y-2">
                                             <Label htmlFor="endTime" className="flex items-center gap-2 text-sm sm:text-base">
                                                 <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                                                 <span className="text-xs sm:text-sm">{t('pickleball_end_time')}</span>
                                             </Label>
-                                            <Input
-                                                id="endTime"
-                                                format="HH:mm"
-                                                type="time"
-                                                step="900"
-                                                lang="en-GB"  // ép 24h
-                                                value={endTime}
-                                                onChange={e => handleEndTimeChange(e.target.value)}
-                                                max={getMaxEndTime()}
-                                                className="text-sm sm:text-base h-9 sm:h-10"
-                                                style={{ fontVariantNumeric: 'tabular-nums' }}
-                                            />
+                                            <Popover open={openEndTime} onOpenChange={setOpenEndTime}>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="w-full justify-between h-9 sm:h-10 text-sm sm:text-base font-normal"
+                                                        type="button"
+                                                        disabled={!startTime}
+                                                    >
+                                                        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                                            {endTime ? formatTimeDisplay(endTime) : '--:--'}
+                                                        </span>
+                                                        <Clock className="h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-0">
+                                                    {!startTime ? (
+                                                        <div className="p-3 text-sm text-gray-500 text-center">
+                                                            {t('pickleball_select_start_time_first') || 'Vui lòng chọn giờ bắt đầu trước'}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex border-t">
+                                                            {/* Cột giờ */}
+                                                            <div className="w-20 border-r max-h-[300px] overflow-y-auto">
+                                                                <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
+                                                                    {t('pickleball_hour') || 'Giờ'}
+                                                                </div>
+                                                                {getAvailableEndHours().map(hour => (
+                                                                    <div
+                                                                        key={hour}
+                                                                        onClick={() => handleEndHourSelect(hour)}
+                                                                        className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                            selectedEndHour === hour ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                        }`}
+                                                                    >
+                                                                        {String(hour).padStart(2, '0')}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            {/* Cột phút */}
+                                                            <div className="w-20 max-h-[300px] overflow-y-auto">
+                                                                <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
+                                                                    {t('pickleball_minute') || 'Phút'}
+                                                                </div>
+                                                                {selectedEndHour !== null ? (
+                                                                    getAvailableEndMinutes(selectedEndHour).map(minute => (
+                                                                        <div
+                                                                            key={minute}
+                                                                            onClick={() => handleEndMinuteSelect(minute)}
+                                                                            className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                                selectedEndMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                            }`}
+                                                                        >
+                                                                            {String(minute).padStart(2, '0')}
+                                                                        </div>
+                                                                    ))
+                                                                ) : (
+                                                                    availableMinutes.map(minute => (
+                                                                        <div
+                                                                            key={minute}
+                                                                            className="px-3 py-2 text-sm text-center text-gray-400"
+                                                                        >
+                                                                            {String(minute).padStart(2, '0')}
+                                                                        </div>
+                                                                    ))
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                     </div>
                                     {/* Tạm ẩn Select Color */}

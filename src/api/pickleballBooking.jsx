@@ -10,11 +10,26 @@ import {
  */
 const callProcedure = async (procedureName, params = {}) => {
   try {
+    // Chặn trường hợp params là array rỗng
+    if (Array.isArray(params) && params.length === 0) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Invalid params for ${procedureName}: params is empty array`);
+      }
+      return {
+        success: false,
+        error: { message: 'Invalid params: params cannot be an empty array' },
+        data: null,
+      };
+    }
+
+    // Đảm bảo params là object, không phải array
+    const validParams = Array.isArray(params) ? {} : (params || {});
+
     const body = {
       dbName: 'HUBIC',
       packageName: 'PW_PICKLE_BALL_EVENT',
       procedureName: procedureName,
-      params: params,
+      params: validParams,
     };
 
     const response = await fetch(PickleballCallProcedureURL, {
@@ -336,10 +351,14 @@ export const getPickleballBookerList = async () => {
  */
 export const getPickleballCourtList = async () => {
   try {
-    const data = await callProcedure('BOOKING_ROOM_LIST_SELECT', {});
+    // Procedure BOOKING_ROOM_LIST_SELECT cần OUT_CURSOR, không phải params rỗng
+    const data = await callProcedure('BOOKING_ROOM_LIST_SELECT', {
+      OUT_CURSOR: { type: "OUT", dataType: "CURSOR" }
+    });
 
-    if (data && data.success && data.data && Array.isArray(data.data) && data.data.length > 0) {
-      return data.data.map((item) => ({
+    // Response structure: { success: true, data: { OUT_CURSOR: [...] } }
+    if (data && data.success && data.data && data.data.OUT_CURSOR && Array.isArray(data.data.OUT_CURSOR) && data.data.OUT_CURSOR.length > 0) {
+      return data.data.OUT_CURSOR.map((item) => ({
         value: item.ROOM_CODE || item.COURT_CODE,
         label: item.ROOM_NAME || item.COURT_NAME,
       }));
