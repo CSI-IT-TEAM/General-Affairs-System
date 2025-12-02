@@ -136,19 +136,19 @@ const HomePage = () => {
             {t("service")} <span>{t("provide")}</span>
           </h3>
           <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing}>
-            {persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" ? (
-              optionData.map((item, index) => {
-                // Kiểm tra điều kiện hiển thị Pickleball Booking
-                // Chỉ hiển thị nếu PERS_TYPE === "EXP" hoặc JOB_POSITION <= 200
-                const canViewPickleball = persType === "EXP" || (jobPosition !== null && Number(jobPosition) <= 180) || Number(jobPosition) === 300 || emp_id === '15050432';
-                
-                // Nếu là Pickleball Booking (id === "004") và không đủ điều kiện, không hiển thị
-                if (item.id === "004" && !canViewPickleball) {
-                  return null;
-                }
-                
-                if (item.id === "001" || item.id === "002" || item.id === "004") {
-                  //|| item.id === "002"
+            {(() => {
+              // Kiểm tra quyền xem menu
+              const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447";
+              const canViewJobPositionMenu = jobPosition !== null && (Number(jobPosition) <= 180 || Number(jobPosition) === 300);
+              
+              // Logic hiển thị menu:
+              // 1. EXP hoặc emp_id đặc biệt → thấy hết 4 menu (001, 002, 003, 004)
+              // 2. jobPosition <= 180 hoặc = 300 → thấy 3 menu (001, 002, 004)
+              // 3. Ngược lại → chỉ thấy menu 001
+              
+              return optionData.map((item) => {
+                // Luôn hiển thị menu 001
+                if (item.id === "001") {
                   return (
                     <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                       <CardPrimary
@@ -157,30 +157,56 @@ const HomePage = () => {
                       />
                     </Grid>
                   );
-                } else {
-                  return (
-                    <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                      <CardPrimary data={item} handleClick={handleOpen} />
-                    </Grid>
-                  );
                 }
-              })
-            ) : (
-              <Grid
-                item
-                justifyItems={"center"}
-                alignItems={"center"}
-                lg={3}
-                md={6}
-                xs={12}
-                key={optionData[0].id}
-              >
-                <CardPrimary
-                  data={optionData[0]}
-                  handleClick={() => handleNavigate(optionData[0].id)}
-                />
-              </Grid>
-            )}
+                
+                // Menu 002: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
+                if (item.id === "002") {
+                  if (isExpOrSpecialEmp) {
+                    return (
+                      <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
+                        <CardPrimary
+                          data={item}
+                          handleClick={() => handleNavigate(item.id)}
+                        />
+                      </Grid>
+                    );
+                  }
+                  return null;
+                }
+                
+                // Menu 003: chỉ hiển thị nếu EXP/special emp
+                if (item.id === "003") {
+                  if (isExpOrSpecialEmp) {
+                    return (
+                      <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
+                        <CardPrimary
+                          data={item}
+                          handleClick={() => handleNavigate(item.id)}
+                        />
+                      </Grid>
+                    );
+                  }
+                  return null;
+                }
+                
+                // Menu 004: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
+                if (item.id === "004") {
+                  if (isExpOrSpecialEmp || canViewJobPositionMenu) {
+                    return (
+                      <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
+                        <CardPrimary
+                          data={item}
+                          handleClick={() => handleNavigate(item.id)}
+                        />
+                      </Grid>
+                    );
+                  }
+                  return null;
+                }
+                
+                return null;
+              });
+            })()}
           </Grid>
         </Container>
       </Box>
