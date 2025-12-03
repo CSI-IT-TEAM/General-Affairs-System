@@ -182,6 +182,69 @@ const AddEventDialog = ({
         });
     };
 
+    // Kiểm tra xem một khung giờ (startTime, endTime) có bị book không
+    const isTimeRangeBooked = (dateStr, startTimeStr, endTimeStr) => {
+        if (!dateStr || !startTimeStr || !endTimeStr || !events || events.length === 0) return false;
+        
+        const start = dayjs(`${dateStr}T${startTimeStr}`, 'YYYY-MM-DDTHH:mm');
+        const end = dayjs(`${dateStr}T${endTimeStr}`, 'YYYY-MM-DDTHH:mm');
+        
+        // Kiểm tra xem có event nào overlap với khung giờ này không
+        return events.some(event => {
+            if (!event || !event.start || !event.end) return false;
+            
+            const eventStart = dayjs(event.start);
+            const eventEnd = dayjs(event.end);
+            
+            // Kiểm tra cùng ngày
+            if (!eventStart.isSame(dayjs(dateStr), 'day')) return false;
+            
+            // Kiểm tra overlap: (start < eventEnd) && (end > eventStart)
+            return start.isBefore(eventEnd) && end.isAfter(eventStart);
+        });
+    };
+
+    // Tìm khung giờ kế tiếp khả dụng
+    const findNextAvailableTimeSlot = (dateStr, defaultStartTimeStr) => {
+        if (!dateStr || !defaultStartTimeStr) return defaultStartTimeStr;
+        
+        let current = dayjs(`${dateStr}T${defaultStartTimeStr}`, 'YYYY-MM-DDTHH:mm');
+        
+        // Giới hạn tối đa: 22:00
+        const maxTime = dayjs(`${dateStr}T22:00`, 'YYYY-MM-DDTHH:mm');
+        
+        // Tìm khung giờ khả dụng, tăng dần 15 phút mỗi lần
+        while (current.isBefore(maxTime) || current.isSame(maxTime, 'minute')) {
+            const currentHour = current.hour();
+            const currentMinute = current.minute();
+            
+            // Tính endTime (current + 2 giờ, tối đa 22:00)
+            let endTime = current.add(2, 'hour');
+            if (endTime.isAfter(maxTime)) {
+                endTime = maxTime;
+            }
+            
+            const startTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+            const endTimeStr = `${String(endTime.hour()).padStart(2, '0')}:${String(endTime.minute()).padStart(2, '0')}`;
+            
+            // Kiểm tra khung giờ này có bị book không
+            if (!isTimeRangeBooked(dateStr, startTimeStr, endTimeStr)) {
+                return startTimeStr;
+            }
+            
+            // Tăng 15 phút và thử lại
+            current = current.add(15, 'minute');
+            
+            // Nếu vượt quá 22:00, dừng lại
+            if (current.isAfter(maxTime)) {
+                break;
+            }
+        }
+        
+        // Nếu không tìm thấy khung giờ khả dụng, trả về default
+        return defaultStartTimeStr;
+    };
+
     // Tạo danh sách giờ dựa trên ngày và lọc các giờ đã bị đặt
     const getAvailableHours = () => {
         let hours = [];
@@ -629,65 +692,31 @@ const AddEventDialog = ({
             // Tính toán startTime dựa trên ngày được chọn
             const defaultStartTimeForDate = getDefaultStartTime(initialStartDate);
 
-            // Nếu có initialStartTime và nó hợp lệ (không phải 00:00 và >= defaultStartTime), dùng nó
-            // Ngược lại, dùng defaultStartTime theo ngày
-            let finalStartTime;
-            if (initialStartTime && initialStartTime !== '00:00') {
-                const defaultTime = dayjs(`2000-01-01T${defaultStartTimeForDate}`, 'YYYY-MM-DDTHH:mm');
-                const initialTime = dayjs(`2000-01-01T${initialStartTime}`, 'YYYY-MM-DDTHH:mm');
-                
-                // Kiểm tra thêm: nếu là ngày thường và initialStartTime < 17:00, dùng defaultStartTime
-                if (!isWeekendOrHoliday(initialStartDate)) {
-                    const minTime = dayjs(`2000-01-01T17:00`, 'YYYY-MM-DDTHH:mm');
-                    if (initialTime.isBefore(minTime)) {
-                        finalStartTime = defaultStartTimeForDate;
-                    } else if (initialTime.isSameOrAfter(defaultTime)) {
-                        finalStartTime = initialStartTime;
-                    } else {
-                        finalStartTime = defaultStartTimeForDate;
-                    }
-                } else {
-                    // Ngày nghỉ/chủ nhật: chỉ cần >= defaultStartTime
-                    if (initialTime.isSameOrAfter(defaultTime)) {
-                        finalStartTime = initialStartTime;
-                    } else {
-                        finalStartTime = defaultStartTimeForDate;
-                    }
-                }
-            } else {
-                finalStartTime = defaultStartTimeForDate;
+            // Bắt đầu từ defaultStartTime và tìm khung giờ khả dụng đầu tiên
+            // endTime sẽ luôn = startTime + 2 giờ
+            let finalStartTime = defaultStartTimeForDate;
+            
+            // Kiểm tra xem khung giờ mặc định có bị book chưa
+            // Nếu bị book, tìm khung giờ kế tiếp khả dụng
+            const calculatedEndTime = calculateEndTime(finalStartTime);
+            if (isTimeRangeBooked(initialStartDate, finalStartTime, calculatedEndTime)) {
+                // Tìm khung giờ kế tiếp khả dụng
+                finalStartTime = findNextAvailableTimeSlot(initialStartDate, finalStartTime);
             }
 
+            // Tính toán endTime luôn dựa trên startTime + 2 giờ
+            const finalEndTime = calculateEndTime(finalStartTime);
+
             setStartTime(finalStartTime);
+            setEndTime(finalEndTime);
             
             // Set selected hour và minute cho start time
             const [startHour, startMinute] = finalStartTime.split(':').map(Number);
             setSelectedStartHour(startHour);
             setSelectedStartMinute(startMinute);
 
-            // Tính toán endTime
-            let defaultEndTime;
-            if (initialEndTime && initialEndTime !== '00:00') {
-                const start = dayjs(`2000-01-01T${finalStartTime}`, 'YYYY-MM-DDTHH:mm');
-                const end = dayjs(`2000-01-01T${initialEndTime}`, 'YYYY-MM-DDTHH:mm');
-                const maxEnd = start.add(2, 'hour');
-                // Nếu initialEndTime hợp lệ (<= 2 giờ và sau startTime), dùng nó
-                // Cho phép bằng đúng 2 giờ (isSameOrBefore)
-                if (end.isSameOrBefore(maxEnd) && (end.isAfter(start) || end.isSame(start))) {
-                    defaultEndTime = initialEndTime;
-                } else {
-                    // Nếu không hợp lệ, tính toán từ startTime + 2 giờ
-                    defaultEndTime = calculateEndTime(finalStartTime);
-                }
-            } else {
-                // Không có initialEndTime, tính toán từ startTime + 2 giờ
-                defaultEndTime = calculateEndTime(finalStartTime);
-            }
-
-            setEndTime(defaultEndTime);
-            
             // Set selected hour và minute cho end time
-            const [endHour, endMinute] = defaultEndTime.split(':').map(Number);
+            const [endHour, endMinute] = finalEndTime.split(':').map(Number);
             setSelectedEndHour(endHour);
             setSelectedEndMinute(endMinute);
             
@@ -708,7 +737,7 @@ const AddEventDialog = ({
             }
         }
         // eslint-disable-next-line
-    }, [isOpen, initialStartDate, initialEndDate, initialStartTime, initialEndTime, courts]);
+    }, [isOpen, initialStartDate, initialEndDate, initialStartTime, initialEndTime, courts, events, startDate]);
 
     return (
         <AnimatePresence>
@@ -717,14 +746,20 @@ const AddEventDialog = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
                     className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 pt-12 sm:pt-12"
                     onClick={onClose}
                 >
                     <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.8, opacity: 0 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                        transition={{ 
+                            type: "spring", 
+                            damping: 30, 
+                            stiffness: 500,
+                            mass: 0.5
+                        }}
                         className="w-full max-w-md sm:max-w-2xl max-h-[calc(100vh-4rem)] sm:max-h-[calc(90vh-6rem)] flex flex-col"
                         onClick={e => e.stopPropagation()}
                     >
@@ -912,11 +947,7 @@ const AddEventDialog = ({
                                                                             {String(minute).padStart(2, '0')}
                                                                         </div>
                                                                     ))
-                                                                ) : (
-                                                                    <div className="px-3 py-2 text-sm text-center text-gray-400">
-                                                                        {t('pickleball_no_available_slots') || 'Không có khung giờ khả dụng'}
-                                                                    </div>
-                                                                )
+                                                                ) :null
                                                             ) : (
                                                                 // Khi chưa chọn giờ, hiển thị tất cả các phút nhưng chỉ cho phép chọn các phút khả dụng cho giờ đầu tiên
                                                                 (() => {
@@ -934,14 +965,21 @@ const AddEventDialog = ({
                                                                                 {String(minute).padStart(2, '0')}
                                                                             </div>
                                                                         ))
-                                                                    ) : (
-                                                                        <div className="px-3 py-2 text-sm text-center text-gray-400">
-                                                                            {t('pickleball_no_available_slots') || 'Không có khung giờ khả dụng'}
-                                                                        </div>
-                                                                    );
+                                                                        ) : null;
                                                                 })()
                                                             )}
                                                         </div>
+                                                    </div>
+                                                    {/* Nút OK để đóng popup */}
+                                                    <div className="border-t p-2 flex justify-end">
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            onClick={() => setOpenStartTime(false)}
+                                                            className="h-8 px-4 text-sm"
+                                                        >
+                                                            {t('btn_ok') || 'OK'}
+                                                        </Button>
                                                     </div>
                                                 </PopoverContent>
                                             </Popover>
@@ -1007,11 +1045,7 @@ const AddEventDialog = ({
                                                                                 {String(minute).padStart(2, '0')}
                                                                             </div>
                                                                         ))
-                                                                    ) : (
-                                                                        <div className="px-3 py-2 text-sm text-center text-gray-400">
-                                                                            {t('pickleball_no_available_slots') || 'Không có khung giờ khả dụng'}
-                                                                        </div>
-                                                                    )
+                                                                    ) : null
                                                                 ) : (
                                                                     // Khi chưa chọn giờ, hiển thị tất cả các phút nhưng không cho phép chọn
                                                                     availableMinutes.map(minute => (
@@ -1024,6 +1058,19 @@ const AddEventDialog = ({
                                                                     ))
                                                                 )}
                                                             </div>
+                                                        </div>
+                                                    )}
+                                                    {/* Nút OK để đóng popup */}
+                                                    {startTime && (
+                                                        <div className="border-t p-2 flex justify-end">
+                                                            <Button
+                                                                type="button"
+                                                                size="sm"
+                                                                onClick={() => setOpenEndTime(false)}
+                                                                className="h-8 px-4 text-sm"
+                                                            >
+                                                                {t('btn_ok') || 'OK'}
+                                                            </Button>
                                                         </div>
                                                     )}
                                                 </PopoverContent>

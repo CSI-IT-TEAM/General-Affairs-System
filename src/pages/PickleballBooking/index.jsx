@@ -23,6 +23,281 @@ import pageBackground from '../../assets/images/background.webp';
 
 dayjs.extend(isSameOrBefore);
 
+// Component Gantt Chart cho Report
+const GanttChart = ({ weekDays, events, format, t }) => {
+    // Giờ bắt đầu và kết thúc
+    const startHour = 7;
+    const endHour = 22;
+    const totalHours = endHour - startHour + 1; // 16 giờ (07-22)
+
+    // Mỗi giờ chia thành 4 khoảng 15 phút: 0, 15, 30, 45
+    const minutesPerSlot = 15;
+    const slotsPerHour = 4;
+    const totalSlots = totalHours * slotsPerHour; // 16 * 4 = 64 slots
+
+    // Tạo mảng giờ từ 07 đến 22 (để hiển thị header)
+    const hours = [];
+    for (let h = startHour; h <= endHour; h++) {
+        hours.push(h);
+    }
+
+    // Tạo mảng các khoảng thời gian (slots) mỗi 15 phút
+    const timeSlots = [];
+    for (let h = startHour; h <= endHour; h++) {
+        for (let m = 0; m < 60; m += minutesPerSlot) {
+            timeSlots.push({ hour: h, minute: m });
+        }
+    }
+
+    // Tên các ngày trong tuần
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    // Hàm tính toán vị trí và độ rộng của bar dựa trên thời gian
+    // Tính chính xác dựa trên phút (chia thành các khoảng 15 phút)
+    const calculateBarPosition = (startTime, endTime) => {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+
+        // Lấy giờ và phút
+        let startHourValue = start.getHours();
+        let startMinuteValue = start.getMinutes();
+        let endHourValue = end.getHours();
+        let endMinuteValue = end.getMinutes();
+
+        // Làm tròn start xuống khoảng 15 phút gần nhất (0, 15, 30, 45)
+        const startSlot = Math.floor(startMinuteValue / minutesPerSlot) * minutesPerSlot;
+        startMinuteValue = startSlot;
+
+        // Làm tròn end lên khoảng 15 phút gần nhất
+        const endSlot = Math.ceil(endMinuteValue / minutesPerSlot) * minutesPerSlot;
+        if (endSlot >= 60) {
+            endHourValue += 1;
+            endMinuteValue = 0;
+        } else {
+            endMinuteValue = endSlot;
+        }
+
+        // Đảm bảo trong khoảng 07:00-22:00
+        // Nếu booking bắt đầu trước 07:00, chỉ hiển thị từ 07:00
+        if (startHourValue < startHour || (startHourValue === startHour && startMinuteValue < 0)) {
+            startHourValue = startHour;
+            startMinuteValue = 0;
+        }
+        // Nếu booking bắt đầu sau 22:00, không hiển thị
+        if (startHourValue > endHour || (startHourValue === endHour && startMinuteValue > 0)) {
+            return { left: 0, width: 0 };
+        }
+        // Nếu booking kết thúc sau 22:00, chỉ hiển thị đến 22:00
+        if (endHourValue > endHour || (endHourValue === endHour && endMinuteValue > 0)) {
+            endHourValue = endHour;
+            endMinuteValue = 0;
+        }
+
+        // Tính số slot từ start đến end
+        const startTotalMinutes = startHourValue * 60 + startMinuteValue;
+        const endTotalMinutes = endHourValue * 60 + endMinuteValue;
+        const baseMinutes = startHour * 60; // 07:00 = 420 phút
+
+        // Tính index của slot (0-based)
+        const startSlotIndex = Math.floor((startTotalMinutes - baseMinutes) / minutesPerSlot);
+        // End slot index bao gồm cả slot cuối cùng (exclusive end)
+        const endSlotIndex = Math.ceil((endTotalMinutes - baseMinutes) / minutesPerSlot);
+
+        // Đảm bảo trong phạm vi hợp lệ
+        if (startSlotIndex < 0 || startSlotIndex >= totalSlots) {
+            return { left: 0, width: 0 };
+        }
+        if (endSlotIndex <= startSlotIndex || endSlotIndex > totalSlots) {
+            return { left: 0, width: 0 };
+        }
+
+        // Tính vị trí và độ rộng (theo %)
+        const left = (startSlotIndex / totalSlots) * 100;
+        const width = ((endSlotIndex - startSlotIndex) / totalSlots) * 100;
+
+        return { left, width, startHour: startHourValue, endHour: endHourValue };
+    };
+
+    // Lấy events cho một ngày cụ thể
+    const getEventsForDay = (date) => {
+        const dateKey = format(date, 'yyyy-MM-dd');
+        return events.filter(event => {
+            const eventDateKey = format(event.start, 'yyyy-MM-dd');
+            return eventDateKey === dateKey;
+        }).sort((a, b) => {
+            return a.start.getTime() - b.start.getTime();
+        });
+    };
+
+    // Tính toán các bars từ bookings trong ngày
+    // Mỗi booking hoặc nhóm booking liên tiếp sẽ có 1 bar riêng
+    const calculateDayBars = (dayEvents) => {
+        if (!dayEvents || dayEvents.length === 0) {
+            return [];
+        }
+
+        // Sắp xếp events theo thời gian bắt đầu
+        const sortedEvents = [...dayEvents].sort((a, b) => a.start.getTime() - b.start.getTime());
+
+        // Nhóm các bookings liên tiếp (overlap hoặc touch)
+        const barGroups = [];
+        let currentGroup = [sortedEvents[0]];
+
+        for (let i = 1; i < sortedEvents.length; i++) {
+            const currentEvent = sortedEvents[i];
+
+            // Lấy event cuối cùng trong group hiện tại
+            const lastEventInGroup = currentGroup[currentGroup.length - 1];
+
+            // Kiểm tra xem currentEvent có overlap hoặc touch với group không
+            // Overlap: currentEvent.start < lastEventInGroup.end
+            // Touch: khoảng cách rất nhỏ (<= 1 phút)
+            const gap = currentEvent.start.getTime() - lastEventInGroup.end.getTime();
+            const hasOverlap = currentEvent.start.getTime() < lastEventInGroup.end.getTime();
+
+            // Nếu overlap hoặc touch (gap <= 1 phút), gộp vào nhóm hiện tại
+            if (hasOverlap || gap <= 60000) { // 1 phút = 60000 ms
+                currentGroup.push(currentEvent);
+            } else {
+                // Có khoảng trống rõ ràng, tạo nhóm mới
+                barGroups.push(currentGroup);
+                currentGroup = [currentEvent];
+            }
+        }
+
+        // Thêm nhóm cuối cùng
+        if (currentGroup.length > 0) {
+            barGroups.push(currentGroup);
+        }
+
+        // Tính toán bar position cho mỗi nhóm
+        return barGroups.map(group => {
+            // Tìm start sớm nhất và end muộn nhất trong nhóm
+            let groupStart = group[0].start;
+            let groupEnd = group[0].end;
+
+            group.forEach(event => {
+                if (event.start < groupStart) {
+                    groupStart = event.start;
+                }
+                if (event.end > groupEnd) {
+                    groupEnd = event.end;
+                }
+            });
+
+            return {
+                barPosition: calculateBarPosition(groupStart, groupEnd),
+                events: group,
+                start: groupStart,
+                end: groupEnd
+            };
+        });
+    };
+
+    return (
+        <div className="w-full h-full max-h-[450px] flex flex-col">
+            <div className="flex-1 overflow-auto border border-gray-300 rounded-lg bg-white/50">
+                {/* Header với các giờ */}
+                <div className="sticky top-0 z-10 bg-gray-100 border-b">
+                    <div className="flex min-w-[800px]">
+                        <div className="w-20 sm:w-32 md:w-40 border-r bg-gray-100 p-1 sm:p-2 font-semibold text-[10px] sm:text-xs">
+                            {/* Header cell cho tên ngày */}
+                        </div>
+                        <div className="flex-1 grid min-w-[720px]" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                            {hours.map((hour, hourIndex) => {
+                                // Tính vị trí slot đầu tiên của giờ này trong grid
+                                const slotStartIndex = hourIndex * slotsPerHour;
+                                return (
+                                    <div
+                                        key={`header-${hour}`}
+                                        className="border-r-2 border-dashed border-blue-950/50 p-1 sm:p-2 text-center font-semibold text-[10px] sm:text-xs md:text-sm"
+                                        style={{
+                                            gridColumnStart: slotStartIndex + 1,
+                                            gridColumnEnd: slotStartIndex + slotsPerHour + 1
+                                        }}
+                                    >
+                                        {String(hour).padStart(2, '0')}{t('pickleball_hh')}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Các hàng cho từng ngày */}
+                <div>
+                    {weekDays.map((day, dayIndex) => {
+                        const dayEvents = getEventsForDay(day);
+                        const dateKey = format(day, 'yyyy-MM-dd');
+                        const dayName = dayNames[dayIndex];
+
+                        // Tính toán các bars cho ngày này (có thể có nhiều bars nếu có khoảng trống)
+                        const dayBars = calculateDayBars(dayEvents);
+                        const bgColor = '#13005f';
+
+                        return (
+                            <div
+                                key={dateKey}
+                                className="relative min-h-[50px] flex items-center border-b border-gray-200 min-w-[800px]"
+                            >
+                                {/* Tên ngày */}
+                                <div className="w-20 sm:w-32 md:w-40 border-r p-1 sm:p-2 flex flex-col justify-center sticky left-0 z-10 bg-white/50 backdrop-blur-sm">
+                                    <div className="text-[10px] sm:text-xs font-semibold text-gray-600">
+                                        {dayName}
+                                    </div>
+                                    <div className="text-[10px] sm:text-xs font-semibold text-gray-600">
+                                        {format(day, 'MM/dd')}
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 relative h-full min-w-[720px]">
+                                    {/* Grid lines cho các khoảng 15 phút */}
+                                    <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                                        {timeSlots.map((slot, index) => {
+                                            // Đường kẻ đậm cho mỗi giờ (0, 15, 30, 45 đầu tiên của giờ)
+                                            const isHourMark = slot.minute === 0;
+                                            return (
+                                                <div
+                                                    key={`${slot.hour}-${slot.minute}`}
+                                                    className={isHourMark ? 'border-r-2 border-gray-400' : 'border-r border-gray-200'}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Vẽ nhiều bars nếu có khoảng trống giữa các bookings */}
+                                    {dayBars.map((barGroup, barIndex) => {
+                                        const { barPosition, events: groupEvents, start, end } = barGroup;
+                                        if (!barPosition || barPosition.width <= 0) return null;
+
+                                        return (
+                                            <div
+                                                key={`bar-${barIndex}`}
+                                                className="absolute h-5 sm:h-6 md:h-8 rounded-lg shadow-md border-2 border-white/80 flex items-center justify-center cursor-pointer transition-all"
+                                                style={{
+                                                    left: `${Math.max(0, barPosition.left)}%`,
+                                                    width: `${Math.max(0, Math.min(barPosition.width, 100 - Math.max(0, barPosition.left)))}%`,
+                                                    backgroundColor: bgColor,
+                                                    top: '50%',
+                                                    color: 'white',
+                                                    transform: 'translateY(-50%)',
+                                                }}
+                                            >
+                                                  <span className="text-[9px] sm:text-xs font-extrabold bg-red-600 text-white rounded-full px-1.5 sm:px-2 py-0.5 inline-block mr-0.5 sm:mr-1">{groupEvents.length}</span>
+                                                  <span className="text-[9px] sm:text-xs font-semibold text-white whitespace-nowrap">{format(start, 'HH:mm')} - {format(end, 'HH:mm')}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const PickleballBooking = () => {
     const { t } = useTranslation();
 
@@ -109,6 +384,7 @@ const PickleballBooking = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [activeTab, setActiveTab] = useState('booking'); // 'booking' hoặc 'report'
     const [currentWeekStart, setCurrentWeekStart] = useState(() => {
         // Bắt đầu từ Chủ nhật của tuần hiện tại
         const today = new Date();
@@ -205,7 +481,7 @@ const PickleballBooking = () => {
         }
 
         const dateStr = format(date, 'yyyy-MM-dd');
-        
+
         try {
             const calendarCheck = await checkCalendarDay(dateStr);
             setIsHoliday(calendarCheck.isHoliday);
@@ -269,7 +545,7 @@ const PickleballBooking = () => {
 
             const fromDate = format(weekStart, 'yyyy-MM-dd');
             const toDate = format(weekEnd, 'yyyy-MM-dd');
-            
+
             if (!fromDate || !toDate || fromDate === 'Invalid Date' || toDate === 'Invalid Date') {
                 setLoading(false);
                 return;
@@ -438,59 +714,100 @@ const PickleballBooking = () => {
     const isDayFull = (date) => {
         const dayEvents = getEventsForDay(date);
         if (dayEvents.length === 0) return false;
-        
+
         // Nếu không có courts, không thể kiểm tra full
         if (!pickleballCourts || pickleballCourts.length === 0) return false;
-        
+
         const numCourts = pickleballCourts.length;
         const dayOfWeek = date.getDay();
-        
-        // Xác định khung giờ có thể book
-        // Chủ nhật: 07:00 - 22:00
-        // Ngày thường: 17:00 - 22:00
+
+        // Ngày nghỉ (Chủ nhật): 07:00 - 22:00
+        // Ngày thường: 17:00 - 22:00 (05:00 PM = 17:00)
         const startHour = dayOfWeek === 0 ? 7 : 17;
         const startMinute = 0;
         const endHour = 22;
         const endMinute = 0;
-        
-        // Tính chính xác tổng số phút có thể book trong ngày (tính cho tất cả courts)
+
+        // Tính chính xác tổng số phút có thể book trong ngày
+        // Từ startHour:startMinute đến endHour:endMinute
+        // Ví dụ: 17:00 (1020 phút) đến 22:00 (1320 phút) = 300 phút
         const startTotalMinutes = startHour * 60 + startMinute;
         const endTotalMinutes = endHour * 60 + endMinute;
-        const totalAvailableMinutes = (endTotalMinutes - startTotalMinutes + 1) * numCourts; // +1 để bao gồm cả phút cuối
-        
+
+        // Số phút khả dụng cho 1 court (từ startHour đến endHour)
+        const minutesPerCourt = endTotalMinutes - startTotalMinutes;
+
+        // Tổng số phút khả dụng cho tất cả courts
+        const totalAvailableMinutes = minutesPerCourt * numCourts;
+
         // Tính tổng số phút đã được book
+        // Lấy giờ kết thúc trừ giờ bắt đầu của mỗi event, sau đó sum tổng lại
         let totalBookedMinutes = 0;
+        const validEvents = [];
+
         dayEvents.forEach(event => {
+            if (!event || !event.start || !event.end) return;
+
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
+
+            // Kiểm tra xem event có cùng ngày không
+            const eventDateKey = format(eventStart, 'yyyy-MM-dd');
+            const checkDateKey = format(date, 'yyyy-MM-dd');
+            if (eventDateKey !== checkDateKey) return;
+
             const startMinutes = eventStart.getHours() * 60 + eventStart.getMinutes();
             const endMinutes = eventEnd.getHours() * 60 + eventEnd.getMinutes();
-            const duration = Math.max(0, endMinutes - startMinutes);
-            totalBookedMinutes += duration;
+
+            // Chỉ tính các phút trong khung giờ cho phép (từ startHour đến endHour)
+            const eventStartMinutes = Math.max(startMinutes, startTotalMinutes);
+            const eventEndMinutes = Math.min(endMinutes, endTotalMinutes);
+
+            const duration = Math.max(0, eventEndMinutes - eventStartMinutes);
+            if (duration > 0) {
+                totalBookedMinutes += duration;
+                validEvents.push({
+                    start: eventStartMinutes,
+                    end: eventEndMinutes,
+                    duration
+                });
+            }
         });
-        
-        // Nếu đã book >= 85% tổng thời gian có thể, coi là full (giảm ngưỡng để nhạy hơn)
-        // Hoặc nếu số events >= số courts * số slots tối đa (mỗi slot 2 giờ)
-        const hoursAvailable = endTotalMinutes - startTotalMinutes + 1; // Tổng số phút
-        const maxPossibleSlots = Math.ceil(hoursAvailable / 120) * numCourts; // Mỗi slot 2 giờ = 120 phút
-        const isFullBySlots = dayEvents.length >= maxPossibleSlots;
-        const isFullByTime = totalBookedMinutes >= totalAvailableMinutes * 0.85;
-        
-        // Kiểm tra thêm: nếu có ít nhất 4 events trong ngày thường (17:00-22:00) hoặc nhiều events trong chủ nhật
-        // thì coi là full (heuristic đơn giản)
-        const isFullByEventCount = dayOfWeek === 0 
-            ? dayEvents.length >= 8  // Chủ nhật: nếu có >= 8 events
-            : dayEvents.length >= 4; // Ngày thường: nếu có >= 4 events
-        
-        return isFullBySlots || isFullByTime || isFullByEventCount;
+
+        // Thêm tolerance nhỏ (2 phút) để xử lý sai số làm tròn và các khoảng trống nhỏ
+        const tolerance = 0;
+
+        // Debug log (chỉ trong development)
+        if (process.env.NODE_ENV === 'development') {
+            console.log('isDayFull check:', {
+                date: format(date, 'yyyy-MM-dd'),
+                dayOfWeek,
+                numCourts,
+                minutesPerCourt,
+                totalAvailableMinutes,
+                totalBookedMinutes,
+                dayEventsCount: dayEvents.length,
+                validEventsCount: validEvents.length,
+                isFull: totalBookedMinutes >= (totalAvailableMinutes - tolerance),
+                events: validEvents.map(e => ({
+                    start: `${Math.floor(e.start / 60)}:${String(e.start % 60).padStart(2, '0')}`,
+                    end: `${Math.floor(e.end / 60)}:${String(e.end % 60).padStart(2, '0')}`,
+                    duration: e.duration
+                }))
+            });
+        }
+
+        // Nếu tổng số phút đã book >= (tổng số phút khả dụng - tolerance), coi là full
+        // Điều này có nghĩa là nếu đã book gần như toàn bộ thời gian khả dụng, coi là full
+        return totalBookedMinutes >= (totalAvailableMinutes - tolerance);
     };
 
     // Format header: "Dec 01 - Dec 07"
     const weekHeader = `${format(weekDays[0], 'MMM dd')} - ${format(weekDays[6], 'MMM dd')}`;
 
     return (
-        <div 
-            className="min-h-screen pt-20 xs:pt-20 sm:pt-20 md:pt-16 relative"
+        <div
+            className="h-screen pt-20 xs:pt-20 sm:pt-20 md:pt-16 relative overflow-hidden"
             style={{
                 backgroundImage: `url(${pageBackground})`,
                 backgroundSize: 'cover',
@@ -501,35 +818,62 @@ const PickleballBooking = () => {
         >
             {/* Overlay để đảm bảo nội dung dễ đọc */}
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm pointer-events-none"></div>
-            <div className="relative z-10 mx-auto p-1 sm:p-2 md:p-4 lg:p-6">
-                <div className="mb-2 sm:mb-4 ">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                        <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">{t('pickleball_booking')}</CardTitle>
-
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <Button
-                                onClick={handleSearch}
-                                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-                                size="sm"
-                                disabled={loading}
+            <div className="relative z-10 mx-auto p-1 sm:p-2 md:p-4 lg:p-6 h-full flex flex-col">
+                <Card className="border-white shadow-lg bg-background/10 backdrop-blur-sm flex flex-col h-full overflow-hidden">
+                    <CardContent className="p-0 flex flex-col flex-1 min-h-0 overflow-hidden">
+                        {/* Tabs */}
+                        <div className="flex border-b bg-background/40 backdrop-blur-sm">
+                            <button
+                                onClick={() => setActiveTab('booking')}
+                                className={`flex-1 px-4 py-3 text-sm sm:text-base font-semibold transition-colors ${activeTab === 'booking'
+                                    ? 'bg-primary text-white border-b-2 border-primary'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                                    }`}
                             >
-                                <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                <span className="text-sm sm:text-base">{t('search')}</span>
-                            </Button>
-                            <Button
-                                onClick={openAddEventDialog}
-                                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-                                size="sm"
+                                {t('pickleball_booking_tab') || 'Đặt Lịch'}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('report')}
+                                className={`flex-1 px-4 py-3 text-sm sm:text-base font-semibold transition-colors ${activeTab === 'report'
+                                    ? 'bg-primary text-white border-b-2 border-primary'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+                                    }`}
                             >
-                                <CalendarIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                <span className="text-sm sm:text-base">{t('pickleball_add_booking')}</span>
-                            </Button>
+                                {t('pickleball_report_tab') || 'Report'}
+                            </button>
                         </div>
-                    </div>
-                </div>
 
-                <Card className=" border-white shadow-lg bg-background/10 backdrop-blur-sm">
-                    <CardContent className="p-0">
+                        {/* Header với title và buttons */}
+                        <div className="p-2 sm:p-4 border-b bg-background/40 backdrop-blur-sm">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2 sm:mb-0">
+                                <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">
+                                    {activeTab === 'booking' ? t('pickleball_booking') : (t('pickleball_report_tab') || 'Report')}
+                                </CardTitle>
+
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <Button
+                                        onClick={handleSearch}
+                                        className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+                                        size="sm"
+                                        disabled={loading}
+                                    >
+                                        <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                                        <span className="text-sm sm:text-base">{t('search')}</span>
+                                    </Button>
+                                    {activeTab === 'booking' && (
+                                        <Button
+                                            onClick={openAddEventDialog}
+                                            className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+                                            size="sm"
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                                            <span className="text-sm sm:text-base">{t('pickleball_add_booking')}</span>
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Header với navigation */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-4 border-b bg-background/40 backdrop-blur-sm gap-2">
                             <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-between sm:justify-start">
@@ -544,134 +888,163 @@ const PickleballBooking = () => {
                                     {t('today')}
                                 </Button>
                             </div>
-                            {/* Chú thích màu sắc - ẩn trên mobile nhỏ */}
-                            <div className="hidden sm:flex items-center gap-4 text-xs sm:text-sm">
-                                <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                                    <span className="text-gray-700">{t('pickleball_available') || 'Còn chỗ'}</span>
+                            {/* Chú thích màu sắc - chỉ hiển thị khi tab booking */}
+                            {activeTab === 'booking' && (
+                                <div className="hidden sm:flex items-center gap-4 text-xs sm:text-sm">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded-full bg-green-600"></div>
+                                        <span className="text-gray-700">{t('pickleball_available') || 'Còn chỗ'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                                        <span className="text-gray-700">{t('pickleball_full')}</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                                    <span className="text-gray-700">{t('pickleball_full')}</span>
+                            )}
+                            {/* Chú thích số lượng booking - chỉ hiển thị khi tab report */}
+                            {activeTab === 'report' && (
+                                <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm">
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-xs sm:text-sm font-extrabold bg-red-600 text-white rounded-full px-2 py-0.5 inline-block">1</span>
+                                        <span className="text-gray-700">{t('pickleball_booking_count_legend')}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
-                        {/* Weekly Calendar Grid */}
-                        <div className="overflow-x-auto -mx-2 sm:mx-0 pickleball-calendar-grid">
-                            <div className="min-w-[700px] sm:min-w-0">
-                                {/* Day Headers */}
-                                <div className="grid grid-cols-7 border-b">
-                                    {weekDays.map((day, index) => {
-                                        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                                        const isTodayDate = isToday(day);
-                                        const past = isPastDate(day);
-                                        const dayFull = !past && isDayFull(day);
-                                        // Ưu tiên màu đỏ khi full, bất kể có phải today hay không
-                                        const textColor = past ? 'text-gray-400' : 
-                                                         dayFull ? 'text-red-600' : 
-                                                         isTodayDate ? 'text-blue-600' : 'text-green-600';
-                                        return (
-                                            <div
-                                                key={index}
-                                                className={`p-1 sm:p-2 border-r text-center ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm font-bold' : 'bg-gray-50/60 backdrop-blur-sm'}`}
-                                            >
-                                                <div className="text-[10px] sm:text-xs text-gray-600">{dayNames[index]}</div>
-                                                <div className={`text-xs sm:text-sm md:text-lg font-semibold ${textColor}`}>
-                                                    {format(day, 'MM/dd')}
-                                                </div>
-                                                {!past && (
-                                                    <div className={`text-[8px] sm:text-[10px] mt-0.5 sm:mt-1 ${
-                                                        dayFull ? 'text-red-500' : 'text-green-500'
-                                                    }`}>
-                                                        {/* {dayFull ? t('pickleball_full') : ''} */}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                        {/* Tab Content */}
 
-                                {/* Day Columns with Events */}
-                                <div 
-                                    className="grid grid-cols-7 border-b pickleball-day-columns" 
-                                >
-                                    {weekDays.map((day, dayIndex) => {
-                                        const dayEvents = getEventsForDay(day);
-                                        const past = isPastDate(day);
-                                        
-                                        return (
-                                            <div
-                                                key={dayIndex}
-                                                className={`p-1 sm:p-2 border-r flex flex-col pickleball-day-cell ${past ? 'bg-gray-100/40 backdrop-blur-sm opacity-50' : 'bg-white/60 backdrop-blur-sm'} ${isToday(day) ? 'bg-blue-50/60 backdrop-blur-sm' : ''}`}
-                                                style={{ 
-                                                    cursor: past ? 'not-allowed' : 'pointer'
-                                                }}
-                                                onClick={() => !past && handleDayClick(day)}
-                                            >
-                                                {/* Events container - có thể cuộn */}
-                                                <div className="flex-1 space-y-1 sm:space-y-2 overflow-y-auto min-h-0 pr-0.5 sm:pr-1">
-                                                    {dayEvents.length > 0 && (
-                                                        dayEvents.map((event, eventIndex) => (
-                                                            <div
-                                                                key={event.id || eventIndex}
-                                                                className="rounded-lg sm:rounded-xl p-1.5 sm:p-3 text-xs cursor-pointer hover:scale-[1.02] transition-all duration-200 shadow-md border border-white/30 sm:border-2 relative overflow-hidden"
-                                                                style={{
-                                                                    backgroundColor: event.bgColor || colorSwatches[0],
-                                                                    backgroundSize: 'cover, cover, cover',
-                                                                    backgroundPosition: 'center, center, center',
-                                                                    backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
-                                                                    backgroundBlendMode: 'normal, multiply, overlay',
-                                                                }}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleEventClick(event);
-                                                                }}
-                                                            >
-                                                                {/* Decorative corner accent */}
-                                                                <div 
-                                                                    className="absolute top-0 right-0 w-8 h-8 sm:w-16 sm:h-16 opacity-30"
-                                                                    style={{
-                                                                        background: `linear-gradient(135deg, transparent 0%, ${event.bgColor || colorSwatches[0]} 100%)`,
-                                                                    }}
-                                                                />
-                                                                
-                                                                {/* Content */}
-                                                                <div className="relative z-10">
-                                                                    <div className="font-extrabold text-xs sm:text-sm md:text-2xl text-gray-900 drop-shadow-sm whitespace-nowrap">    
-                                                                        {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
-                                                                    </div>
-                                                                    <div className="text-[8px] sm:text-xs md:text-lg text-gray-800 sm:font-semibold font-light truncate drop-shadow-sm text-right mt-0.5 sm:mt-1">{event.title}</div>
-                                                                    {/* {event.court && (
+                        {/* Tab Content */}
+                        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                            {activeTab === 'booking' && (
+                                <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden flex flex-col -mx-2 sm:mx-0">
+                                    <div className="min-w-[700px] sm:min-w-0 flex-1 flex flex-col min-h-0">
+                                        {/* Day Headers */}
+                                        <div className="grid grid-cols-7 border-b flex-shrink-0">
+                                            {weekDays.map((day, index) => {
+                                                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                                const isTodayDate = isToday(day);
+                                                const past = isPastDate(day);
+                                                const dayFull = !past && isDayFull(day);
+                                                // Ưu tiên màu đỏ khi full, bất kể có phải today hay không
+                                                const textColor = past ? 'text-gray-400' :
+                                                    dayFull ? 'text-red-600' :
+                                                        isTodayDate ? 'text-blue-600' : 'text-green-600';
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className={`p-1 sm:p-2 border-r text-center ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm font-bold' : 'bg-gray-50/60 backdrop-blur-sm'}`}
+                                                    >
+                                                        <div className="text-[10px] sm:text-xs text-gray-600">{dayNames[index]}</div>
+                                                        <div className={`text-xs sm:text-sm md:text-lg font-semibold ${textColor}`}>
+                                                            {format(day, 'MM/dd')}
+                                                        </div>
+                                                        {!past && (
+                                                            <div className={`text-[8px] sm:text-[10px] mt-0.5 sm:mt-1 ${dayFull ? 'text-red-500' : 'text-green-500'
+                                                                }`}>
+                                                                {/* {dayFull ? t('pickleball_full') : ''} */}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Day Columns with Events */}
+                                        <div
+                                            className="grid grid-cols-7 border-b pickleball-day-columns"
+                                            style={{ maxHeight: 'calc(100vh - 365px)' }}
+                                        >
+                                            {weekDays.map((day, dayIndex) => {
+                                                const dayEvents = getEventsForDay(day);
+                                                const past = isPastDate(day);
+
+                                                return (
+                                                    <div
+                                                        key={dayIndex}
+                                                        className={`p-0 border-r flex flex-col pickleball-day-cell  ${past ? 'bg-gray-100/40 backdrop-blur-sm opacity-50' : 'bg-white/60 backdrop-blur-sm'} ${isToday(day) ? 'bg-blue-50/60 backdrop-blur-sm' : ''}`}
+                                                        style={{
+                                                            cursor: past ? 'not-allowed' : 'pointer',
+                                                            maxHeight: 'calc(100vh - 365px)'
+                                                        }}
+                                                        onClick={() => !past && handleDayClick(day)}
+                                                    >
+                                                        {/* Events container - có thể cuộn */}
+                                                        <div className="flex-1 space-y-1 sm:space-y-2 overflow-y-auto min-h-0 p-1 sm:p-2 pr-0.5 sm:pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                                                            {dayEvents.length > 0 && (
+                                                                dayEvents.map((event, eventIndex) => (
+                                                                    <div
+                                                                        key={event.id || eventIndex}
+                                                                        className="rounded-lg sm:rounded-xl p-1.5 sm:p-3 text-xs cursor-pointer hover:scale-[1.02] transition-all duration-200 shadow-md border border-white/30 sm:border-2 relative overflow-hidden"
+                                                                        style={{
+                                                                            backgroundColor: event.bgColor || colorSwatches[0],
+                                                                            backgroundSize: 'cover, cover, cover',
+                                                                            backgroundPosition: 'center, center, center',
+                                                                            backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
+                                                                            backgroundBlendMode: 'normal, multiply, overlay',
+                                                                        }}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleEventClick(event);
+                                                                        }}
+                                                                    >
+                                                                        {/* Decorative corner accent */}
+                                                                        <div
+                                                                            className="absolute top-0 right-0 w-8 h-8 sm:w-16 sm:h-16 opacity-30"
+                                                                            style={{
+                                                                                background: `linear-gradient(135deg, transparent 0%, ${event.bgColor || colorSwatches[0]} 100%)`,
+                                                                            }}
+                                                                        />
+
+                                                                        {/* Content */}
+                                                                        <div className="relative z-10">
+                                                                            <div className="font-extrabold text-xs sm:text-sm md:text-2xl text-gray-900 drop-shadow-sm whitespace-nowrap">
+                                                                                {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
+                                                                            </div>
+                                                                            <div className="text-[8px] sm:text-xs md:text-lg text-gray-800 sm:font-semibold font-light truncate drop-shadow-sm text-right mt-0.5 sm:mt-1">{event.title}</div>
+                                                                            {/* {event.court && (
                                                                         <div className="text-gray-700 text-[10px] mt-1 truncate">
                                                                             {event.court}
                                                                         </div>
                                                                     )} */}
-                                                                </div>
-                                                                
-                                                                {/* Bottom accent line */}
-                                                                <div 
-                                                                    className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 opacity-70"
-                                                                    style={{
-                                                                        background: `linear-gradient(90deg, transparent 0%, ${event.bgColor || colorSwatches[0]} 50%, transparent 100%)`,
-                                                                    }}
-                                                                />
+                                                                        </div>
+
+                                                                        {/* Bottom accent line */}
+                                                                        <div
+                                                                            className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 opacity-70"
+                                                                            style={{
+                                                                                background: `linear-gradient(90deg, transparent 0%, ${event.bgColor || colorSwatches[0]} 50%, transparent 100%)`,
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                ))
+                                                            )}
+                                                        </div>
+                                                        {/* Click to add event - luôn ở bottom */}
+                                                        {!past && (
+                                                            <div className="text-[10px] sm:text-xs text-gray-400 text-center py-1 sm:py-2 px-1 sm:px-2 border-t border-gray-200 flex-shrink-0 flex items-center justify-center gap-1 hover:text-primary transition-colors bg-white/80 backdrop-blur-sm">
+                                                                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                                                <span>{t('pickleball_click_to_add_event')}</span>
                                                             </div>
-                                                        ))
-                                                    )}
-                                                </div>
-                                                {/* Click to add event - luôn ở bottom */}
-                                                {!past && (
-                                                    <div className="text-[10px] sm:text-xs text-gray-400 text-center pt-1 sm:pt-2 border-t border-gray-200 flex-shrink-0 flex items-center justify-center gap-1 hover:text-primary transition-colors">
-                                                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                                                        <span>{t('pickleball_click_to_add_event')}</span>
+                                                        )}
                                                     </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {activeTab === 'report' && (
+                                <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto p-1 sm:p-2 md:p-4">
+                                    <GanttChart
+                                        weekDays={weekDays}
+                                        events={events}
+                                        format={format}
+                                        t={t}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -740,10 +1113,10 @@ const PickleballBooking = () => {
                                         </Label>
                                         <div className="pl-6 space-y-1">
                                             <p className="text-base md:text-lg lg:text-xl text-muted-foreground">
-                                                <span className="font-semibold">{t('pickleball_date')}</span> {format(selectedEvent.start, 'dd/MM/yyyy')} 
+                                                <span className="font-semibold">{t('pickleball_date')}</span> {format(selectedEvent.start, 'dd/MM/yyyy')}
                                             </p>
                                             <p className="text-base md:text-lg lg:text-xl text-muted-foreground">
-                                                <span className="font-semibold">{t('pickleball_time_label')}</span> {format(selectedEvent.start, 'HH:mm')} 
+                                                <span className="font-semibold">{t('pickleball_time_label')}</span> {format(selectedEvent.start, 'HH:mm')}
                                             </p>
                                         </div>
                                     </div>
@@ -765,16 +1138,16 @@ const PickleballBooking = () => {
                                         const eventDate = new Date(selectedEvent.start);
                                         eventDate.setHours(0, 0, 0, 0);
                                         const isPastEvent = eventDate < today;
-                                        
+
                                         // Lấy thông tin user đăng nhập
                                         const userInfo = getCurrentUserInfo();
                                         const currentUserEmpId = userInfo.empId;
-                                        
+
                                         // Kiểm tra emp_id của event (có thể là cardNumber hoặc userId)
                                         const eventEmpId = selectedEvent.cardNumber || selectedEvent.userId;
-                                        const isOwner = currentUserEmpId && eventEmpId && 
-                                                       String(currentUserEmpId).trim() === String(eventEmpId).trim();
-                                        
+                                        const isOwner = currentUserEmpId && eventEmpId &&
+                                            String(currentUserEmpId).trim() === String(eventEmpId).trim();
+
                                         // Chỉ hiển thị nút xóa nếu: không phải event quá khứ VÀ là chủ sở hữu
                                         if (!isPastEvent && isOwner) {
                                             return (

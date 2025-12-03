@@ -153,7 +153,7 @@ const HomePage = () => {
                     <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                       <CardPrimary
                         data={item}
-                        handleClick={() => handleNavigate(item.id)}
+                        handleClick={()=>handleNavigate(item.id)}
                       />
                     </Grid>
                   );
@@ -166,7 +166,7 @@ const HomePage = () => {
                       <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                         <CardPrimary
                           data={item}
-                          handleClick={() => handleNavigate(item.id)}
+                          handleClick={()=>handleNavigate(item.id)}
                         />
                       </Grid>
                     );
@@ -181,7 +181,7 @@ const HomePage = () => {
                       <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                         <CardPrimary
                           data={item}
-                          handleClick={() => handleNavigate(item.id)}
+                          handleClick={handleOpen}
                         />
                       </Grid>
                     );
@@ -196,7 +196,7 @@ const HomePage = () => {
                       <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
                         <CardPrimary
                           data={item}
-                          handleClick={() => handleNavigate(item.id)}
+                          handleClick={()=>handleNavigate(item.id)}
                         />
                       </Grid>
                     );
