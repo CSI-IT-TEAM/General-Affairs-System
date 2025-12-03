@@ -48,24 +48,24 @@ const AddEventDialog = ({
         return '17:00'; // Ngày thường = 17:00
     };
 
-    // Tính toán max time cho endTime (startTime + 2 giờ, nhưng tối đa là 23:59)
-    // Nếu startTime từ 22:00 (10:00 PM) trở đi, maxEndTime luôn là 23:59
+    // Tính toán max time cho endTime (startTime + 2 giờ, nhưng tối đa là 22:00)
+    // Nếu startTime từ 20:00 trở đi, maxEndTime luôn là 22:00
     const getMaxEndTime = () => {
-        if (!startTime) return '23:59';
+        if (!startTime) return '22:00';
         const [hours, minutes] = startTime.split(':').map(Number);
         
-        // Nếu startTime từ 22:00 (10:00 PM) trở đi, maxEndTime luôn là 23:59
-        if (hours >= 22) {
-            return '23:59';
+        // Nếu startTime từ 20:00 trở đi, maxEndTime luôn là 22:00
+        if (hours >= 20) {
+            return '22:00';
         }
         
         const maxTime = dayjs().hour(hours).minute(minutes).add(2, 'hour');
         const maxHour = maxTime.hour();
         const maxMinute = maxTime.minute();
         
-        // Giới hạn tối đa là 23:59 để tránh tràn sang ngày hôm sau
-        if (maxHour >= 24 || (maxHour === 23 && maxMinute >= 59)) {
-            return '23:59';
+        // Giới hạn tối đa là 22:00
+        if (maxHour >= 22) {
+            return '22:00';
         }
         
         return `${String(maxHour).padStart(2, '0')}:${String(maxMinute).padStart(2, '0')}`;
@@ -93,7 +93,7 @@ const AddEventDialog = ({
         }
     };
 
-    // Xử lý khi endTime thay đổi thủ công - kiểm tra không vượt quá 2 giờ và tối đa 23:59
+    // Xử lý khi endTime thay đổi thủ công - kiểm tra không vượt quá 2 giờ và tối đa 22:00
     const handleEndTimeChange = (newEndTime) => {
         setIsEndTimeManual(true); // Đánh dấu người dùng đã chỉnh thủ công
 
@@ -105,25 +105,25 @@ const AddEventDialog = ({
         const [startHours] = startTime.split(':').map(Number);
         const [endHours, endMinutes] = newEndTime.split(':').map(Number);
         
-        // Nếu startTime từ 22:00 (10:00 PM) trở đi, maxEndTime luôn là 23:59
-        const maxEndTime2359 = dayjs(`2000-01-01T23:59`, 'YYYY-MM-DDTHH:mm');
+        // Nếu startTime từ 20:00 trở đi, maxEndTime luôn là 22:00
+        const maxEndTime2200 = dayjs(`2000-01-01T22:00`, 'YYYY-MM-DDTHH:mm');
         let actualMaxEnd;
         
-        if (startHours >= 22) {
-            // Nếu startTime >= 22:00, maxEndTime luôn là 23:59
-            actualMaxEnd = maxEndTime2359;
+        if (startHours >= 20) {
+            // Nếu startTime >= 20:00, maxEndTime luôn là 22:00
+            actualMaxEnd = maxEndTime2200;
         } else {
-            // Nếu startTime < 22:00, tính maxEndTime = startTime + 2 giờ, tối đa 23:59
+            // Nếu startTime < 20:00, tính maxEndTime = startTime + 2 giờ, tối đa 22:00
             const start = dayjs(`2000-01-01T${startTime}`, 'YYYY-MM-DDTHH:mm');
             const maxEnd = start.add(2, 'hour');
-            actualMaxEnd = maxEnd.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEnd;
+            actualMaxEnd = maxEnd.isAfter(maxEndTime2200) ? maxEndTime2200 : maxEnd;
         }
         
         const end = dayjs(`2000-01-01T${newEndTime}`, 'YYYY-MM-DDTHH:mm');
         
-        // Kiểm tra nếu endTime là 00:00 (12:00 AM) và startTime >= 22:00, giới hạn lại 23:59
-        if (endHours === 0 && startHours >= 22) {
-            setEndTime('23:59');
+        // Kiểm tra nếu endTime vượt quá 22:00, giới hạn lại 22:00
+        if (endHours > 22 || (endHours === 22 && endMinutes > 0)) {
+            setEndTime('22:00');
             return;
         }
 
@@ -131,11 +131,7 @@ const AddEventDialog = ({
         if (end.isAfter(actualMaxEnd)) {
             const maxTime = actualMaxEnd.format('HH:mm');
             setEndTime(maxTime);
-            if (startHours >= 22) {
-                alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59!');
-            } else {
-                alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu!');
-            }
+            alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 22:00!');
         } else {
             setEndTime(newEndTime);
         }
@@ -156,19 +152,69 @@ const AddEventDialog = ({
     const [selectedEndHour, setSelectedEndHour] = useState(null);
     const [selectedEndMinute, setSelectedEndMinute] = useState(null);
 
-    // Tạo danh sách giờ dựa trên ngày
+    // Kiểm tra xem một thời điểm (hour:minute) có bị chiếm bởi event nào không
+    const isTimeSlotBooked = (hour, minute, isStartTime = true) => {
+        if (!startDate || !events || events.length === 0) return false;
+        
+        const checkTime = dayjs(`${startDate}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`, 'YYYY-MM-DDTHH:mm');
+        
+        return events.some(event => {
+            if (!event || !event.start || !event.end) return false;
+            
+            const eventStart = dayjs(event.start);
+            const eventEnd = dayjs(event.end);
+            
+            // Kiểm tra cùng ngày
+            if (!eventStart.isSame(dayjs(startDate), 'day')) return false;
+            
+            // Kiểm tra xem thời điểm có nằm trong khoảng thời gian của event không
+            // Không cho phép bất kỳ thời điểm nào nằm trong khoảng [event.start, event.end]
+            // Điều này đảm bảo không có overlap giữa các booking
+            // Start time: không được nằm trong [event.start, event.end)
+            // End time: không được nằm trong (event.start, event.end]
+            if (isStartTime) {
+                // Start time: không được nằm trong khoảng [event.start, event.end)
+                return checkTime.isSameOrAfter(eventStart) && checkTime.isBefore(eventEnd);
+            } else {
+                // End time: không được nằm trong khoảng (event.start, event.end]
+                return checkTime.isAfter(eventStart) && checkTime.isSameOrBefore(eventEnd);
+            }
+        });
+    };
+
+    // Tạo danh sách giờ dựa trên ngày và lọc các giờ đã bị đặt
     const getAvailableHours = () => {
+        let hours = [];
         if (isWeekendOrHoliday(startDate)) {
-            // Ngày nghỉ: từ 7:00 đến 23:00
-            return Array.from({ length: 17 }, (_, i) => i + 7);
+            // Ngày nghỉ: từ 7:00 đến 22:00
+            hours = Array.from({ length: 16 }, (_, i) => i + 7);
         } else {
-            // Ngày thường: từ 17:00 đến 23:00
-            return Array.from({ length: 7 }, (_, i) => i + 17);
+            // Ngày thường: từ 17:00 đến 22:00
+            hours = Array.from({ length: 6 }, (_, i) => i + 17);
         }
+        
+        // Lọc các giờ có ít nhất một phút khả dụng
+        return hours.filter(hour => {
+            // Kiểm tra xem giờ này có ít nhất một phút khả dụng không
+            return availableMinutes.some(minute => !isTimeSlotBooked(hour, minute, true));
+        });
     };
 
     // Tạo danh sách phút (cách nhau 15 phút)
     const availableMinutes = [0, 15, 30, 45];
+    
+    // Lấy danh sách phút khả dụng cho start time dựa trên giờ đã chọn
+    const getAvailableStartMinutes = (hour) => {
+        if (hour === null || hour === undefined) return availableMinutes;
+        
+        // Nếu startTime là 22:00, chỉ cho phép chọn phút 00 (không cho 15, 30, 45)
+        if (hour === 22) {
+            return [0].filter(minute => !isTimeSlotBooked(hour, minute, true));
+        }
+        
+        // Lọc các phút chưa bị đặt
+        return availableMinutes.filter(minute => !isTimeSlotBooked(hour, minute, true));
+    };
 
     // Format time để hiển thị
     const formatTimeDisplay = (timeStr) => {
@@ -217,20 +263,26 @@ const AddEventDialog = ({
         setSelectedEndHour(currentHour);
     };
 
-    // Lấy danh sách giờ cho end time
+    // Lấy danh sách giờ cho end time (đã lọc các giờ đã bị đặt)
     const getAvailableEndHours = () => {
         if (!startTime) return [];
         const slots = getAvailableEndTimeSlots();
         const hours = [...new Set(slots.map(s => s.hour))].sort((a, b) => a - b);
-        return hours;
+        // Lọc các giờ có ít nhất một phút khả dụng
+        return hours.filter(hour => {
+            const minutesForHour = slots.filter(s => s.hour === hour).map(s => s.minute);
+            return minutesForHour.some(minute => !isTimeSlotBooked(hour, minute, false));
+        });
     };
 
-    // Lấy danh sách phút cho end time dựa trên giờ đã chọn
+    // Lấy danh sách phút cho end time dựa trên giờ đã chọn (đã lọc các phút đã bị đặt)
     const getAvailableEndMinutes = (selectedHour) => {
         if (!startTime || selectedHour === null) return availableMinutes;
         const slots = getAvailableEndTimeSlots();
         const minutes = slots.filter(s => s.hour === selectedHour).map(s => s.minute).sort((a, b) => a - b);
-        return minutes.length > 0 ? minutes : availableMinutes;
+        // Lọc các phút chưa bị đặt
+        const availableMinutesForHour = minutes.length > 0 ? minutes : availableMinutes;
+        return availableMinutesForHour.filter(minute => !isTimeSlotBooked(selectedHour, minute, false));
     };
 
     // Lấy danh sách time slots hợp lệ cho end time (dựa trên startTime)
@@ -239,8 +291,10 @@ const AddEventDialog = ({
         
         const startTimeObj = dayjs(`2000-01-01T${startTime}`, 'YYYY-MM-DDTHH:mm');
         const maxEndTime = startTimeObj.add(2, 'hour');
-        const maxEndTime2359 = dayjs(`2000-01-01T23:59`, 'YYYY-MM-DDTHH:mm');
-        const actualMaxEnd = maxEndTime.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEndTime;
+        const maxEndTime2200 = dayjs(`2000-01-01T22:00`, 'YYYY-MM-DDTHH:mm');
+        
+        // Giới hạn tối đa là 22:00
+        const actualMaxEnd = maxEndTime.isAfter(maxEndTime2200) ? maxEndTime2200 : maxEndTime;
         
         const slots = [];
         let current = startTimeObj.add(15, 'minute'); // Bắt đầu từ startTime + 15 phút
@@ -249,19 +303,22 @@ const AddEventDialog = ({
             const hour = current.hour();
             const minute = current.minute();
             
-            // Chỉ thêm nếu phút là bội số của 15
-            if (minute % 15 === 0) {
+            // Chỉ thêm nếu phút là bội số của 15 và không vượt quá 22:00
+            if (minute % 15 === 0 && hour <= 22) {
+                if (hour === 22 && minute > 0) {
+                    break; // Không cho phép sau 22:00
+                }
                 slots.push({ hour, minute });
             }
             
             current = current.add(15, 'minute');
         }
         
-        // Nếu maxEndTime là 23:59, thêm nó vào
-        if (actualMaxEnd.hour() === 23 && actualMaxEnd.minute() === 59) {
-            const exists = slots.some(s => s.hour === 23 && s.minute === 59);
+        // Nếu maxEndTime là 22:00, thêm nó vào
+        if (actualMaxEnd.hour() === 22 && actualMaxEnd.minute() === 0) {
+            const exists = slots.some(s => s.hour === 22 && s.minute === 0);
             if (!exists) {
-                slots.push({ hour: 23, minute: 59 });
+                slots.push({ hour: 22, minute: 0 });
             }
         }
         
@@ -354,14 +411,14 @@ const AddEventDialog = ({
                     return;
                 }
 
-                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59 (chỉ cho cùng một ngày)
+                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu và tối đa là 22:00 (chỉ cho cùng một ngày)
                 // Cho phép bằng đúng 2 giờ (chỉ báo lỗi nếu lớn hơn 2 giờ)
                 const maxEndTime = startDay.add(2, 'hour');
-                const maxEndTime2359 = dayjs(`${startDate}T23:59`, 'YYYY-MM-DDTHH:mm');
-                const actualMaxEnd = maxEndTime.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEndTime;
+                const maxEndTime2200 = dayjs(`${startDate}T22:00`, 'YYYY-MM-DDTHH:mm');
+                const actualMaxEnd = maxEndTime.isAfter(maxEndTime2200) ? maxEndTime2200 : maxEndTime;
                 
                 if (endDay.isAfter(actualMaxEnd)) {
-                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59!');
+                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 22:00!');
                     return;
                 }
             }
@@ -406,16 +463,16 @@ const AddEventDialog = ({
                     }
                 }
 
-                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59
+                // Kiểm tra thời gian kết thúc không quá 2 giờ sau thời gian bắt đầu và tối đa là 22:00
                 // Cho phép bằng đúng 2 giờ (chỉ báo lỗi nếu lớn hơn 2 giờ)
                 const maxEndTime = eventStart.add(2, 'hour');
-                const maxEndTime2359 = current.hour(23).minute(59).second(0).millisecond(0);
-                const actualMaxEnd = maxEndTime.isAfter(maxEndTime2359) ? maxEndTime2359 : maxEndTime;
+                const maxEndTime2200 = current.hour(22).minute(0).second(0).millisecond(0);
+                const actualMaxEnd = maxEndTime.isAfter(maxEndTime2200) ? maxEndTime2200 : maxEndTime;
                 
                 if (eventEnd.isAfter(actualMaxEnd)) {
                     hasConflict = true;
                     conflictDate = current.format('DD/MM/YYYY');
-                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 23:59!');
+                    alert(t('pickleball_max_duration_error') || 'Thời gian kết thúc không được vượt quá 2 giờ sau thời gian bắt đầu và tối đa là 22:00!');
                     break;
                 }
 
@@ -494,25 +551,25 @@ const AddEventDialog = ({
         }
     });
 
-    // Tính toán endTime = startTime + 2 giờ, nhưng tối đa là 23:59
-    // Nếu startTime từ 22:00 (10:00 PM) trở đi, endTime luôn là 23:59
+    // Tính toán endTime = startTime + 2 giờ, nhưng tối đa là 22:00
+    // Nếu startTime từ 20:00 trở đi, endTime luôn là 22:00
     const calculateEndTime = (startTimeStr) => {
         if (!startTimeStr) return '19:00'; // Default fallback
         const [hours, minutes] = startTimeStr.split(':').map(Number);
         
-        // Nếu startTime từ 22:00 (10:00 PM) trở đi, endTime luôn là 23:59
-        if (hours >= 22) {
-            return '23:59';
+        // Nếu startTime từ 20:00 trở đi, endTime luôn là 22:00
+        if (hours >= 20) {
+            return '22:00';
         }
         
         const endTimeObj = dayjs().hour(hours).minute(minutes).add(2, 'hour');
         let endHour = endTimeObj.hour();
         let endMinute = endTimeObj.minute();
         
-        // Giới hạn tối đa là 23:59 để tránh tràn sang ngày hôm sau
-        if (endHour >= 24 || (endHour === 23 && endMinute >= 59)) {
-            endHour = 23;
-            endMinute = 59;
+        // Giới hạn tối đa là 22:00
+        if (endHour >= 22) {
+            endHour = 22;
+            endMinute = 0;
         }
         
         return `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
@@ -842,17 +899,48 @@ const AddEventDialog = ({
                                                             <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
                                                                 {t('pickleball_minute') || 'Phút'}
                                                             </div>
-                                                            {availableMinutes.map(minute => (
-                                                                <div
-                                                                    key={minute}
-                                                                    onClick={() => handleStartMinuteSelect(minute)}
-                                                                    className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                        selectedStartMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                    }`}
-                                                                >
-                                                                    {String(minute).padStart(2, '0')}
-                                                                </div>
-                                                            ))}
+                                                            {selectedStartHour !== null ? (
+                                                                getAvailableStartMinutes(selectedStartHour).length > 0 ? (
+                                                                    getAvailableStartMinutes(selectedStartHour).map(minute => (
+                                                                        <div
+                                                                            key={minute}
+                                                                            onClick={() => handleStartMinuteSelect(minute)}
+                                                                            className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                                selectedStartMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                            }`}
+                                                                        >
+                                                                            {String(minute).padStart(2, '0')}
+                                                                        </div>
+                                                                    ))
+                                                                ) : (
+                                                                    <div className="px-3 py-2 text-sm text-center text-gray-400">
+                                                                        {t('pickleball_no_available_slots') || 'Không có khung giờ khả dụng'}
+                                                                    </div>
+                                                                )
+                                                            ) : (
+                                                                // Khi chưa chọn giờ, hiển thị tất cả các phút nhưng chỉ cho phép chọn các phút khả dụng cho giờ đầu tiên
+                                                                (() => {
+                                                                    const defaultHour = isWeekendOrHoliday(startDate) ? 7 : 17;
+                                                                    const availableMins = getAvailableStartMinutes(defaultHour);
+                                                                    return availableMins.length > 0 ? (
+                                                                        availableMins.map(minute => (
+                                                                            <div
+                                                                                key={minute}
+                                                                                onClick={() => handleStartMinuteSelect(minute)}
+                                                                                className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                                    selectedStartMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                                }`}
+                                                                            >
+                                                                                {String(minute).padStart(2, '0')}
+                                                                            </div>
+                                                                        ))
+                                                                    ) : (
+                                                                        <div className="px-3 py-2 text-sm text-center text-gray-400">
+                                                                            {t('pickleball_no_available_slots') || 'Không có khung giờ khả dụng'}
+                                                                        </div>
+                                                                    );
+                                                                })()
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </PopoverContent>
@@ -907,18 +995,25 @@ const AddEventDialog = ({
                                                                     {t('pickleball_minute') || 'Phút'}
                                                                 </div>
                                                                 {selectedEndHour !== null ? (
-                                                                    getAvailableEndMinutes(selectedEndHour).map(minute => (
-                                                                        <div
-                                                                            key={minute}
-                                                                            onClick={() => handleEndMinuteSelect(minute)}
-                                                                            className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                                selectedEndMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                            }`}
-                                                                        >
-                                                                            {String(minute).padStart(2, '0')}
+                                                                    getAvailableEndMinutes(selectedEndHour).length > 0 ? (
+                                                                        getAvailableEndMinutes(selectedEndHour).map(minute => (
+                                                                            <div
+                                                                                key={minute}
+                                                                                onClick={() => handleEndMinuteSelect(minute)}
+                                                                                className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                                                    selectedEndMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
+                                                                                }`}
+                                                                            >
+                                                                                {String(minute).padStart(2, '0')}
+                                                                            </div>
+                                                                        ))
+                                                                    ) : (
+                                                                        <div className="px-3 py-2 text-sm text-center text-gray-400">
+                                                                            {t('pickleball_no_available_slots') || 'Không có khung giờ khả dụng'}
                                                                         </div>
-                                                                    ))
+                                                                    )
                                                                 ) : (
+                                                                    // Khi chưa chọn giờ, hiển thị tất cả các phút nhưng không cho phép chọn
                                                                     availableMinutes.map(minute => (
                                                                         <div
                                                                             key={minute}

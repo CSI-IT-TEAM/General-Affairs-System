@@ -198,6 +198,12 @@ const PickleballBooking = () => {
             return;
         }
 
+        // Kiểm tra xem ngày này đã full chưa
+        if (isDayFull(date)) {
+            alert(t('pickleball_day_full_alert') || 'Ngày này đã full lịch, không thể book thêm!');
+            return;
+        }
+
         const dateStr = format(date, 'yyyy-MM-dd');
         
         try {
@@ -285,6 +291,12 @@ const PickleballBooking = () => {
     const openAddEventDialog = async () => {
         const now = new Date();
         const dateStr = format(now, 'yyyy-MM-dd');
+
+        // Kiểm tra xem ngày hôm nay đã full chưa
+        if (isDayFull(now)) {
+            alert(t('pickleball_day_full_alert') || 'Ngày này đã full lịch, không thể book thêm!');
+            return;
+        }
 
         try {
             const calendarCheck = await checkCalendarDay(dateStr);
@@ -434,15 +446,17 @@ const PickleballBooking = () => {
         const dayOfWeek = date.getDay();
         
         // Xác định khung giờ có thể book
-        // Chủ nhật: 07:00 - 23:59 (khoảng 17 giờ = 1020 phút)
-        // Ngày thường: 17:00 - 23:59 (khoảng 7 giờ = 420 phút)
+        // Chủ nhật: 07:00 - 22:00
+        // Ngày thường: 17:00 - 22:00
         const startHour = dayOfWeek === 0 ? 7 : 17;
-        const endHour = 23;
-        const endMinute = 59;
+        const startMinute = 0;
+        const endHour = 22;
+        const endMinute = 0;
         
-        // Tính tổng số phút có thể book trong ngày (tính cho tất cả courts)
-        const hoursAvailable = endHour - startHour + 1;
-        const totalAvailableMinutes = hoursAvailable * 60 * numCourts;
+        // Tính chính xác tổng số phút có thể book trong ngày (tính cho tất cả courts)
+        const startTotalMinutes = startHour * 60 + startMinute;
+        const endTotalMinutes = endHour * 60 + endMinute;
+        const totalAvailableMinutes = (endTotalMinutes - startTotalMinutes + 1) * numCourts; // +1 để bao gồm cả phút cuối
         
         // Tính tổng số phút đã được book
         let totalBookedMinutes = 0;
@@ -455,13 +469,20 @@ const PickleballBooking = () => {
             totalBookedMinutes += duration;
         });
         
-        // Nếu đã book >= 95% tổng thời gian có thể, coi là full
+        // Nếu đã book >= 85% tổng thời gian có thể, coi là full (giảm ngưỡng để nhạy hơn)
         // Hoặc nếu số events >= số courts * số slots tối đa (mỗi slot 2 giờ)
-        const maxPossibleSlots = Math.ceil(hoursAvailable / 2) * numCourts; // Mỗi slot 2 giờ
+        const hoursAvailable = endTotalMinutes - startTotalMinutes + 1; // Tổng số phút
+        const maxPossibleSlots = Math.ceil(hoursAvailable / 120) * numCourts; // Mỗi slot 2 giờ = 120 phút
         const isFullBySlots = dayEvents.length >= maxPossibleSlots;
-        const isFullByTime = totalBookedMinutes >= totalAvailableMinutes * 0.95;
+        const isFullByTime = totalBookedMinutes >= totalAvailableMinutes * 0.85;
         
-        return isFullBySlots || isFullByTime;
+        // Kiểm tra thêm: nếu có ít nhất 4 events trong ngày thường (17:00-22:00) hoặc nhiều events trong chủ nhật
+        // thì coi là full (heuristic đơn giản)
+        const isFullByEventCount = dayOfWeek === 0 
+            ? dayEvents.length >= 8  // Chủ nhật: nếu có >= 8 events
+            : dayEvents.length >= 4; // Ngày thường: nếu có >= 4 events
+        
+        return isFullBySlots || isFullByTime || isFullByEventCount;
     };
 
     // Format header: "Dec 01 - Dec 07"
@@ -546,24 +567,24 @@ const PickleballBooking = () => {
                                         const isTodayDate = isToday(day);
                                         const past = isPastDate(day);
                                         const dayFull = !past && isDayFull(day);
+                                        // Ưu tiên màu đỏ khi full, bất kể có phải today hay không
+                                        const textColor = past ? 'text-gray-400' : 
+                                                         dayFull ? 'text-red-600' : 
+                                                         isTodayDate ? 'text-blue-600' : 'text-green-600';
                                         return (
                                             <div
                                                 key={index}
                                                 className={`p-1 sm:p-2 border-r text-center ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm font-bold' : 'bg-gray-50/60 backdrop-blur-sm'}`}
                                             >
                                                 <div className="text-[10px] sm:text-xs text-gray-600">{dayNames[index]}</div>
-                                                <div className={`text-xs sm:text-sm md:text-lg font-semibold ${
-                                                    past ? 'text-gray-400' : 
-                                                    dayFull ? 'text-red-600' : 
-                                                    isTodayDate ? 'text-blue-600' : 'text-green-600'
-                                                }`}>
+                                                <div className={`text-xs sm:text-sm md:text-lg font-semibold ${textColor}`}>
                                                     {format(day, 'MM/dd')}
                                                 </div>
                                                 {!past && (
                                                     <div className={`text-[8px] sm:text-[10px] mt-0.5 sm:mt-1 ${
                                                         dayFull ? 'text-red-500' : 'text-green-500'
                                                     }`}>
-                                                        {dayFull ? t('pickleball_full') : ''}
+                                                        {/* {dayFull ? t('pickleball_full') : ''} */}
                                                     </div>
                                                 )}
                                             </div>
@@ -745,7 +766,17 @@ const PickleballBooking = () => {
                                         eventDate.setHours(0, 0, 0, 0);
                                         const isPastEvent = eventDate < today;
                                         
-                                        if (!isPastEvent) {
+                                        // Lấy thông tin user đăng nhập
+                                        const userInfo = getCurrentUserInfo();
+                                        const currentUserEmpId = userInfo.empId;
+                                        
+                                        // Kiểm tra emp_id của event (có thể là cardNumber hoặc userId)
+                                        const eventEmpId = selectedEvent.cardNumber || selectedEvent.userId;
+                                        const isOwner = currentUserEmpId && eventEmpId && 
+                                                       String(currentUserEmpId).trim() === String(eventEmpId).trim();
+                                        
+                                        // Chỉ hiển thị nút xóa nếu: không phải event quá khứ VÀ là chủ sở hữu
+                                        if (!isPastEvent && isOwner) {
                                             return (
                                                 <Button
                                                     variant="destructive"

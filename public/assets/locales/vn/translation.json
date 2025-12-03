@@ -64,6 +64,7 @@
     "pickleball_minute": "Phút",
     "pickleball_select_start_time_first": "Vui lòng chọn giờ bắt đầu trước",
     "pickleball_day_full": "Đã full lịch",
+    "pickleball_day_full_alert": "Ngày này đã full lịch, không thể book thêm!",
     "pickleball_past_date": "Quá khứ",
     "previous": "Trước",
     "today": "Hôm nay",

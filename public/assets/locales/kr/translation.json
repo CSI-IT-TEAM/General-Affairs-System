@@ -58,6 +58,7 @@
     "pickleball_minute": "분",
     "pickleball_select_start_time_first": "먼저 시작 시간을 선택하세요",
     "pickleball_day_full": "일정 만석",
+    "pickleball_day_full_alert": "이 날짜는 이미 만석입니다. 더 이상 예약할 수 없습니다!",
     "pickleball_past_date": "과거 날짜",
     "pickleball_delete": "삭제",
     "previous": "이전",

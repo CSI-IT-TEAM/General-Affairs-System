@@ -64,6 +64,7 @@
     "pickleball_minute": "Minute",
     "pickleball_select_start_time_first": "Please select start time first",
     "pickleball_day_full": "Day Full",
+    "pickleball_day_full_alert": "This day is fully booked, cannot book more!",
     "pickleball_past_date": "Past Date",
     "previous": "Previous",
     "today": "Today",
