@@ -984,49 +984,34 @@ const AddEventDialog = ({
                                                     </Button>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-3">
-                                                    <div className="max-h-[400px] overflow-y-auto">
-                                                        {(() => {
-                                                            const slots = getAllStartTimeSlots();
-                                                            const groupedByHour = {};
-                                                            slots.forEach(slot => {
-                                                                if (!groupedByHour[slot.hour]) {
-                                                                    groupedByHour[slot.hour] = [];
-                                                                }
-                                                                groupedByHour[slot.hour].push(slot);
-                                                            });
-                                                            
-                                                            return Object.keys(groupedByHour).sort((a, b) => Number(a) - Number(b)).map(hour => (
-                                                                <div key={hour} className="mb-2 last:mb-0">
-                                                                    <div className="grid grid-cols-2 gap-2">
-                                                                        {groupedByHour[hour].map((slot) => {
-                                                                            const isSelected = startTime === slot.timeStr;
-                                                                            return (
-                                                                                <button
-                                                                                    key={slot.timeStr}
-                                                                                    type="button"
-                                                                                    onClick={() => {
-                                                                                        if (slot.isAvailable) {
-                                                                                            handleStartTimeSlotSelect(slot.timeStr);
-                                                                                            setOpenStartTime(false);
-                                                                                        }
-                                                                                    }}
-                                                                                    disabled={!slot.isAvailable}
-                                                                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                                                                                        isSelected
-                                                                                            ? 'bg-primary text-white hover:bg-primary/90'
-                                                                                            : slot.isAvailable
-                                                                                            ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 cursor-pointer'
-                                                                                            : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
-                                                                                    }`}
-                                                                                >
-                                                                                    {slot.timeStr}
-                                                                                </button>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                </div>
-                                                            ));
-                                                        })()}
+                                                    <div className="max-h-[250px] overflow-y-auto">
+                                                        <div className="flex flex-col gap-2">
+                                                            {getAllStartTimeSlots().map((slot) => {
+                                                                const isSelected = startTime === slot.timeStr;
+                                                                return (
+                                                                    <button
+                                                                        key={slot.timeStr}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            if (slot.isAvailable) {
+                                                                                handleStartTimeSlotSelect(slot.timeStr);
+                                                                                setOpenStartTime(false);
+                                                                            }
+                                                                        }}
+                                                                        disabled={!slot.isAvailable}
+                                                                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors w-full text-left ${
+                                                                            isSelected
+                                                                                ? 'bg-primary text-white hover:bg-primary/90'
+                                                                                : slot.isAvailable
+                                                                                ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 cursor-pointer'
+                                                                                : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
+                                                                        }`}
+                                                                    >
+                                                                        {slot.timeStr}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
                                                     </div>
                                                 </PopoverContent>
                                             </Popover>
@@ -1056,49 +1041,34 @@ const AddEventDialog = ({
                                                             {t('pickleball_select_start_time_first') || 'Vui lòng chọn giờ bắt đầu trước'}
                                                         </div>
                                                     ) : (
-                                                        <div className="max-h-[400px] overflow-y-auto">
-                                                            {(() => {
-                                                                const slots = getAllEndTimeSlots();
-                                                                const groupedByHour = {};
-                                                                slots.forEach(slot => {
-                                                                    if (!groupedByHour[slot.hour]) {
-                                                                        groupedByHour[slot.hour] = [];
-                                                                    }
-                                                                    groupedByHour[slot.hour].push(slot);
-                                                                });
-                                                                
-                                                                return Object.keys(groupedByHour).sort((a, b) => Number(a) - Number(b)).map(hour => (
-                                                                    <div key={hour} className="mb-2 last:mb-0">
-                                                                        <div className="grid grid-cols-2 gap-2">
-                                                                            {groupedByHour[hour].map((slot) => {
-                                                                                const isSelected = endTime === slot.timeStr;
-                                                                                return (
-                                                                                    <button
-                                                                                        key={slot.timeStr}
-                                                                                        type="button"
-                                                                                        onClick={() => {
-                                                                                            if (slot.isAvailable) {
-                                                                                                handleEndTimeSlotSelect(slot.timeStr);
-                                                                                                setOpenEndTime(false);
-                                                                                            }
-                                                                                        }}
-                                                                                        disabled={!slot.isAvailable}
-                                                                                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                                                                                            isSelected
-                                                                                                ? 'bg-primary text-white hover:bg-primary/90'
-                                                                                                : slot.isAvailable
-                                                                                                ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 cursor-pointer'
-                                                                                                : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
-                                                                                        }`}
-                                                                                    >
-                                                                                        {slot.timeStr}
-                                                                                    </button>
-                                                                                );
-                                                                            })}
-                                                                        </div>
-                                                                    </div>
-                                                                ));
-                                                            })()}
+                                                        <div className="max-h-[250px] overflow-y-auto">
+                                                            <div className="flex flex-col gap-2">
+                                                                {getAllEndTimeSlots().map((slot) => {
+                                                                    const isSelected = endTime === slot.timeStr;
+                                                                    return (
+                                                                        <button
+                                                                            key={slot.timeStr}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                if (slot.isAvailable) {
+                                                                                    handleEndTimeSlotSelect(slot.timeStr);
+                                                                                    setOpenEndTime(false);
+                                                                                }
+                                                                            }}
+                                                                            disabled={!slot.isAvailable}
+                                                                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors w-full text-left ${
+                                                                                isSelected
+                                                                                    ? 'bg-primary text-white hover:bg-primary/90'
+                                                                                    : slot.isAvailable
+                                                                                    ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 cursor-pointer'
+                                                                                    : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
+                                                                            }`}
+                                                                        >
+                                                                            {slot.timeStr}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </PopoverContent>
