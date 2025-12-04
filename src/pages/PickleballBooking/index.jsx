@@ -30,10 +30,10 @@ const GanttChart = ({ weekDays, events, format, t }) => {
     const endHour = 22;
     const totalHours = endHour - startHour + 1; // 16 giờ (07-22)
 
-    // Mỗi giờ chia thành 4 khoảng 15 phút: 0, 15, 30, 45
-    const minutesPerSlot = 15;
-    const slotsPerHour = 4;
-    const totalSlots = totalHours * slotsPerHour; // 16 * 4 = 64 slots
+    // Mỗi giờ chia thành 2 khoảng 30 phút: 0, 30
+    const minutesPerSlot = 30;
+    const slotsPerHour = 2;
+    const totalSlots = totalHours * slotsPerHour; // 16 * 2 = 32 slots
 
     // Tạo mảng giờ từ 07 đến 22 (để hiển thị header)
     const hours = [];
@@ -41,7 +41,7 @@ const GanttChart = ({ weekDays, events, format, t }) => {
         hours.push(h);
     }
 
-    // Tạo mảng các khoảng thời gian (slots) mỗi 15 phút
+    // Tạo mảng các khoảng thời gian (slots) mỗi 30 phút
     const timeSlots = [];
     for (let h = startHour; h <= endHour; h++) {
         for (let m = 0; m < 60; m += minutesPerSlot) {
@@ -53,7 +53,7 @@ const GanttChart = ({ weekDays, events, format, t }) => {
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     // Hàm tính toán vị trí và độ rộng của bar dựa trên thời gian
-    // Tính chính xác dựa trên phút (chia thành các khoảng 15 phút)
+    // Tính chính xác dựa trên phút (chia thành các khoảng 30 phút)
     const calculateBarPosition = (startTime, endTime) => {
         const start = new Date(startTime);
         const end = new Date(endTime);
@@ -64,11 +64,11 @@ const GanttChart = ({ weekDays, events, format, t }) => {
         let endHourValue = end.getHours();
         let endMinuteValue = end.getMinutes();
 
-        // Làm tròn start xuống khoảng 15 phút gần nhất (0, 15, 30, 45)
+        // Làm tròn start xuống khoảng 30 phút gần nhất (0, 30)
         const startSlot = Math.floor(startMinuteValue / minutesPerSlot) * minutesPerSlot;
         startMinuteValue = startSlot;
 
-        // Làm tròn end lên khoảng 15 phút gần nhất
+        // Làm tròn end lên khoảng 30 phút gần nhất
         const endSlot = Math.ceil(endMinuteValue / minutesPerSlot) * minutesPerSlot;
         if (endSlot >= 60) {
             endHourValue += 1;
@@ -231,10 +231,6 @@ const GanttChart = ({ weekDays, events, format, t }) => {
                         const dateKey = format(day, 'yyyy-MM-dd');
                         const dayName = dayNames[dayIndex];
 
-                        // Tính toán các bars cho ngày này (có thể có nhiều bars nếu có khoảng trống)
-                        const dayBars = calculateDayBars(dayEvents);
-                        const bgColor = '#13005f';
-
                         return (
                             <div
                                 key={dateKey}
@@ -251,10 +247,10 @@ const GanttChart = ({ weekDays, events, format, t }) => {
                                 </div>
 
                                 <div className="flex-1 relative h-full min-w-[720px]">
-                                    {/* Grid lines cho các khoảng 15 phút */}
+                                    {/* Grid lines cho các khoảng 30 phút */}
                                     <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
                                         {timeSlots.map((slot, index) => {
-                                            // Đường kẻ đậm cho mỗi giờ (0, 15, 30, 45 đầu tiên của giờ)
+                                            // Đường kẻ đậm cho mỗi giờ (0, 30 đầu tiên của giờ)
                                             const isHourMark = slot.minute === 0;
                                             return (
                                                 <div
@@ -265,26 +261,27 @@ const GanttChart = ({ weekDays, events, format, t }) => {
                                         })}
                                     </div>
 
-                                    {/* Vẽ nhiều bars nếu có khoảng trống giữa các bookings */}
-                                    {dayBars.map((barGroup, barIndex) => {
-                                        const { barPosition, events: groupEvents, start, end } = barGroup;
+                                    {/* Vẽ mỗi event là 1 bar riêng, cùng ngày nằm cùng dòng */}
+                                    {dayEvents.map((event, eventIndex) => {
+                                        const barPosition = calculateBarPosition(event.start, event.end);
                                         if (!barPosition || barPosition.width <= 0) return null;
+
+                                        // Sử dụng màu từ event.bgColor (đã được gán bởi assignColorsToEvents)
+                                        const eventColor = event.bgColor || '#13005f';
 
                                         return (
                                             <div
-                                                key={`bar-${barIndex}`}
+                                                key={`event-${event.id || eventIndex}`}
                                                 className="absolute h-5 sm:h-6 md:h-8 rounded-lg shadow-md border-2 border-white/80 flex items-center justify-center cursor-pointer transition-all"
                                                 style={{
                                                     left: `${Math.max(0, barPosition.left)}%`,
                                                     width: `${Math.max(0, Math.min(barPosition.width, 100 - Math.max(0, barPosition.left)))}%`,
-                                                    backgroundColor: bgColor,
+                                                    backgroundColor: eventColor,
                                                     top: '50%',
-                                                    color: 'white',
                                                     transform: 'translateY(-50%)',
                                                 }}
                                             >
-                                                  <span className="text-[9px] sm:text-xs font-extrabold bg-red-600 text-white rounded-full px-1.5 sm:px-2 py-0.5 inline-block mr-0.5 sm:mr-1">{groupEvents.length}</span>
-                                                  <span className="text-[9px] sm:text-xs font-semibold text-white whitespace-nowrap">{format(start, 'HH:mm')} - {format(end, 'HH:mm')}</span>
+                                                <span className="text-[9px] sm:text-xs font-semibold  whitespace-nowrap">{format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}</span>
                                             </div>
                                         );
                                     })}
@@ -902,14 +899,14 @@ const PickleballBooking = () => {
                                 </div>
                             )}
                             {/* Chú thích số lượng booking - chỉ hiển thị khi tab report */}
-                            {activeTab === 'report' && (
+                            {/* {activeTab === 'report' && (
                                 <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm">
                                     <div className="flex items-center gap-1">
                                         <span className="text-xs sm:text-sm font-extrabold bg-red-600 text-white rounded-full px-2 py-0.5 inline-block">1</span>
                                         <span className="text-gray-700">{t('pickleball_booking_count_legend')}</span>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
 
                         {/* Tab Content */}

@@ -210,10 +210,15 @@ const AddEventDialog = ({
         
         let current = dayjs(`${dateStr}T${defaultStartTimeStr}`, 'YYYY-MM-DDTHH:mm');
         
+        // Làm tròn xuống slot 30 phút gần nhất (0 hoặc 30)
+        const currentMinute = current.minute();
+        const roundedMinute = currentMinute < 30 ? 0 : 30;
+        current = current.minute(roundedMinute).second(0).millisecond(0);
+        
         // Giới hạn tối đa: 22:00
         const maxTime = dayjs(`${dateStr}T22:00`, 'YYYY-MM-DDTHH:mm');
         
-        // Tìm khung giờ khả dụng, tăng dần 15 phút mỗi lần
+        // Tìm khung giờ khả dụng, tăng dần 30 phút mỗi lần
         while (current.isBefore(maxTime) || current.isSame(maxTime, 'minute')) {
             const currentHour = current.hour();
             const currentMinute = current.minute();
@@ -232,8 +237,8 @@ const AddEventDialog = ({
                 return startTimeStr;
             }
             
-            // Tăng 15 phút và thử lại
-            current = current.add(15, 'minute');
+            // Tăng 30 phút và thử lại
+            current = current.add(30, 'minute');
             
             // Nếu vượt quá 22:00, dừng lại
             if (current.isAfter(maxTime)) {
@@ -263,14 +268,46 @@ const AddEventDialog = ({
         });
     };
 
-    // Tạo danh sách phút (cách nhau 15 phút)
-    const availableMinutes = [0, 15, 30, 45];
+    // Tạo danh sách phút (cách nhau 30 phút)
+    const availableMinutes = [0, 30];
     
-    // Lấy danh sách phút khả dụng cho start time dựa trên giờ đã chọn
+    // Tạo danh sách tất cả các slot thời gian cho start time
+    const getAllStartTimeSlots = () => {
+        let hours = [];
+        if (isWeekendOrHoliday(startDate)) {
+            // Ngày nghỉ: từ 7:00 đến 22:00
+            hours = Array.from({ length: 16 }, (_, i) => i + 7);
+        } else {
+            // Ngày thường: từ 17:00 đến 22:00
+            hours = Array.from({ length: 6 }, (_, i) => i + 17);
+        }
+        
+        const slots = [];
+        hours.forEach(hour => {
+            availableMinutes.forEach(minute => {
+                // Nếu là 22:00, chỉ cho phép phút 00
+                if (hour === 22 && minute === 30) return;
+                
+                const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                const isAvailable = !isTimeSlotBooked(hour, minute, true);
+                
+                slots.push({
+                    hour,
+                    minute,
+                    timeStr,
+                    isAvailable
+                });
+            });
+        });
+        
+        return slots;
+    };
+    
+    // Lấy danh sách phút khả dụng cho start time dựa trên giờ đã chọn (giữ lại cho tương thích)
     const getAvailableStartMinutes = (hour) => {
         if (hour === null || hour === undefined) return availableMinutes;
         
-        // Nếu startTime là 22:00, chỉ cho phép chọn phút 00 (không cho 15, 30, 45)
+        // Nếu startTime là 22:00, chỉ cho phép chọn phút 00 (không cho 30)
         if (hour === 22) {
             return [0].filter(minute => !isTimeSlotBooked(hour, minute, true));
         }
@@ -286,7 +323,16 @@ const AddEventDialog = ({
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     };
 
-    // Xử lý chọn giờ cho start time
+    // Xử lý chọn slot cho start time
+    const handleStartTimeSlotSelect = (timeStr) => {
+        if (!timeStr) return;
+        handleStartTimeChange(timeStr);
+        const [hour, minute] = timeStr.split(':').map(Number);
+        setSelectedStartHour(hour);
+        setSelectedStartMinute(minute);
+    };
+
+    // Xử lý chọn giờ cho start time (giữ lại cho tương thích)
     const handleStartHourSelect = (hour) => {
         setSelectedStartHour(hour);
         // Lấy phút từ startTime hiện tại hoặc mặc định là 0
@@ -296,7 +342,7 @@ const AddEventDialog = ({
         setSelectedStartMinute(currentMinute);
     };
 
-    // Xử lý chọn phút cho start time
+    // Xử lý chọn phút cho start time (giữ lại cho tương thích)
     const handleStartMinuteSelect = (minute) => {
         setSelectedStartMinute(minute);
         // Lấy giờ từ startTime hiện tại hoặc mặc định
@@ -306,7 +352,16 @@ const AddEventDialog = ({
         setSelectedStartHour(currentHour);
     };
 
-    // Xử lý chọn giờ cho end time
+    // Xử lý chọn slot cho end time
+    const handleEndTimeSlotSelect = (timeStr) => {
+        if (!timeStr) return;
+        handleEndTimeChange(timeStr);
+        const [hour, minute] = timeStr.split(':').map(Number);
+        setSelectedEndHour(hour);
+        setSelectedEndMinute(minute);
+    };
+
+    // Xử lý chọn giờ cho end time (giữ lại cho tương thích)
     const handleEndHourSelect = (hour) => {
         setSelectedEndHour(hour);
         // Lấy phút từ endTime hiện tại hoặc mặc định là 0
@@ -316,7 +371,7 @@ const AddEventDialog = ({
         setSelectedEndMinute(currentMinute);
     };
 
-    // Xử lý chọn phút cho end time
+    // Xử lý chọn phút cho end time (giữ lại cho tương thích)
     const handleEndMinuteSelect = (minute) => {
         setSelectedEndMinute(minute);
         // Lấy giờ từ endTime hiện tại hoặc mặc định
@@ -360,21 +415,21 @@ const AddEventDialog = ({
         const actualMaxEnd = maxEndTime.isAfter(maxEndTime2200) ? maxEndTime2200 : maxEndTime;
         
         const slots = [];
-        let current = startTimeObj.add(15, 'minute'); // Bắt đầu từ startTime + 15 phút
+        let current = startTimeObj.add(30, 'minute'); // Bắt đầu từ startTime + 30 phút
         
         while (current.isSameOrBefore(actualMaxEnd)) {
             const hour = current.hour();
             const minute = current.minute();
             
-            // Chỉ thêm nếu phút là bội số của 15 và không vượt quá 22:00
-            if (minute % 15 === 0 && hour <= 22) {
+            // Chỉ thêm nếu phút là bội số của 30 và không vượt quá 22:00
+            if (minute % 30 === 0 && hour <= 22) {
                 if (hour === 22 && minute > 0) {
                     break; // Không cho phép sau 22:00
                 }
                 slots.push({ hour, minute });
             }
             
-            current = current.add(15, 'minute');
+            current = current.add(30, 'minute');
         }
         
         // Nếu maxEndTime là 22:00, thêm nó vào
@@ -386,6 +441,24 @@ const AddEventDialog = ({
         }
         
         return slots;
+    };
+    
+    // Tạo danh sách tất cả các slot thời gian cho end time
+    const getAllEndTimeSlots = () => {
+        if (!startTime) return [];
+        
+        const slots = getAvailableEndTimeSlots();
+        
+        return slots.map(slot => {
+            const timeStr = `${String(slot.hour).padStart(2, '0')}:${String(slot.minute).padStart(2, '0')}`;
+            const isAvailable = !isTimeSlotBooked(slot.hour, slot.minute, false);
+            
+            return {
+                ...slot,
+                timeStr,
+                isAvailable
+            };
+        });
     };
 
     // Nhóm time slots theo giờ
@@ -910,76 +983,50 @@ const AddEventDialog = ({
                                                         <Clock className="h-4 w-4 opacity-50" />
                                                     </Button>
                                                 </PopoverTrigger>
-                                                <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-0">
-                                                    <div className="flex border-t">
-                                                        {/* Cột giờ */}
-                                                        <div className="w-20 border-r max-h-[300px] overflow-y-auto">
-                                                            <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
-                                                                {t('pickleball_hour') || 'Giờ'}
-                                                            </div>
-                                                            {getAvailableHours().map(hour => (
-                                                                <div
-                                                                    key={hour}
-                                                                    onClick={() => handleStartHourSelect(hour)}
-                                                                    className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                        selectedStartHour === hour ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                    }`}
-                                                                >
-                                                                    {String(hour).padStart(2, '0')}
+                                                <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-3">
+                                                    <div className="max-h-[400px] overflow-y-auto">
+                                                        {(() => {
+                                                            const slots = getAllStartTimeSlots();
+                                                            const groupedByHour = {};
+                                                            slots.forEach(slot => {
+                                                                if (!groupedByHour[slot.hour]) {
+                                                                    groupedByHour[slot.hour] = [];
+                                                                }
+                                                                groupedByHour[slot.hour].push(slot);
+                                                            });
+                                                            
+                                                            return Object.keys(groupedByHour).sort((a, b) => Number(a) - Number(b)).map(hour => (
+                                                                <div key={hour} className="mb-2 last:mb-0">
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        {groupedByHour[hour].map((slot) => {
+                                                                            const isSelected = startTime === slot.timeStr;
+                                                                            return (
+                                                                                <button
+                                                                                    key={slot.timeStr}
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        if (slot.isAvailable) {
+                                                                                            handleStartTimeSlotSelect(slot.timeStr);
+                                                                                            setOpenStartTime(false);
+                                                                                        }
+                                                                                    }}
+                                                                                    disabled={!slot.isAvailable}
+                                                                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                                                                                        isSelected
+                                                                                            ? 'bg-primary text-white hover:bg-primary/90'
+                                                                                            : slot.isAvailable
+                                                                                            ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 cursor-pointer'
+                                                                                            : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
+                                                                                    }`}
+                                                                                >
+                                                                                    {slot.timeStr}
+                                                                                </button>
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 </div>
-                                                            ))}
-                                                        </div>
-                                                        {/* Cột phút */}
-                                                        <div className="w-20 max-h-[300px] overflow-y-auto">
-                                                            <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
-                                                                {t('pickleball_minute') || 'Phút'}
-                                                            </div>
-                                                            {selectedStartHour !== null ? (
-                                                                getAvailableStartMinutes(selectedStartHour).length > 0 ? (
-                                                                    getAvailableStartMinutes(selectedStartHour).map(minute => (
-                                                                        <div
-                                                                            key={minute}
-                                                                            onClick={() => handleStartMinuteSelect(minute)}
-                                                                            className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                                selectedStartMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                            }`}
-                                                                        >
-                                                                            {String(minute).padStart(2, '0')}
-                                                                        </div>
-                                                                    ))
-                                                                ) :null
-                                                            ) : (
-                                                                // Khi chưa chọn giờ, hiển thị tất cả các phút nhưng chỉ cho phép chọn các phút khả dụng cho giờ đầu tiên
-                                                                (() => {
-                                                                    const defaultHour = isWeekendOrHoliday(startDate) ? 7 : 17;
-                                                                    const availableMins = getAvailableStartMinutes(defaultHour);
-                                                                    return availableMins.length > 0 ? (
-                                                                        availableMins.map(minute => (
-                                                                            <div
-                                                                                key={minute}
-                                                                                onClick={() => handleStartMinuteSelect(minute)}
-                                                                                className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                                    selectedStartMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                                }`}
-                                                                            >
-                                                                                {String(minute).padStart(2, '0')}
-                                                                            </div>
-                                                                        ))
-                                                                        ) : null;
-                                                                })()
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    {/* Nút OK để đóng popup */}
-                                                    <div className="border-t p-2 flex justify-end">
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            onClick={() => setOpenStartTime(false)}
-                                                            className="h-8 px-4 text-sm"
-                                                        >
-                                                            {t('btn_ok') || 'OK'}
-                                                        </Button>
+                                                            ));
+                                                        })()}
                                                     </div>
                                                 </PopoverContent>
                                             </Popover>
@@ -1003,74 +1050,55 @@ const AddEventDialog = ({
                                                         <Clock className="h-4 w-4 opacity-50" />
                                                     </Button>
                                                 </PopoverTrigger>
-                                                <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-0">
+                                                <PopoverContent align="start" side="bottom" sideOffset={4} className="w-auto p-3">
                                                     {!startTime ? (
                                                         <div className="p-3 text-sm text-gray-500 text-center">
                                                             {t('pickleball_select_start_time_first') || 'Vui lòng chọn giờ bắt đầu trước'}
                                                         </div>
                                                     ) : (
-                                                        <div className="flex border-t">
-                                                            {/* Cột giờ */}
-                                                            <div className="w-20 border-r max-h-[300px] overflow-y-auto">
-                                                                <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
-                                                                    {t('pickleball_hour') || 'Giờ'}
-                                                                </div>
-                                                                {getAvailableEndHours().map(hour => (
-                                                                    <div
-                                                                        key={hour}
-                                                                        onClick={() => handleEndHourSelect(hour)}
-                                                                        className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                            selectedEndHour === hour ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                        }`}
-                                                                    >
-                                                                        {String(hour).padStart(2, '0')}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                            {/* Cột phút */}
-                                                            <div className="w-20 max-h-[300px] overflow-y-auto">
-                                                                <div className="sticky top-0 bg-gray-50 border-b px-2 py-1 text-xs font-semibold text-gray-600 text-center">
-                                                                    {t('pickleball_minute') || 'Phút'}
-                                                                </div>
-                                                                {selectedEndHour !== null ? (
-                                                                    getAvailableEndMinutes(selectedEndHour).length > 0 ? (
-                                                                        getAvailableEndMinutes(selectedEndHour).map(minute => (
-                                                                            <div
-                                                                                key={minute}
-                                                                                onClick={() => handleEndMinuteSelect(minute)}
-                                                                                className={`px-3 py-2 text-sm text-center cursor-pointer hover:bg-gray-100 transition-colors ${
-                                                                                    selectedEndMinute === minute ? 'bg-primary text-white hover:bg-primary/90' : ''
-                                                                                }`}
-                                                                            >
-                                                                                {String(minute).padStart(2, '0')}
-                                                                            </div>
-                                                                        ))
-                                                                    ) : null
-                                                                ) : (
-                                                                    // Khi chưa chọn giờ, hiển thị tất cả các phút nhưng không cho phép chọn
-                                                                    availableMinutes.map(minute => (
-                                                                        <div
-                                                                            key={minute}
-                                                                            className="px-3 py-2 text-sm text-center text-gray-400"
-                                                                        >
-                                                                            {String(minute).padStart(2, '0')}
+                                                        <div className="max-h-[400px] overflow-y-auto">
+                                                            {(() => {
+                                                                const slots = getAllEndTimeSlots();
+                                                                const groupedByHour = {};
+                                                                slots.forEach(slot => {
+                                                                    if (!groupedByHour[slot.hour]) {
+                                                                        groupedByHour[slot.hour] = [];
+                                                                    }
+                                                                    groupedByHour[slot.hour].push(slot);
+                                                                });
+                                                                
+                                                                return Object.keys(groupedByHour).sort((a, b) => Number(a) - Number(b)).map(hour => (
+                                                                    <div key={hour} className="mb-2 last:mb-0">
+                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                            {groupedByHour[hour].map((slot) => {
+                                                                                const isSelected = endTime === slot.timeStr;
+                                                                                return (
+                                                                                    <button
+                                                                                        key={slot.timeStr}
+                                                                                        type="button"
+                                                                                        onClick={() => {
+                                                                                            if (slot.isAvailable) {
+                                                                                                handleEndTimeSlotSelect(slot.timeStr);
+                                                                                                setOpenEndTime(false);
+                                                                                            }
+                                                                                        }}
+                                                                                        disabled={!slot.isAvailable}
+                                                                                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                                                                                            isSelected
+                                                                                                ? 'bg-primary text-white hover:bg-primary/90'
+                                                                                                : slot.isAvailable
+                                                                                                ? 'bg-gray-100 text-gray-900 hover:bg-gray-200 cursor-pointer'
+                                                                                                : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
+                                                                                        }`}
+                                                                                    >
+                                                                                        {slot.timeStr}
+                                                                                    </button>
+                                                                                );
+                                                                            })}
                                                                         </div>
-                                                                    ))
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {/* Nút OK để đóng popup */}
-                                                    {startTime && (
-                                                        <div className="border-t p-2 flex justify-end">
-                                                            <Button
-                                                                type="button"
-                                                                size="sm"
-                                                                onClick={() => setOpenEndTime(false)}
-                                                                className="h-8 px-4 text-sm"
-                                                            >
-                                                                {t('btn_ok') || 'OK'}
-                                                            </Button>
+                                                                    </div>
+                                                                ));
+                                                            })()}
                                                         </div>
                                                     )}
                                                 </PopoverContent>
