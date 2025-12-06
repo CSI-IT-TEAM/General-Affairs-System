@@ -104,6 +104,7 @@ const CardPrimary = ({ data, handleClick }) => {
       "002": { r: 239, g: 154, b: 154 },   // Đỏ nhạt (Medical)
       "003": { r: 129, g: 199, b: 132 },   // Xanh lá nhạt (Flight)
       "004": { r: 255, g: 183, b: 77 },    // Cam nhạt (Pickleball)
+      "005": { r: 255, g: 183, b: 77 },    // Cam nhạt (Meeting Room)
     };
     
     const color = colorMap[data.id] || { r: 245, g: 247, b: 250 };
@@ -131,6 +132,10 @@ const CardPrimary = ({ data, handleClick }) => {
       case "004":
         title = t("pickleball_title");
         desc = t("pickleball_desc");
+        break;
+      case "005":
+        title = t("meeting_room_title");
+        desc = t("meeting_room_desc");
         break;
       default:
         break;

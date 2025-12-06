@@ -51,6 +51,12 @@ const PickleballSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-proce
 const PickleballDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
 const PickleballEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
 
+// Meeting Room Booking API URLs
+const MeetingRoomCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+const MeetingRoomSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-procedure";
+const MeetingRoomDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
+const MeetingRoomEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
+
 export {
   downloadURL,
   uploadURL,
@@ -78,4 +84,8 @@ export {
   PickleballSaveProcedureURL,
   PickleballDeleteProcedureURL,
   PickleballEmployeeInfoURL,
+  MeetingRoomCallProcedureURL,
+  MeetingRoomSaveProcedureURL,
+  MeetingRoomDeleteProcedureURL,
+  MeetingRoomEmployeeInfoURL,
 };

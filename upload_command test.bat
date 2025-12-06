@@ -1,0 +1,1 @@
+scp -r ./build/* administrator@172.30.10.120:/var/www/CE_TEMPERATURE_CHECKLIST_WEBSITE
