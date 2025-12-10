@@ -19,41 +19,38 @@ import {
     checkCalendarDay,
 } from '../../api/meetingRoomBooking';
 import backgroundImage from '../../assets/images/background.png';
-import pageBackground from '../../assets/images/background.webp';
+import pageBackground from '../../assets/images/meeting_room_bg.jpeg';
 
 dayjs.extend(isSameOrBefore);
 
 // Component Gantt Chart cho Report
-const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter }) => {
-    // Giờ bắt đầu và kết thúc
+const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, meetingRooms }) => {
+    // Giờ bắt đầu và kết thúc: 07:30 đến 16:30
     const startHour = 7;
-    const endHour = 22;
-    const totalHours = endHour - startHour + 1; // 16 giờ (07-22)
+    const startMinute = 30;
+    const endHour = 16;
+    const endMinute = 30;
 
-    // Mỗi giờ chia thành 2 khoảng 30 phút: 0, 30
-    const minutesPerSlot = 30;
-    const slotsPerHour = 2;
-    const totalSlots = totalHours * slotsPerHour; // 16 * 2 = 32 slots
-
-    // Tạo mảng giờ từ 07 đến 22 (để hiển thị header)
+    // Mỗi slot = 60 phút (1 giờ)
+    const minutesPerSlot = 60;
+    const slotsPerHour = 1;
+    
+    // Tạo mảng giờ từ 07:30 đến 16:30 (mỗi slot = 60 phút)
+    // Bao gồm: 07:30, 08:30, 09:30, 10:30, 11:30, 12:30, 13:30, 14:30, 15:30, 16:30
     const hours = [];
+    // Từ 07:30 đến 16:30 (mỗi giờ cách nhau 60 phút)
     for (let h = startHour; h <= endHour; h++) {
-        hours.push(h);
+        hours.push({ hour: h, minute: startMinute });
     }
-
-    // Tạo mảng các khoảng thời gian (slots) mỗi 30 phút
-    const timeSlots = [];
-    for (let h = startHour; h <= endHour; h++) {
-        for (let m = 0; m < 60; m += minutesPerSlot) {
-            timeSlots.push({ hour: h, minute: m });
-        }
-    }
+    
+    // Tính totalSlots = số phần tử trong mảng hours
+    const totalSlots = hours.length; // 10 slots
 
     // Tên các ngày trong tuần
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     // Hàm tính toán vị trí và độ rộng của bar dựa trên thời gian
-    // Tính chính xác dựa trên phút (chia thành các khoảng 30 phút)
+    // Tính chính xác dựa trên phút (mỗi slot = 60 phút)
     const calculateBarPosition = (startTime, endTime) => {
         const start = new Date(startTime);
         const end = new Date(endTime);
@@ -64,58 +61,113 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter }) 
         let endHourValue = end.getHours();
         let endMinuteValue = end.getMinutes();
 
-        // Làm tròn start xuống khoảng 30 phút gần nhất (0, 30)
-        const startSlot = Math.floor(startMinuteValue / minutesPerSlot) * minutesPerSlot;
-        startMinuteValue = startSlot;
+        // Tính tổng số phút từ 00:00
+        let startTotalMinutes = startHourValue * 60 + startMinuteValue;
+        let endTotalMinutes = endHourValue * 60 + endMinuteValue;
+        const baseMinutes = startHour * 60 + startMinute; // 07:30 = 450 phút
+        const endBaseMinutes = endHour * 60 + endMinute; // 16:30 = 990 phút
 
-        // Làm tròn end lên khoảng 30 phút gần nhất
-        const endSlot = Math.ceil(endMinuteValue / minutesPerSlot) * minutesPerSlot;
-        if (endSlot >= 60) {
-            endHourValue += 1;
-            endMinuteValue = 0;
-        } else {
-            endMinuteValue = endSlot;
+        // Đảm bảo trong khoảng 07:30-16:30
+        // Nếu booking bắt đầu trước 07:30, chỉ hiển thị từ 07:30
+        if (startTotalMinutes < baseMinutes) {
+            startTotalMinutes = baseMinutes;
         }
-
-        // Đảm bảo trong khoảng 07:00-22:00
-        // Nếu booking bắt đầu trước 07:00, chỉ hiển thị từ 07:00
-        if (startHourValue < startHour || (startHourValue === startHour && startMinuteValue < 0)) {
-            startHourValue = startHour;
-            startMinuteValue = 0;
-        }
-        // Nếu booking bắt đầu sau 22:00, không hiển thị
-        if (startHourValue > endHour || (startHourValue === endHour && startMinuteValue > 0)) {
+        // Nếu booking bắt đầu sau 16:30, không hiển thị
+        if (startTotalMinutes > endBaseMinutes) {
             return { left: 0, width: 0 };
         }
-        // Nếu booking kết thúc sau 22:00, chỉ hiển thị đến 22:00
-        if (endHourValue > endHour || (endHourValue === endHour && endMinuteValue > 0)) {
-            endHourValue = endHour;
-            endMinuteValue = 0;
+        // Nếu booking kết thúc sau 16:30, chỉ hiển thị đến 16:30
+        if (endTotalMinutes > endBaseMinutes) {
+            endTotalMinutes = endBaseMinutes;
         }
 
-        // Tính số slot từ start đến end
-        const startTotalMinutes = startHourValue * 60 + startMinuteValue;
-        const endTotalMinutes = endHourValue * 60 + endMinuteValue;
-        const baseMinutes = startHour * 60; // 07:00 = 420 phút
-
-        // Tính index của slot (0-based)
-        const startSlotIndex = Math.floor((startTotalMinutes - baseMinutes) / minutesPerSlot);
-        // End slot index bao gồm cả slot cuối cùng (exclusive end)
-        const endSlotIndex = Math.ceil((endTotalMinutes - baseMinutes) / minutesPerSlot);
+        // Tính index của slot (0-based), mỗi slot = 60 phút
+        // Tính vị trí chính xác trong slot (0-1)
+        const startOffsetMinutes = startTotalMinutes - baseMinutes;
+        const endOffsetMinutes = endTotalMinutes - baseMinutes;
+        
+        const startSlotIndex = Math.floor(startOffsetMinutes / minutesPerSlot);
+        const endSlotIndex = Math.ceil(endOffsetMinutes / minutesPerSlot);
+        
+        // Tính vị trí chính xác trong slot
+        const startPositionInSlot = (startOffsetMinutes % minutesPerSlot) / minutesPerSlot;
+        const endPositionInSlot = (endOffsetMinutes % minutesPerSlot) / minutesPerSlot;
 
         // Đảm bảo trong phạm vi hợp lệ
         if (startSlotIndex < 0 || startSlotIndex >= totalSlots) {
             return { left: 0, width: 0 };
         }
-        if (endSlotIndex <= startSlotIndex || endSlotIndex > totalSlots) {
+        if (endSlotIndex <= startSlotIndex && endSlotIndex >= totalSlots) {
+            return { left: 0, width: 0 };
+        }
+        if (endSlotIndex < startSlotIndex) {
             return { left: 0, width: 0 };
         }
 
         // Tính vị trí và độ rộng (theo %)
-        const left = (startSlotIndex / totalSlots) * 100;
-        const width = ((endSlotIndex - startSlotIndex) / totalSlots) * 100;
+        // Mỗi slot chiếm 1/totalSlots của width
+        const slotWidth = 100 / totalSlots;
+        
+        // Tính left: vị trí bắt đầu của slot + vị trí trong slot
+        const left = (startSlotIndex * slotWidth) + (startPositionInSlot * slotWidth);
+        
+        // Tính width: từ start đến end
+        let width;
+        if (startSlotIndex === endSlotIndex) {
+            // Cùng 1 slot
+            width = (endPositionInSlot - startPositionInSlot) * slotWidth;
+        } else {
+            // Nhiều slot
+            const startSlotRemaining = (1 - startPositionInSlot) * slotWidth;
+            const endSlotUsed = endPositionInSlot * slotWidth;
+            const middleSlots = (endSlotIndex - startSlotIndex - 1) * slotWidth;
+            width = startSlotRemaining + middleSlots + endSlotUsed;
+        }
 
         return { left, width, startHour: startHourValue, endHour: endHourValue };
+    };
+
+    // Lấy events cho một meetingRoom cụ thể trong tuần
+    const getEventsForMeetingRoom = (meetingRoomValue) => {
+        return events.filter(event => {
+            const eventRoom = String(event.meetingRoom || '').trim();
+            const roomValue = String(meetingRoomValue || '').trim();
+            const roomMatches = eventRoom === roomValue || 
+                               eventRoom.toLowerCase() === roomValue.toLowerCase();
+            
+            // Kiểm tra event có trong tuần hiện tại không
+            const eventDate = format(event.start, 'yyyy-MM-dd');
+            const weekStart = format(weekDays[0], 'yyyy-MM-dd');
+            const weekEnd = format(weekDays[6], 'yyyy-MM-dd');
+            const dateInWeek = eventDate >= weekStart && eventDate <= weekEnd;
+            
+            // Nếu có filter phòng họp, chỉ lấy phòng được chọn
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter !== '') {
+                const filterRoom = String(selectedMeetingRoomFilter).trim();
+                return roomMatches && dateInWeek && 
+                       (eventRoom === filterRoom || eventRoom.toLowerCase() === filterRoom.toLowerCase());
+            }
+            
+            return roomMatches && dateInWeek;
+        }).sort((a, b) => {
+            return a.start.getTime() - b.start.getTime();
+        });
+    };
+
+    // Lấy tên meetingRoom từ meetingRooms list
+    const getMeetingRoomName = (meetingRoomValue) => {
+        if (!meetingRooms || meetingRooms.length === 0) {
+            return String(meetingRoomValue || '').trim();
+        }
+        
+        const roomValue = String(meetingRoomValue || '').trim();
+        const meetingRoomItem = meetingRooms.find(room => {
+            const rValue = String(room.value || '').trim();
+            return rValue === roomValue || 
+                   rValue.toLowerCase() === roomValue.toLowerCase();
+        });
+        
+        return meetingRoomItem ? meetingRoomItem.label : roomValue;
     };
 
     // Lấy events cho một ngày cụ thể (có filter theo phòng họp nếu được chọn)
@@ -205,102 +257,290 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter }) 
         });
     };
 
+    // Lấy events cho một ngày cụ thể, nhóm theo meetingRoom
+    const getEventsForDayByRoom = (date) => {
+        const dateKey = format(date, 'yyyy-MM-dd');
+        const dayEvents = events.filter(event => {
+            const eventDateKey = format(event.start, 'yyyy-MM-dd');
+            const dateMatches = eventDateKey === dateKey;
+            
+            // Nếu có filter phòng họp, kiểm tra thêm
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter !== '') {
+                const eventRoom = String(event.meetingRoom || '').trim();
+                const filterRoom = String(selectedMeetingRoomFilter).trim();
+                const roomMatches = eventRoom === filterRoom || 
+                                   eventRoom.toLowerCase() === filterRoom.toLowerCase();
+                return dateMatches && roomMatches;
+            }
+            
+            return dateMatches;
+        });
+        
+        // Nhóm events theo meetingRoom
+        const eventsByRoom = {};
+        dayEvents.forEach(event => {
+            const roomValue = String(event.meetingRoom || '').trim();
+            if (!eventsByRoom[roomValue]) {
+                eventsByRoom[roomValue] = [];
+            }
+            eventsByRoom[roomValue].push(event);
+        });
+        
+        return eventsByRoom;
+    };
+
+    // Kiểm tra xem có filter phòng cụ thể không
+    const hasRoomFilter = selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim() !== '';
+
     return (
-        <div className="w-full h-full max-h-[450px] flex flex-col">
+        <div className="w-full h-full max-h-[600px] flex flex-col">
             <div className="flex-1 overflow-auto border border-gray-300 rounded-lg bg-white/50">
-                {/* Header với các giờ */}
-                <div className="sticky top-0 z-10 bg-gray-100 border-b">
-                    <div className="flex min-w-[800px]">
-                        <div className="w-20 sm:w-32 md:w-40 border-r bg-gray-100 p-1 sm:p-2 font-semibold text-[10px] sm:text-xs">
+                {/* Header với các giờ - giống PickleballBooking */}
+                <div className="sticky top-0 z-20 bg-gray-100 border-b">
+                    <div className="flex min-w-[600px] sm:min-w-[800px]">
+                        {/* Cột đầu tiên: Date - empty trong header */}
+                        <div className="w-16 sm:w-24 md:w-32 lg:w-40 border-r bg-gray-100 p-0.5 sm:p-1 md:p-2 font-semibold text-[8px] sm:text-[10px] md:text-xs">
                             {/* Header cell cho tên ngày */}
                         </div>
-                        <div className="flex-1 grid min-w-[720px]" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
-                            {hours.map((hour, hourIndex) => {
-                                // Tính vị trí slot đầu tiên của giờ này trong grid
-                                const slotStartIndex = hourIndex * slotsPerHour;
-                                return (
-                                    <div
-                                        key={`header-${hour}`}
-                                        className="border-r-2 border-dashed border-blue-950/50 p-1 sm:p-2 text-center font-semibold text-[10px] sm:text-xs md:text-sm"
-                                        style={{
-                                            gridColumnStart: slotStartIndex + 1,
-                                            gridColumnEnd: slotStartIndex + slotsPerHour + 1
-                                        }}
-                                    >
-                                        {String(hour).padStart(2, '0')}{t('pickleball_hh')}
-                                    </div>
-                                );
-                            })}
+                        {/* Cột thứ hai: Meeting Room - chỉ hiển thị khi không có filter */}
+                        {!hasRoomFilter && (
+                            <div className="w-16 sm:w-24 md:w-32 lg:w-40 border-r bg-gray-100 p-0.5 sm:p-1 md:p-2 font-semibold text-[8px] sm:text-[10px] md:text-xs">
+                                {/* Header cell cho meeting room */}
+                            </div>
+                        )}
+                        {/* Header giờ từ 07:30 đến 16:30 - chỉ có 9 cột */}
+                        <div className="flex-1 grid min-w-[500px] sm:min-w-[720px]" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                            {hours.map((hourSlot, hourIndex) => (
+                                <div
+                                    key={`header-${hourSlot.hour}-${hourSlot.minute}`}
+                                    className="border-r-2 border-dashed border-blue-950/50 p-0.5 sm:p-1 md:p-2 text-center font-semibold text-[8px] sm:text-[10px] md:text-xs lg:text-sm"
+                                >
+                                    {String(hourSlot.hour).padStart(2, '0')}:{String(hourSlot.minute).padStart(2, '0')}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Các hàng cho từng ngày */}
-                <div>
-                    {weekDays.map((day, dayIndex) => {
-                        const dayEvents = getEventsForDay(day);
-                        const dateKey = format(day, 'yyyy-MM-dd');
-                        const dayName = dayNames[dayIndex];
-
-                        return (
-                            <div
-                                key={dateKey}
-                                className="relative min-h-[50px] flex items-center border-b border-gray-200 min-w-[800px]"
-                            >
-                                {/* Tên ngày */}
-                                <div className="w-20 sm:w-32 md:w-40 border-r p-1 sm:p-2 flex flex-col justify-center sticky left-0 z-10 bg-white/50 backdrop-blur-sm">
-                                    <div className="text-[10px] sm:text-xs font-semibold text-gray-600">
-                                        {dayName}
-                                    </div>
-                                    <div className="text-[10px] sm:text-xs font-semibold text-gray-600">
-                                        {format(day, 'MM/dd')}
-                                    </div>
-                                </div>
-
-                                <div className="flex-1 relative h-full min-w-[720px]">
-                                    {/* Grid lines cho các khoảng 30 phút */}
-                                    <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
-                                        {timeSlots.map((slot, index) => {
-                                            // Đường kẻ đậm cho mỗi giờ (0, 30 đầu tiên của giờ)
-                                            const isHourMark = slot.minute === 0;
-                                            return (
-                                                <div
-                                                    key={`${slot.hour}-${slot.minute}`}
-                                                    className={isHourMark ? 'border-r-2 border-gray-400' : 'border-r border-gray-200'}
-                                                />
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Vẽ mỗi event là 1 bar riêng, cùng ngày nằm cùng dòng */}
-                                    {dayEvents.map((event, eventIndex) => {
-                                        const barPosition = calculateBarPosition(event.start, event.end);
-                                        if (!barPosition || barPosition.width <= 0) return null;
-
-                                        // Sử dụng màu từ event.bgColor (đã được gán bởi assignColorsToEvents)
-                                        const eventColor = event.bgColor || '#13005f';
-
-                                        return (
-                                            <div
-                                                key={`event-${event.id || eventIndex}`}
-                                                className="absolute h-5 sm:h-6 md:h-8 rounded-lg shadow-md border-2 border-white/80 flex items-center justify-center cursor-pointer transition-all"
-                                                style={{
-                                                    left: `${Math.max(0, barPosition.left)}%`,
-                                                    width: `${Math.max(0, Math.min(barPosition.width, 100 - Math.max(0, barPosition.left)))}%`,
-                                                    backgroundColor: eventColor,
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                }}
-                                            >
-                                                <span className="text-[9px] sm:text-xs font-semibold  whitespace-nowrap">{format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}</span>
+                {/* Các hàng cho từng ngày - mỗi ngày có các dòng meetingRoom - dùng table với rowspan */}
+                <table className="w-full min-w-[600px] sm:min-w-[800px] border-collapse">
+                    <tbody>
+                        {weekDays.map((day, dayIndex) => {
+                            const dateKey = format(day, 'yyyy-MM-dd');
+                            const dayName = dayNames[dayIndex];
+                            
+                            // Nếu có filter phòng, lấy tất cả events trong ngày (đã được filter theo phòng rồi)
+                            // Nếu không có filter, nhóm theo phòng
+                            let dayEvents = [];
+                            let roomKeys = [];
+                            
+                            if (hasRoomFilter) {
+                                // Có filter phòng: lấy tất cả events trong ngày (chỉ có 1 phòng)
+                                dayEvents = getEventsForDay(day);
+                            } else {
+                                // Không có filter: nhóm theo phòng
+                                const dayEventsByRoom = getEventsForDayByRoom(day);
+                                roomKeys = Object.keys(dayEventsByRoom);
+                            }
+                            
+                            // Nếu có filter phòng và không có events, hiển thị 1 dòng trống
+                            if (hasRoomFilter && dayEvents.length === 0) {
+                                return (
+                                    <tr key={dateKey} className="border-b border-gray-200">
+                                        <td className="w-16 sm:w-24 md:w-32 lg:w-40 border-r p-0.5 sm:p-1 md:p-2 sticky left-0 z-10 bg-white/50 backdrop-blur-sm align-middle">
+                                            <div className="flex flex-col justify-center h-full">
+                                                <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                    {dayName}
+                                                </div>
+                                                <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                    {format(day, 'MM/dd')}
+                                                </div>
                                             </div>
+                                        </td>
+                                        <td className="relative h-[40px] sm:h-[50px] min-w-[500px] sm:min-w-[720px]">
+                                            <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                                                {hours.map((hourSlot, hourIndex) => (
+                                                    <div
+                                                        key={`${dayIndex}-${hourSlot.hour}-${hourSlot.minute}`}
+                                                        className="border-r border-dashed border-gray-400"
+                                                    />
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            // Nếu không có filter và không có events, hiển thị 1 dòng trống
+                            if (!hasRoomFilter && roomKeys.length === 0) {
+                                return (
+                                    <tr key={dateKey} className="border-b border-gray-200">
+                                        <td className="w-16 sm:w-24 md:w-32 lg:w-40 border-r p-0.5 sm:p-1 md:p-2 sticky left-0 z-10 bg-white/50 backdrop-blur-sm align-middle">
+                                            <div className="flex flex-col justify-center h-full">
+                                                <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                    {dayName}
+                                                </div>
+                                                <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                    {format(day, 'MM/dd')}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="w-16 sm:w-24 md:w-32 lg:w-40 border-r p-0.5 sm:p-1 md:p-2 sticky left-0 z-10 bg-white/50 backdrop-blur-sm">
+                                        </td>
+                                        <td className="relative h-[40px] sm:h-[50px] min-w-[500px] sm:min-w-[720px]">
+                                            <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                                                {hours.map((hourSlot, hourIndex) => (
+                                                    <div
+                                                        key={`${dayIndex}-${hourSlot.hour}-${hourSlot.minute}`}
+                                                        className="border-r border-dashed border-gray-400"
+                                                    />
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            // Nếu có filter phòng: hiển thị 1 dòng cho tất cả events trong ngày
+                            if (hasRoomFilter) {
+                                return (
+                                    <tr key={dateKey} className="border-b border-gray-200">
+                                        <td className="w-16 sm:w-24 md:w-32 lg:w-40 border-r p-0.5 sm:p-1 md:p-2 sticky left-0 z-10 bg-white/50 backdrop-blur-sm align-middle">
+                                            <div className="flex flex-col justify-center h-full">
+                                                <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                    {dayName}
+                                                </div>
+                                                <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                    {format(day, 'MM/dd')}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="relative h-[40px] sm:h-[50px] min-w-[500px] sm:min-w-[720px]">
+                                            {/* Grid lines cho các slot 60 phút */}
+                                            <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                                                {hours.map((hourSlot, hourIndex) => (
+                                                    <div
+                                                        key={`${dayIndex}-${hourSlot.hour}-${hourSlot.minute}`}
+                                                        className="border-r border-dashed border-gray-400"
+                                                    />
+                                                ))}
+                                            </div>
+
+                                            {/* Vẽ các events trong ngày */}
+                                            {dayEvents.map((event, eventIndex) => {
+                                                const barPosition = calculateBarPosition(event.start, event.end);
+                                                if (!barPosition || barPosition.width <= 0) return null;
+
+                                                const eventColor = event.bgColor || '#13005f';
+
+                                                return (
+                                                    <div
+                                                        key={`event-${event.id || eventIndex}`}
+                                                        className="absolute h-4 sm:h-5 md:h-6 lg:h-8 shadow-md border-2 border-white/80 flex items-center justify-center cursor-pointer transition-all z-0"
+                                                        style={{
+                                                            left: `${Math.max(0, Math.min(barPosition.left, 100))}%`,
+                                                            width: `${Math.max(0, Math.min(barPosition.width, 100 - Math.max(0, barPosition.left)))}%`,
+                                                            backgroundColor: eventColor,
+                                                            top: '50%',
+                                                            transform: 'translateY(-50%)',
+                                                        }}
+                                                        title={`${format(event.start, 'dd/MM HH:mm')} - ${format(event.end, 'HH:mm')} ${event.title || ''} ${event.department || ''}`}
+                                                    >
+                                                        <span className="text-[7px] sm:text-[9px] md:text-xs font-semibold whitespace-nowrap px-0.5 sm:px-1">
+                                                            {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            // Không có filter: hiển thị các dòng cho từng meetingRoom trong ngày
+                            return (
+                                <React.Fragment key={`day-group-${dayIndex}`}>
+                                    {roomKeys.map((roomValue, roomIndex) => {
+                                        const dayEventsByRoom = getEventsForDayByRoom(day);
+                                        const roomEvents = dayEventsByRoom[roomValue];
+                                        const roomName = getMeetingRoomName(roomValue);
+                                        
+                                        return (
+                                            <tr
+                                                key={`${dateKey}-${roomValue}-${roomIndex}`}
+                                                className="border-b border-gray-200"
+                                            >
+                                                {/* Cột đầu tiên: Thứ và ngày - chỉ render ở dòng đầu tiên với rowspan */}
+                                                {roomIndex === 0 && (
+                                                    <td 
+                                                        rowSpan={roomKeys.length}
+                                                        className="w-16 sm:w-24 md:w-32 lg:w-40 border-r p-0.5 sm:p-1 md:p-2 sticky left-0 z-10 bg-white/50 backdrop-blur-sm align-middle"
+                                                    >
+                                                        <div className="flex flex-col justify-center h-full">
+                                                            <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                                {dayName}
+                                                            </div>
+                                                            <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600">
+                                                                {format(day, 'MM/dd')}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                
+                                                {/* Cột thứ hai: Tên meetingRoom - chỉ hiển thị khi không có filter */}
+                                                <td className="w-16 sm:w-24 md:w-32 lg:w-40 border-r p-0.5 sm:p-1 md:p-2 sticky left-0 z-10 bg-white/50 backdrop-blur-sm">
+                                                    <div className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-gray-600 break-words">
+                                                        {roomName || ''}
+                                                    </div>
+                                                </td>
+
+                                                {/* Grid giờ từ 07:30 đến 16:30 */}
+                                                <td className="relative h-[40px] sm:h-[50px] min-w-[500px] sm:min-w-[720px]">
+                                                    {/* Grid lines cho các slot 60 phút */}
+                                                    <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalSlots}, 1fr)` }}>
+                                                        {hours.map((hourSlot, hourIndex) => (
+                                                            <div
+                                                                key={`${dayIndex}-${roomValue}-${hourSlot.hour}-${hourSlot.minute}`}
+                                                                className="border-r border-dashed border-gray-400"
+                                                            />
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Vẽ các events của meetingRoom này trong ngày */}
+                                                    {roomEvents.map((event, eventIndex) => {
+                                                        const barPosition = calculateBarPosition(event.start, event.end);
+                                                        if (!barPosition || barPosition.width <= 0) return null;
+
+                                                        const eventColor = event.bgColor || '#13005f';
+
+                                                        return (
+                                                            <div
+                                                                key={`event-${event.id || eventIndex}`}
+                                                                className="absolute h-4 sm:h-5 md:h-6 lg:h-8  shadow-md border-2 border-white/80 flex items-center justify-center cursor-pointer transition-all z-0"
+                                                                style={{
+                                                                    left: `${Math.max(0, Math.min(barPosition.left, 100))}%`,
+                                                                    width: `${Math.max(0, Math.min(barPosition.width, 100 - Math.max(0, barPosition.left)))}%`,
+                                                                    backgroundColor: eventColor,
+                                                                    top: '50%',
+                                                                    transform: 'translateY(-50%)',
+                                                                }}
+                                                                title={`${format(event.start, 'dd/MM HH:mm')} - ${format(event.end, 'HH:mm')} ${event.title || ''} ${event.department || ''}`}
+                                                            >
+                                                                <span className="text-[7px] sm:text-[9px] md:text-xs font-semibold whitespace-nowrap px-0.5 sm:px-1">
+                                                                    {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </td>
+                                            </tr>
                                         );
                                     })}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                                </React.Fragment>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
@@ -432,11 +672,10 @@ const MeetingRoomBooking = () => {
                     setMeetingRooms(meetingRooms);
                 }
 
-                // Load events for current week ± 1 week
-                const weekStart = new Date(currentWeekStart);
-                weekStart.setDate(weekStart.getDate() - 7);
+                // Load events for current week (Chủ nhật đến Thứ bảy)
+                const weekStart = new Date(currentWeekStart); // Chủ nhật của tuần đã chọn
                 const weekEnd = new Date(currentWeekStart);
-                weekEnd.setDate(weekEnd.getDate() + 14);
+                weekEnd.setDate(weekEnd.getDate() + 6); // Thứ bảy của tuần đã chọn
 
                 const fromDate = format(weekStart, 'yyyy-MM-dd');
                 const toDate = format(weekEnd, 'yyyy-MM-dd');
@@ -558,10 +797,10 @@ const MeetingRoomBooking = () => {
                 setMeetingRooms(meetingRooms);
             }
 
-            const weekStart = new Date(currentWeekStart);
-            weekStart.setDate(weekStart.getDate() - 7);
+            // Load events for current week (Chủ nhật đến Thứ bảy)
+            const weekStart = new Date(currentWeekStart); // Chủ nhật của tuần đã chọn
             const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(weekEnd.getDate() + 14);
+            weekEnd.setDate(weekEnd.getDate() + 6); // Thứ bảy của tuần đã chọn
 
             const fromDate = format(weekStart, 'yyyy-MM-dd');
             const toDate = format(weekEnd, 'yyyy-MM-dd');
@@ -649,36 +888,53 @@ const MeetingRoomBooking = () => {
                     console.log('eventPayload', eventPayload);
                 const result = await saveMeetingRoomEvent(eventPayload);
 
-                if (result && !result.success) {
+                // Kiểm tra nếu có lỗi rõ ràng trong response
+                if (result && result.success === false) {
                     const errorMsg = result.error?.message || result.error || 'Có lỗi xảy ra khi lưu sự kiện';
                     throw new Error(errorMsg);
+                }
+                
+                // Log để debug (chỉ trong development)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Save event result:', result);
                 }
             }
 
             setIsDialogOpen(false);
 
             // Reload events ngay lập tức để cập nhật danh sách booking
-            // Reload với khoảng ngày rộng hơn để bao phủ cả khoảng có thể chọn
-            const weekStart = new Date(currentWeekStart);
-            weekStart.setDate(weekStart.getDate() - 7);
-            const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(weekEnd.getDate() + 14);
+            // Sử dụng khoảng ngày của tuần hiện tại (Chủ nhật đến Thứ bảy)
+            try {
+                const weekStart = new Date(currentWeekStart); // Chủ nhật của tuần đã chọn
+                const weekEnd = new Date(currentWeekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6); // Thứ bảy của tuần đã chọn
 
-            const fromDate = format(weekStart, 'yyyy-MM-dd');
-            const toDate = format(weekEnd, 'yyyy-MM-dd');
-            
-            // Reload events và meeting rooms để cập nhật dữ liệu mới nhất
-            const [reloadedEvents, reloadedMeetingRooms] = await Promise.all([
-                getMeetingRoomEvents(fromDate, toDate),
-                getMeetingRoomList()
-            ]);
-            
-            const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
-            setEvents(eventsWithColors);
-            
-            // Cập nhật meeting rooms nếu có thay đổi
-            if (reloadedMeetingRooms && reloadedMeetingRooms.length > 0) {
-                setMeetingRooms(reloadedMeetingRooms);
+                const fromDate = format(weekStart, 'yyyy-MM-dd');
+                const toDate = format(weekEnd, 'yyyy-MM-dd');
+                
+                // Thêm một chút delay nhỏ để đảm bảo database đã commit
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // Reload events và meeting rooms để cập nhật dữ liệu mới nhất
+                const [reloadedEvents, reloadedMeetingRooms] = await Promise.all([
+                    getMeetingRoomEvents(fromDate, toDate),
+                    getMeetingRoomList()
+                ]);
+                
+                const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+                setEvents(eventsWithColors);
+                
+                // Cập nhật meeting rooms nếu có thay đổi
+                if (reloadedMeetingRooms && reloadedMeetingRooms.length > 0) {
+                    setMeetingRooms(reloadedMeetingRooms);
+                }
+                
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Events reloaded after save:', eventsWithColors.length, 'events');
+                }
+            } catch (reloadError) {
+                console.error('Error reloading events after save:', reloadError);
+                // Không throw error ở đây để không ảnh hưởng đến flow chính
             }
         } catch (error) {
             console.error('Error saving event:', error);
@@ -707,11 +963,10 @@ const MeetingRoomBooking = () => {
                     setIsEventDetailOpen(false);
                     setSelectedEvent(null);
 
-                    // Reload events
-                    const weekStart = new Date(currentWeekStart);
-                    weekStart.setDate(weekStart.getDate() - 7);
+                    // Reload events for current week (Chủ nhật đến Thứ bảy)
+                    const weekStart = new Date(currentWeekStart); // Chủ nhật của tuần đã chọn
                     const weekEnd = new Date(currentWeekStart);
-                    weekEnd.setDate(weekEnd.getDate() + 14);
+                    weekEnd.setDate(weekEnd.getDate() + 6); // Thứ bảy của tuần đã chọn
 
                     const fromDate = format(weekStart, 'yyyy-MM-dd');
                     const toDate = format(weekEnd, 'yyyy-MM-dd');
@@ -1097,6 +1352,11 @@ const MeetingRoomBooking = () => {
                                                                                 {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
                                                                             </div>
                                                                             <div className="text-[8px] sm:text-xs md:text-lg text-gray-800 sm:font-semibold font-light truncate drop-shadow-sm text-right mt-0.5 sm:mt-1">{event.title}</div>
+                                                                            {event.department && (
+                                                                                <div className="text-[7px] sm:text-[10px] md:text-sm text-gray-700 font-medium truncate drop-shadow-sm text-right mt-0.5 sm:mt-1 opacity-90">
+                                                                                    {event.department}
+                                                                                </div>
+                                                                            )}
                                                                         </div>
 
                                                                         {/* Bottom accent line */}
@@ -1133,6 +1393,7 @@ const MeetingRoomBooking = () => {
                                         format={format}
                                         t={t}
                                         selectedMeetingRoomFilter={selectedMeetingRoomFilter}
+                                        meetingRooms={meetingRooms}
                                     />
                                 </div>
                             )}
@@ -1154,6 +1415,7 @@ const MeetingRoomBooking = () => {
                 events={events}
                 meetingRooms={meetingRooms}
                 isHoliday={isHoliday}
+                defaultMeetingRoom={selectedMeetingRoomFilter || undefined}
             />
 
             {/* Popup chi tiết event */}
@@ -1192,10 +1454,21 @@ const MeetingRoomBooking = () => {
                                     <div className="space-y-2">
                                         <Label className="flex items-center gap-2 text-base md:text-lg lg:text-xl font-semibold">
                                             <FileText className="h-4 w-4 text-primary" />
-                                            {t('meeting_room_booking_title')}
+                                            {/* {t('meeting_room_booking_title')} */}
+                                            {t('meeting_room_title')}
                                         </Label>
                                         <p className="text-base md:text-lg lg:text-xl text-muted-foreground pl-6 font-bold">{selectedEvent.title}</p>
                                     </div>
+
+                                    {selectedEvent.userName && (
+                                        <div className="space-y-2">
+                                            <Label className="flex items-center gap-2 text-base md:text-lg lg:text-xl font-semibold">
+                                                <User className="h-4 w-4 text-primary" />
+                                                {t('meeting_room_booker_name') || 'Người đặt'}
+                                            </Label>
+                                            <p className="text-base md:text-lg lg:text-xl text-muted-foreground pl-6 font-bold">{selectedEvent.userName}</p>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         <Label className="flex items-center gap-2 text-base md:text-lg lg:text-xl font-semibold">
@@ -1204,13 +1477,45 @@ const MeetingRoomBooking = () => {
                                         </Label>
                                         <div className="pl-6 space-y-1">
                                             <p className="text-base md:text-lg lg:text-xl text-muted-foreground">
-                                                <span className="font-semibold">{t('meeting_room_date')}</span> {format(selectedEvent.start, 'dd/MM/yyyy')}
+                                                <span className="font-extrabold">{t('meeting_room_date')}</span> {format(selectedEvent.start, 'dd/MM/yyyy')}
                                             </p>
                                             <p className="text-base md:text-lg lg:text-xl text-muted-foreground">
-                                                <span className="font-semibold">{t('meeting_room_time_label')}</span> {format(selectedEvent.start, 'HH:mm')}
+                                                <span className="font-extrabold">{t('meeting_room_booking_from')}</span> {format(selectedEvent.start, 'HH:mm')}  <span className="font-extrabold">{t('meeting_room_booking_to')}</span> {format(selectedEvent.end, 'HH:mm')}
                                             </p>
+                                            
                                         </div>
                                     </div>
+
+                                    {selectedEvent.meetingRoom && (() => {
+                                        // Try to find matching room (case-insensitive, trimmed)
+                                        const meetingRoomValue = String(selectedEvent.meetingRoom).trim();
+                                        const meetingRoomItem = meetingRooms.find(room => {
+                                            const roomValue = String(room.value || '').trim();
+                                            return roomValue === meetingRoomValue || 
+                                                   roomValue.toLowerCase() === meetingRoomValue.toLowerCase();
+                                        });
+                                        const roomName = meetingRoomItem ? meetingRoomItem.label : meetingRoomValue;
+                                        
+                                        return (
+                                            <div className="space-y-2">
+                                                <Label className="flex items-center gap-2 text-base md:text-lg lg:text-xl font-semibold">
+                                                    <CalendarIcon className="h-4 w-4 text-primary" />
+                                                    {t('meeting_room_name')}
+                                                </Label>
+                                                <p className="text-base md:text-lg lg:text-xl text-muted-foreground pl-6 font-bold">{roomName}</p>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {selectedEvent.department && (
+                                        <div className="space-y-2">
+                                            <Label className="flex items-center gap-2 text-base md:text-lg lg:text-xl font-semibold">
+                                                <User className="h-4 w-4 text-primary" />
+                                                {t('frm_depart')}
+                                            </Label>
+                                            <p className="text-base md:text-lg lg:text-xl text-muted-foreground pl-6 font-bold">{selectedEvent.department}</p>
+                                        </div>
+                                    )}
 
                                     {selectedEvent.description && (
                                         <div className="space-y-2">
@@ -1232,12 +1537,31 @@ const MeetingRoomBooking = () => {
 
                                         // Lấy thông tin user đăng nhập
                                         const userInfo = getCurrentUserInfo();
-                                        const currentUserEmpId = userInfo.empId;
+                                        const currentUserEmpId = userInfo?.empId || '';
 
                                         // Kiểm tra emp_id của event (có thể là cardNumber hoặc userId)
-                                        const eventEmpId = selectedEvent.cardNumber || selectedEvent.userId;
-                                        const isOwner = currentUserEmpId && eventEmpId &&
-                                            String(currentUserEmpId).trim() === String(eventEmpId).trim();
+                                        const eventEmpId = selectedEvent.cardNumber || selectedEvent.userId || '';
+                                        
+                                        // So sánh case-insensitive và trim
+                                        const currentUserEmpIdNormalized = String(currentUserEmpId).trim().toUpperCase();
+                                        const eventEmpIdNormalized = String(eventEmpId).trim().toUpperCase();
+                                        const isOwner = currentUserEmpIdNormalized && eventEmpIdNormalized &&
+                                            currentUserEmpIdNormalized === eventEmpIdNormalized;
+
+                                        // Debug log (chỉ trong development)
+                                        if (process.env.NODE_ENV === 'development') {
+                                            console.log('Delete button check:', {
+                                                isPastEvent,
+                                                isOwner,
+                                                currentUserEmpId: currentUserEmpIdNormalized,
+                                                eventEmpId: eventEmpIdNormalized,
+                                                selectedEvent: {
+                                                    id: selectedEvent.id,
+                                                    cardNumber: selectedEvent.cardNumber,
+                                                    userId: selectedEvent.userId
+                                                }
+                                            });
+                                        }
 
                                         // Chỉ hiển thị nút xóa nếu: không phải event quá khứ VÀ là chủ sở hữu
                                         if (!isPastEvent && isOwner) {

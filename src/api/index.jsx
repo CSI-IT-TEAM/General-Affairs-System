@@ -57,6 +57,9 @@ const MeetingRoomSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-proc
 const MeetingRoomDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
 const MeetingRoomEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
 
+// Car Booking API URLs
+const CarBookingCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+
 export {
   downloadURL,
   uploadURL,
@@ -88,4 +91,5 @@ export {
   MeetingRoomSaveProcedureURL,
   MeetingRoomDeleteProcedureURL,
   MeetingRoomEmployeeInfoURL,
+  CarBookingCallProcedureURL,
 };

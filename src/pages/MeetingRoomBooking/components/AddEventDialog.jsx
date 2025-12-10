@@ -31,7 +31,8 @@ const AddEventDialog = ({
     colorSwatches,
     events = [],
     meetingRooms = [],
-    isHoliday = false // Nhận thông tin ngày nghỉ từ props
+    isHoliday = false, // Nhận thông tin ngày nghỉ từ props
+    defaultMeetingRoom = undefined // Phòng mặc định từ filter
 }) => {
     const { t } = useTranslation();
     const [startDate, setStartDate] = useState(initialStartDate);
@@ -273,6 +274,11 @@ const AddEventDialog = ({
             return '07:30';
         }
 
+        const today = dayjs().format('YYYY-MM-DD');
+        const selectedStartDate = dayjs(startDateValue).format('YYYY-MM-DD');
+        const isToday = selectedStartDate === today;
+        const now = dayjs();
+
         // Bắt đầu từ 07:30, kiểm tra từng phút (chỉ kiểm tra phút 00 và 30 để tối ưu)
         for (let hour = 7; hour <= 16; hour++) {
             // Giờ 7 chỉ từ phút 30 trở đi, giờ 16 chỉ đến phút 30
@@ -285,6 +291,15 @@ const AddEventDialog = ({
                 
                 const testStartTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                 
+                // Nếu là ngày hiện tại, kiểm tra xem thời gian có đã qua chưa
+                if (isToday) {
+                    const testStartDateTime = dayjs(`${startDateValue}T${testStartTime}`, 'YYYY-MM-DDTHH:mm');
+                    // Nếu thời gian đã qua, bỏ qua và tiếp tục tìm giờ tiếp theo
+                    if (testStartDateTime.isBefore(now, 'minute')) {
+                        continue;
+                    }
+                }
+                
                 // Kiểm tra từng ngày trong khoảng startDate-endDate
                 const start = dayjs(startDateValue);
                 const end = dayjs(endDateValue || startDateValue);
@@ -293,6 +308,16 @@ const AddEventDialog = ({
 
                 while (current.isSameOrBefore(end, 'day') && isAvailable) {
                     const dateStr = current.format('YYYY-MM-DD');
+                    
+                    // Nếu là ngày hiện tại trong vòng lặp, kiểm tra lại thời gian đã qua
+                    const currentDateStr = dayjs(current).format('YYYY-MM-DD');
+                    if (currentDateStr === today) {
+                        const testStartDateTime = dayjs(`${dateStr}T${testStartTime}`, 'YYYY-MM-DDTHH:mm');
+                        if (testStartDateTime.isBefore(now, 'minute')) {
+                            isAvailable = false;
+                            break;
+                        }
+                    }
                     
                     // Tính endTime mặc định: startTime + 1 giờ, tối đa 16:30
                     const testStart = dayjs(`${dateStr}T${testStartTime}`, 'YYYY-MM-DDTHH:mm');
@@ -339,8 +364,55 @@ const AddEventDialog = ({
             }
         }
 
-        // Nếu không tìm thấy giờ khả dụng, trả về mặc định 07:30
+        // Nếu không tìm thấy giờ khả dụng, trả về giờ hiện tại + 30 phút (nếu là ngày hiện tại) hoặc 07:30
+        if (isToday) {
+            const nextAvailable = now.add(30, 'minute');
+            const nextHour = nextAvailable.hour();
+            const nextMinute = nextAvailable.minute();
+            
+            // Đảm bảo không vượt quá 16:30
+            if (nextHour < 16 || (nextHour === 16 && nextMinute <= 30)) {
+                // Làm tròn lên đến phút 00 hoặc 30
+                const roundedMinute = nextMinute <= 15 ? 0 : (nextMinute <= 45 ? 30 : 60);
+                let finalHour = nextHour;
+                let finalMinute = roundedMinute;
+                
+                if (roundedMinute === 60) {
+                    finalHour = nextHour + 1;
+                    finalMinute = 0;
+                }
+                
+                // Kiểm tra giới hạn 16:30
+                if (finalHour < 16 || (finalHour === 16 && finalMinute <= 30)) {
+                    // Kiểm tra giới hạn 07:30
+                    if (finalHour > 7 || (finalHour === 7 && finalMinute >= 30)) {
+                        return `${String(finalHour).padStart(2, '0')}:${String(finalMinute).padStart(2, '0')}`;
+                    }
+                }
+            }
+        }
+        
+        // Fallback: trả về 07:30 hoặc giờ hiện tại + 30 phút nếu là ngày hiện tại
         return '07:30';
+    };
+
+    // Kiểm tra xem một thời gian có đã qua giờ hiện tại chưa (nếu là ngày hiện tại)
+    const isTimePast = (dateStr, hour, minute) => {
+        if (!dateStr) return false;
+        
+        const today = dayjs().format('YYYY-MM-DD');
+        const selectedDate = dayjs(dateStr).format('YYYY-MM-DD');
+        
+        // Chỉ kiểm tra nếu là ngày hiện tại
+        if (selectedDate !== today) {
+            return false;
+        }
+        
+        const now = dayjs();
+        const testTime = dayjs(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`, 'YYYY-MM-DDTHH:mm');
+        
+        // Kiểm tra xem thời gian test có đã qua giờ hiện tại chưa
+        return testTime.isBefore(now, 'minute');
     };
 
     // Kiểm tra xem một phút cụ thể có bị disable không (helper function)
@@ -352,6 +424,11 @@ const AddEventDialog = ({
         
         // Nếu giờ là 16, chỉ cho phép phút từ 0-30 (đến 16:30)
         if (hour === 16 && minute > 30) {
+            return true;
+        }
+
+        // Kiểm tra nếu thời gian đã qua (nếu là ngày hiện tại)
+        if (startDate && isTimePast(startDate, hour, minute)) {
             return true;
         }
 
@@ -439,6 +516,38 @@ const AddEventDialog = ({
             return true;
         }
 
+        // Kiểm tra nếu giờ đã qua (nếu là ngày hiện tại)
+        if (startDate) {
+            const today = dayjs().format('YYYY-MM-DD');
+            const selectedDate = dayjs(startDate).format('YYYY-MM-DD');
+            
+            if (selectedDate === today) {
+                const now = dayjs();
+                // Kiểm tra xem giờ này có đã qua chưa (so sánh với giờ hiện tại)
+                // Nếu giờ hiện tại > giờ test, thì disable
+                if (now.hour() > hour) {
+                    return true;
+                }
+                // Nếu cùng giờ, kiểm tra xem có phút nào còn lại (bao gồm phút hiện tại) không
+                if (now.hour() === hour) {
+                    const minMinute = hour === 7 ? 30 : 0;
+                    const maxMinute = hour === 16 ? 30 : 59;
+                    // Nếu tất cả các phút còn lại (bao gồm phút hiện tại) đều đã qua, disable giờ này
+                    let hasFutureMinute = false;
+                    for (let minute = minMinute; minute <= maxMinute; minute++) {
+                        // Bao gồm cả phút hiện tại (>= thay vì >)
+                        if (minute >= now.minute() && !isMinuteDisabledForStartTime(hour, minute)) {
+                            hasFutureMinute = true;
+                            break;
+                        }
+                    }
+                    if (!hasFutureMinute) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         // Kiểm tra nếu meetingRoom đã được chọn và có event đã book
         if (!formik.values.meetingRoom || !startDate) {
             return false;
@@ -465,6 +574,69 @@ const AddEventDialog = ({
         // Disable giờ ngoài phạm vi 7-16
         if (hour < 7 || hour > 16) {
             return true;
+        }
+
+        // Kiểm tra nếu giờ đã qua (nếu là ngày hiện tại) và endTime phải sau startTime
+        if (startDate && startTime) {
+            const today = dayjs().format('YYYY-MM-DD');
+            const selectedDate = dayjs(startDate).format('YYYY-MM-DD');
+            
+            if (selectedDate === today) {
+                const now = dayjs();
+                const { hour: startHour } = parseTime(startTime);
+                
+                // Nếu giờ hiện tại > giờ test, thì disable (endTime phải sau giờ hiện tại)
+                if (now.hour() > hour) {
+                    return true;
+                }
+                
+                // Nếu cùng giờ, kiểm tra xem có phút nào còn lại (bao gồm phút hiện tại) không
+                if (now.hour() === hour) {
+                    const minMinute = hour === 7 ? 30 : 0;
+                    const maxMinute = hour === 16 ? 30 : 59;
+                    // Nếu tất cả các phút còn lại (bao gồm phút hiện tại) đều đã qua, disable giờ này
+                    let hasFutureMinute = false;
+                    for (let minute = minMinute; minute <= maxMinute; minute++) {
+                        // Bao gồm cả phút hiện tại (>= thay vì >)
+                        if (minute >= now.minute()) {
+                            // Kiểm tra xem phút này có sau startTime không
+                            const testEndTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                            const testEndDateTime = dayjs(`${startDate}T${testEndTime}`, 'YYYY-MM-DDTHH:mm');
+                            const startDateTime = dayjs(`${startDate}T${startTime}`, 'YYYY-MM-DDTHH:mm');
+                            
+                            if (testEndDateTime.isAfter(startDateTime, 'minute')) {
+                                hasFutureMinute = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasFutureMinute) {
+                        return true;
+                    }
+                }
+                
+                // EndTime phải sau startTime - nếu giờ test < giờ startTime, disable
+                if (startHour !== null && hour < startHour) {
+                    return true;
+                }
+                
+                // Nếu cùng giờ với startTime, kiểm tra xem có phút nào sau startTime không
+                if (startHour !== null && hour === startHour) {
+                    const { minute: startMinute } = parseTime(startTime);
+                    const minMinute = hour === 7 ? 30 : 0;
+                    const maxMinute = hour === 16 ? 30 : 59;
+                    let hasMinuteAfterStart = false;
+                    for (let minute = minMinute; minute <= maxMinute; minute++) {
+                        if (minute > startMinute) {
+                            hasMinuteAfterStart = true;
+                            break;
+                        }
+                    }
+                    if (!hasMinuteAfterStart) {
+                        return true;
+                    }
+                }
+            }
         }
 
         // Nếu chưa có startTime, không disable (trừ khi là giờ 7 với phút < 30 hoặc giờ 16 với phút > 30)
@@ -540,6 +712,30 @@ const AddEventDialog = ({
         // Nếu giờ là 16, chỉ cho phép phút từ 0-30 (đến 16:30)
         if (currentHour === 16 && minute > 30) {
             return true;
+        }
+
+        // Kiểm tra nếu thời gian đã qua (nếu là ngày hiện tại)
+        // EndTime phải sau startTime, nên cần kiểm tra cả startTime và thời gian hiện tại
+        if (startDate && startTime) {
+            const today = dayjs().format('YYYY-MM-DD');
+            const selectedDate = dayjs(startDate).format('YYYY-MM-DD');
+            
+            if (selectedDate === today) {
+                const now = dayjs();
+                const testEndTime = `${String(currentHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                const testEndDateTime = dayjs(`${startDate}T${testEndTime}`, 'YYYY-MM-DDTHH:mm');
+                
+                // Kiểm tra xem endTime có đã qua giờ hiện tại chưa
+                if (testEndDateTime.isBefore(now, 'minute')) {
+                    return true;
+                }
+                
+                // Kiểm tra endTime phải sau startTime
+                const startDateTime = dayjs(`${startDate}T${startTime}`, 'YYYY-MM-DDTHH:mm');
+                if (testEndDateTime.isBefore(startDateTime, 'minute') || testEndDateTime.isSame(startDateTime, 'minute')) {
+                    return true;
+                }
+            }
         }
 
         // Nếu chưa có startTime, không disable
@@ -660,7 +856,7 @@ const AddEventDialog = ({
 
     const formik = useFormik({
         initialValues: {
-            title: getCurrentEmpName(), // Lấy EMP_NM từ userData
+            title: '', // Tiêu đề cuộc họp - để trống để người dùng nhập
             cardNumber: getCurrentEmpId(),
             meetingRoom: meetingRooms.length > 0 ? meetingRooms[0].value : '', // Mặc định Meeting Room 1
             description: '' // Mặc định rỗng
@@ -957,12 +1153,31 @@ const AddEventDialog = ({
             const currentEmpName = getCurrentEmpName();
             
             // Set meetingRoom trước để có thể tìm giờ khả dụng
-            const defaultMeetingRoom = meetingRooms.length > 0 ? meetingRooms[0].value : '';
+            // Ưu tiên dùng defaultMeetingRoom từ props (từ filter), nếu không có thì dùng meetingRooms[0]
+            let selectedMeetingRoom = '';
+            if (defaultMeetingRoom && defaultMeetingRoom.trim() !== '') {
+                // Kiểm tra xem defaultMeetingRoom có tồn tại trong meetingRooms không
+                const existsInRooms = meetingRooms.some(room => {
+                    const roomValue = String(room.value || '').trim();
+                    const defaultValue = String(defaultMeetingRoom).trim();
+                    return roomValue === defaultValue || roomValue.toLowerCase() === defaultValue.toLowerCase();
+                });
+                if (existsInRooms) {
+                    selectedMeetingRoom = defaultMeetingRoom;
+                } else {
+                    // Nếu không tồn tại, dùng meetingRooms[0]
+                    selectedMeetingRoom = meetingRooms.length > 0 ? meetingRooms[0].value : '';
+                }
+            } else {
+                // Nếu không có defaultMeetingRoom, dùng meetingRooms[0]
+                selectedMeetingRoom = meetingRooms.length > 0 ? meetingRooms[0].value : '';
+            }
+            
             formik.resetForm({
                 values: {
-                    title: currentEmpName, // Lấy EMP_NM từ userData
+                    title: '', // Tiêu đề cuộc họp - để trống để người dùng nhập
                     cardNumber: currentEmpId,
-                    meetingRoom: defaultMeetingRoom, // Mặc định Meeting Room 1
+                    meetingRoom: selectedMeetingRoom, // Dùng phòng từ filter hoặc mặc định
                     description: '' // Mặc định rỗng
                 }
             });
@@ -971,7 +1186,7 @@ const AddEventDialog = ({
             // Sử dụng setTimeout để đảm bảo formik đã được cập nhật
             setTimeout(() => {
                 const availableStartTime = findNextAvailableStartTime(
-                    defaultMeetingRoom,
+                    selectedMeetingRoom,
                     initialStartDate,
                     initialStartDate
                 );
@@ -981,7 +1196,7 @@ const AddEventDialog = ({
                 setEndTime(finalEndTime);
                 
                 // Set ref sau khi đã set startTime và date range
-                prevMeetingRoomRef.current = defaultMeetingRoom;
+                prevMeetingRoomRef.current = selectedMeetingRoom;
                 prevDateRangeRef.current = {
                     startDate: initialStartDate,
                     endDate: initialStartDate
@@ -989,7 +1204,7 @@ const AddEventDialog = ({
             }, 0);
         }
         // eslint-disable-next-line
-    }, [isOpen, initialStartDate, initialEndDate, initialStartTime, initialEndTime, meetingRooms]);
+    }, [isOpen, initialStartDate, initialEndDate, initialStartTime, initialEndTime, meetingRooms, defaultMeetingRoom]);
 
     // Cập nhật startTime khi meetingRoom thay đổi
     // Sử dụng useRef để theo dõi meetingRoom trước đó và chỉ cập nhật khi thực sự thay đổi
@@ -1080,21 +1295,7 @@ const AddEventDialog = ({
                             </CardHeader>
                             <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
                                 <CardContent className="space-y-3 sm:space-y-4 overflow-y-auto flex-1 min-h-0 px-4 py-3 sm:px-6 sm:py-4">
-                                    {/* Tạm ẩn Title */}
-                                    {/* <div className="space-y-1.5 sm:space-y-2">
-                                        <Label htmlFor="title" className="flex items-center gap-2 text-sm sm:text-base">
-                                            <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
-                                            {t('meeting_room_booking_title')}
-                                        </Label>
-                                        <Input
-                                            id="title"
-                                            name="title"
-                                            value={formik.values.title}
-                                            onChange={formik.handleChange}
-                                            placeholder={t('meeting_room_booking_title_placeholder')}
-                                            className="text-sm sm:text-base h-9 sm:h-10"
-                                        />
-                                    </div> */}
+                                    
                                     
                                     {/* Select Meeting Room */}
                                     <div className="space-y-1.5 sm:space-y-2">
@@ -1312,6 +1513,23 @@ const AddEventDialog = ({
                                                 shouldDisableMinute={shouldDisableMinuteForEndTime}
                                             />
                                         </div>
+                                    </div>
+
+                                    {/* Title - Tiêu đề cuộc họp */}
+                                    <div className="space-y-1.5 sm:space-y-2">
+                                        <Label htmlFor="title" className="flex items-center gap-2 text-sm sm:text-base">
+                                            <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                                            {t('meeting_room_booking_title')}
+                                        </Label>
+                                        <Input
+                                            id="title"
+                                            name="title"
+                                            value={formik.values.title}
+                                            onChange={formik.handleChange}
+                                            placeholder={t('meeting_room_booking_title_placeholder') || 'Nhập tiêu đề cuộc họp'}
+                                            className="text-sm sm:text-base h-9 sm:h-10"
+                                            required
+                                        />
                                     </div>
                                     {/* Tạm ẩn Select Color */}
                                     {/* <div className="mb-2 sm:mb-4">
