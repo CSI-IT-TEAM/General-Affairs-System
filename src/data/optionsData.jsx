@@ -49,6 +49,19 @@ const optionData = [
         btn_order_text: "order",
         sort_order: 5,
         visible: false,
+    },    
+    {
+        id: '005',
+        title: 'Meeting Room Booking',
+        thumb: meetingRoomBanner, // Ảnh icon - đang sử dụng
+        // thumb: pickleballBanner, // Ảnh banner - comment lại
+        desc: 'Đặt lịch họp tại các phòng họp',
+        desc_color: "#000000",
+        bgColor: '#f97316',
+        link: '',
+        btn_order_text: "Booking Now",
+        sort_order: 3,
+        visible: true,
     },
     {
         id: '004',
@@ -61,19 +74,6 @@ const optionData = [
         link: '',
         btn_order_text: "Booking Now",
         sort_order: 4,
-        visible: true,
-    },
-    {
-        id: '005',
-        title: 'Meeting Room Booking',
-        thumb: meetingRoomBanner, // Ảnh icon - đang sử dụng
-        // thumb: pickleballBanner, // Ảnh banner - comment lại
-        desc: 'Đặt lịch họp tại các phòng họp',
-        desc_color: "#000000",
-        bgColor: '#f97316',
-        link: '',
-        btn_order_text: "Booking Now",
-        sort_order: 3,
         visible: true,
     }
 ]

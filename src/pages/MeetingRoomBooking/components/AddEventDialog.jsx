@@ -578,7 +578,7 @@ const AddEventDialog = ({
 
         // Kiểm tra nếu giờ đã qua (nếu là ngày hiện tại) và endTime phải sau startTime
         if (startDate && startTime) {
-            const today = dayjs().format('YYYY-MM-DD');
+            const today = dayjs().format('YYYY-MM-DD'); 
             const selectedDate = dayjs(startDate).format('YYYY-MM-DD');
             
             if (selectedDate === today) {
