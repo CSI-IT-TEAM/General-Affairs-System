@@ -14,6 +14,7 @@ import FormHospital from "./pages/FormPage/FormHospital";
 import HistoryMedicalPage from "./pages/HistoryPage/HistoryMedicalPage";
 import PickleballBooking from "./pages/PickleballBooking";
 import MeetingRoomBooking from "./pages/MeetingRoomBooking";
+import TemporaryResidence from "./pages/TemporaryResidence";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -89,6 +90,15 @@ const router = createBrowserRouter([
         element: (
             <Layout>
                 <MeetingRoomBooking />
+            </Layout>
+        ),
+    },
+    {
+        path: "/registration/temporary-residence",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <TemporaryResidence />
             </Layout>
         ),
     },

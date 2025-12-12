@@ -2,7 +2,7 @@ import * as React from "react";
 import { DatePicker } from "rsuite";
 import dayjs from "dayjs";
 
-export function DatePickerDay({ value, onChange, id, minDate }) {
+export function DatePickerDay({ value, onChange, id, minDate, customDisabledDate }) {
     // Chuyển value từ format YYYY-MM-DD sang Date object
     const selectedDate = React.useMemo(() => {
         if (!value) return null;
@@ -41,13 +41,22 @@ export function DatePickerDay({ value, onChange, id, minDate }) {
         }
     };
 
-    // Hàm để disable các ngày trước minDate
+    // Hàm để disable các ngày trước minDate và các ngày tùy chỉnh
     const disabledDate = React.useCallback((date) => {
-        if (!minDateObj) return false;
-        const dateToCheck = dayjs(date).startOf('day');
-        const minDateDayjs = dayjs(minDateObj).startOf('day');
-        return dateToCheck.isBefore(minDateDayjs, 'day');
-    }, [minDateObj]);
+        // Check minDate
+        if (minDateObj) {
+            const dateToCheck = dayjs(date).startOf('day');
+            const minDateDayjs = dayjs(minDateObj).startOf('day');
+            if (dateToCheck.isBefore(minDateDayjs, 'day')) {
+                return true;
+            }
+        }
+        // Check custom disabled dates
+        if (customDisabledDate) {
+            return customDisabledDate(date);
+        }
+        return false;
+    }, [minDateObj, customDisabledDate]);
 
     // Thêm style để đảm bảo popover có z-index cao hơn dialog và style cho disabled dates
     React.useEffect(() => {

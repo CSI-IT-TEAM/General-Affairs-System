@@ -350,14 +350,69 @@ export const getMeetingRoomBookerList = async () => {
 };
 
 /**
- * Get list of Meeting Room rooms
+ * Get list of Group Booking Rooms
  */
-export const getMeetingRoomList = async () => {
+export const getGroupBookingRoomList = async () => {
   try {
-    // Procedure BOOKING_ROOM_LIST_SELECT cần OUT_CURSOR, không phải params rỗng
-    const data = await callProcedure('BOOKING_ROOM_LIST_SELECT', {
+    const data = await callProcedure('GROUP_BOOKING_ROOM_LIST_SELECT', {
       OUT_CURSOR: { type: "OUT", dataType: "CURSOR" }
     });
+
+    // Response structure: { success: true, data: { OUT_CURSOR: [...] } }
+    if (data && data.success && data.data && data.data.OUT_CURSOR && Array.isArray(data.data.OUT_CURSOR) && data.data.OUT_CURSOR.length > 0) {
+      return data.data.OUT_CURSOR.map((item) => ({
+        value: item.GRP_CODE,
+        label: item.GRP_NAME,
+      }));
+    }
+
+    // Fallback to default groups if API fails
+    return [
+      {
+        value: 'GRP_MAIN',
+        label: 'Main Office',
+      },
+      {
+        value: 'GRP_PCC',
+        label: 'PCC',
+      },
+    ];
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error getting group booking room list:', error);
+    }
+    // Return default groups as fallback
+    return [
+      {
+        value: 'GRP_MAIN',
+        label: 'Main Office',
+      },
+      {
+        value: 'GRP_PCC',
+        label: 'PCC',
+      },
+    ];
+  }
+};
+
+/**
+ * Get list of Meeting Room rooms
+ * @param {string} groupCode - Group code to filter rooms (optional)
+ */
+export const getMeetingRoomList = async (groupCode = null) => {
+  try {
+    // Procedure BOOKING_ROOM_LIST_SELECT cần tham số V_P_GRP
+    const params = {};
+    
+    // Nếu có groupCode, thêm tham số V_P_GRP (phải nằm trước OUT_CURSOR)
+    if (groupCode) {
+      params.V_P_GRP = { value: String(groupCode), type: "IN" };
+    }
+    
+    // OUT_CURSOR phải nằm sau V_P_GRP
+    params.OUT_CURSOR = { type: "OUT", dataType: "CURSOR" };
+
+    const data = await callProcedure('BOOKING_ROOM_LIST_SELECT', params);
 
     // Response structure: { success: true, data: { OUT_CURSOR: [...] } }
     if (data && data.success && data.data && data.data.OUT_CURSOR && Array.isArray(data.data.OUT_CURSOR) && data.data.OUT_CURSOR.length > 0) {

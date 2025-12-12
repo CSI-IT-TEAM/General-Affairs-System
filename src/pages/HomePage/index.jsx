@@ -118,11 +118,14 @@ const HomePage = () => {
       // case "003":
       //   navigate("/request/plane");
         // break;
-      case "004":
+      case "005":
         navigate("/booking/meeting-room");
         break;
-      case "005":
+      case "004":
         navigate("/booking/pickleball");
+        break;
+      case "006":
+        navigate("/registration/temporary-residence");
         break;
       default: {
         navigate("/");
@@ -160,80 +163,64 @@ const HomePage = () => {
             //     ? handleOpen 
             //     : () => handleNavigate(item.id);
 
-
-               return optionData.map((item) => {
+              // Thu thập tất cả các cards sẽ hiển thị
+              const visibleCards = [];
+              
+              optionData.forEach((item) => {
                 // Luôn hiển thị menu 001
                 if (item.id === "001") {
-                  return (
-                    <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                      <CardPrimary
-                        data={item}
-                        handleClick={()=>handleNavigate(item.id)}
-                      />
-                    </Grid>
+                  visibleCards.push(item);
+                }
+                // Menu 002: hiển thị nếu EXP/special emp
+                else if (item.id === "002") {
+                  if (isExpOrSpecialEmp) {
+                    visibleCards.push(item);
+                  }
+                }
+                // Menu 004, 005, 006: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
+                else if (item.id === "004" || item.id === "005" || item.id === "006") {
+                  if (isExpOrSpecialEmp || canViewJobPositionMenu) {
+                    visibleCards.push(item);
+                  }
+                }
+              });
+
+              // Render cards với layout: 3 cards trên, 2 cards dưới (căn giữa)
+              const result = [];
+              
+              visibleCards.forEach((item, index) => {
+                // Nếu có 5 cards và đang ở card thứ 4 (index 3), thêm Grid item rỗng ở đầu để offset căn giữa
+                if (visibleCards.length === 5 && index === 3) {
+                  result.push(
+                    <Grid item lg={2} md={0} xs={0} key={`spacer-start-${item.id}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
                   );
                 }
                 
-                // Menu 002: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
-                if (item.id === "002") {
-                  if (isExpOrSpecialEmp) {
-                    return (
-                      <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                        <CardPrimary
-                          data={item}
-                          handleClick={()=>handleNavigate(item.id)}
-                        />
-                      </Grid>
-                    );
-                  }
-                  return null;
-                }
+                result.push(
+                  <Grid 
+                    item 
+                    lg={4} 
+                    md={6} 
+                    xs={12} 
+                    key={item.id} 
+                    style={{ height: "100%" }}
+                  >
+                    <CardPrimary
+                      data={item}
+                      handleClick={()=>handleNavigate(item.id)}
+                    />
+                  </Grid>
+                );
                 
-                // // Menu 003: chỉ hiển thị nếu EXP/special emp
-                // if (item.id === "003") {
-                //   if (isExpOrSpecialEmp) {
-                //     return (
-                //       <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                //         <CardPrimary
-                //           data={item}
-                //           handleClick={handleOpen}
-                //         />
-                //       </Grid>
-                //     );
-                //   }
-                //   return null;
-                // }
-                
-                // Menu 004: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
-                if (item.id === "004") {
-                  if (isExpOrSpecialEmp || canViewJobPositionMenu) {
-                    return (
-                      <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                        <CardPrimary
-                          data={item}
-                          handleClick={()=>handleNavigate(item.id)}
-                        />
-                      </Grid>
-                    );
-                  }
-                  return null;
+                // Nếu có 5 cards và đang ở card cuối cùng (index 4), thêm Grid item rỗng ở cuối để căn giữa hoàn hảo
+                if (visibleCards.length === 5 && index === 4) {
+                  result.push(
+                    <Grid item lg={2} md={0} xs={0} key={`spacer-end-${item.id}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
+                  );
                 }
-                // Menu 004: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
-                if (item.id === "005") {
-                  if (isExpOrSpecialEmp || canViewJobPositionMenu) {
-                    return (
-                      <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                        <CardPrimary
-                          data={item}
-                          handleClick={()=>handleNavigate(item.id)}
-                        />
-                      </Grid>
-                    );
-                  }
-                  return null;
-                }
-                return null;
               });
+              
+              return result;
             })()}
               {/* return (
                 <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>

@@ -11,6 +11,7 @@ import medicalBanner from "../assets/images/banners/medical_fee.png";
 import flightBanner from "../assets/images/banners/flight_ticket.png";
 import pickleballBanner from "../assets/images/banners/pickleball.png";
 import meetingRoomBanner from "../assets/images/banners/meeting-room.png";
+import temporaryResidenceBanner from "../assets/images/banners/temporary_residence.png";
 const optionData = [
     {
         id: '001',
@@ -74,6 +75,19 @@ const optionData = [
         link: '',
         btn_order_text: "Booking Now",
         sort_order: 4,
+        visible: true,
+    },
+    {
+        id: '006',
+        title: 'Temporary Residence Registration',
+        thumb: temporaryResidenceBanner, // Ảnh icon - đang sử dụng
+        // thumb: temporaryResidenceBanner, // Ảnh banner - comment lại
+        desc: '베트남 출입국 관리소 임시 거주 신고',
+        desc_color: "#000000",
+        bgColor: '#8b5cf6',
+        link: '',
+        btn_order_text: "register_now",
+        sort_order: 6,
         visible: true,
     }
 ]

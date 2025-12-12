@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format, parse, startOfWeek, addDays, addWeeks, subWeeks, isSameDay, isSameWeek } from 'date-fns';
 import './MeetingRoomBooking.css';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,6 +16,7 @@ import {
     saveMeetingRoomEvent,
     deleteMeetingRoomEvent,
     getMeetingRoomList,
+    getGroupBookingRoomList,
     checkCalendarDay,
 } from '../../api/meetingRoomBooking';
 import backgroundImage from '../../assets/images/background.png';
@@ -87,11 +88,31 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, me
         const endOffsetMinutes = endTotalMinutes - baseMinutes;
         
         const startSlotIndex = Math.floor(startOffsetMinutes / minutesPerSlot);
-        const endSlotIndex = Math.ceil(endOffsetMinutes / minutesPerSlot);
         
-        // Tính vị trí chính xác trong slot
+        // Tính endSlotIndex và endPositionInSlot
+        // Nếu endOffsetMinutes chia hết cho minutesPerSlot (ví dụ: 60, 120, ...)
+        // thì bar kết thúc tại cuối slot hiện tại (endPositionInSlot = 1)
+        // Nếu không, bar kết thúc trong slot hiện tại với vị trí tương ứng
+        let endSlotIndex;
+        let endPositionInSlot;
+        
+        if (endOffsetMinutes % minutesPerSlot === 0 && endOffsetMinutes > 0) {
+            // Kết thúc tại ranh giới slot (ví dụ: 08:30, 09:30, ...)
+            // endSlotIndex = slot hiện tại (không phải slot tiếp theo)
+            endSlotIndex = (endOffsetMinutes / minutesPerSlot) - 1;
+            endPositionInSlot = 1; // Cuối slot
+        } else if (endOffsetMinutes === 0) {
+            // Trường hợp đặc biệt: kết thúc ngay tại 07:30
+            endSlotIndex = 0;
+            endPositionInSlot = 0;
+        } else {
+            // Kết thúc trong slot (không phải tại ranh giới)
+            endSlotIndex = Math.floor(endOffsetMinutes / minutesPerSlot);
+            endPositionInSlot = (endOffsetMinutes % minutesPerSlot) / minutesPerSlot;
+        }
+        
+        // Tính vị trí chính xác trong slot cho start
         const startPositionInSlot = (startOffsetMinutes % minutesPerSlot) / minutesPerSlot;
-        const endPositionInSlot = (endOffsetMinutes % minutesPerSlot) / minutesPerSlot;
 
         // Đảm bảo trong phạm vi hợp lệ
         if (startSlotIndex < 0 || startSlotIndex >= totalSlots) {
@@ -628,6 +649,8 @@ const MeetingRoomBooking = () => {
 
     const [events, setEvents] = useState([]);
     const [meetingRooms, setMeetingRooms] = useState([]);
+    const [groupBookingRooms, setGroupBookingRooms] = useState([]);
+    const [selectedGroup, setSelectedGroup] = useState('');
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
@@ -661,17 +684,63 @@ const MeetingRoomBooking = () => {
         weekDays.push(addDays(currentWeekStart, i));
     }
 
+    // Load group booking rooms on mount
+    useEffect(() => {
+        const loadGroups = async () => {
+            try {
+                const groups = await getGroupBookingRoomList();
+                if (groups && groups.length > 0) {
+                    setGroupBookingRooms(groups);
+                    // Set default group to first one
+                    if (!selectedGroup && groups.length > 0) {
+                        setSelectedGroup(groups[0].value);
+                    }
+                }
+            } catch (error) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn('Error loading group booking rooms:', error);
+                }
+            }
+        };
+
+        loadGroups();
+    }, []);
+
+    // Load meeting rooms when selectedGroup changes
+    useEffect(() => {
+        const loadMeetingRooms = async () => {
+            if (selectedGroup) {
+                try {
+                    const rooms = await getMeetingRoomList(selectedGroup);
+                    if (rooms && rooms.length > 0) {
+                        setMeetingRooms(rooms);
+                        // Set default room to first room when group changes
+                        setSelectedMeetingRoomFilter(rooms[0].value);
+                    } else {
+                        setMeetingRooms([]);
+                        setSelectedMeetingRoomFilter('');
+                    }
+                } catch (error) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.warn('Error loading meeting rooms:', error);
+                    }
+                    setMeetingRooms([]);
+                    setSelectedMeetingRoomFilter('');
+                }
+            } else {
+                setMeetingRooms([]);
+                setSelectedMeetingRoomFilter('');
+            }
+        };
+
+        loadMeetingRooms();
+    }, [selectedGroup]);
+
     // Load events and meeting rooms on mount and when week changes
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
             try {
-                // Load meeting rooms
-                const meetingRooms = await getMeetingRoomList();
-                if (meetingRooms && meetingRooms.length > 0) {
-                    setMeetingRooms(meetingRooms);
-                }
-
                 // Load events for current week (Chủ nhật đến Thứ bảy)
                 const weekStart = new Date(currentWeekStart); // Chủ nhật của tuần đã chọn
                 const weekEnd = new Date(currentWeekStart);
@@ -685,12 +754,6 @@ const MeetingRoomBooking = () => {
             } catch (error) {
                 if (process.env.NODE_ENV === 'development') {
                     console.warn('Error loading data:', error);
-                }
-                if (meetingRooms.length === 0) {
-                    setMeetingRooms([{
-                        value: 'Meeting Room 1',
-                        label: 'Meeting Room 1'
-                    }]);
                 }
                 setEvents([]);
             } finally {
@@ -792,9 +855,12 @@ const MeetingRoomBooking = () => {
     const handleSearch = async () => {
         setLoading(true);
         try {
-            const meetingRooms = await getMeetingRoomList();
-            if (meetingRooms && meetingRooms.length > 0) {
-                setMeetingRooms(meetingRooms);
+            // Load meeting rooms for selected group
+            if (selectedGroup) {
+                const rooms = await getMeetingRoomList(selectedGroup);
+                if (rooms && rooms.length > 0) {
+                    setMeetingRooms(rooms);
+                }
             }
 
             // Load events for current week (Chủ nhật đến Thứ bảy)
@@ -854,6 +920,28 @@ const MeetingRoomBooking = () => {
         setStartTime(defaultStartTime);
         setEndTime(defaultEndTime);
         setIsDialogOpen(true);
+    };
+
+    // Ref để lưu selection từ dialog
+    const dialogSelectionRef = useRef({ group: null, meetingRoom: null });
+
+    // Handler để cập nhật selectedGroup và selectedMeetingRoomFilter từ AddEventDialog
+    const handleSelectionChange = (selection) => {
+        if (selection) {
+            // Lưu vào ref để sử dụng trong handleAddEvent
+            dialogSelectionRef.current = {
+                group: selection.group || null,
+                meetingRoom: selection.meetingRoom || null
+            };
+            
+            // Cập nhật state
+            if (selection.group) {
+                setSelectedGroup(selection.group);
+            }
+            if (selection.meetingRoom) {
+                setSelectedMeetingRoomFilter(selection.meetingRoom);
+            }
+        }
     };
 
     const handleAddEvent = async (eventsData) => {
@@ -916,9 +1004,11 @@ const MeetingRoomBooking = () => {
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
                 // Reload events và meeting rooms để cập nhật dữ liệu mới nhất
+                // Sử dụng group từ dialog nếu có, nếu không thì dùng selectedGroup hiện tại
+                const groupToUse = dialogSelectionRef.current.group || selectedGroup;
                 const [reloadedEvents, reloadedMeetingRooms] = await Promise.all([
                     getMeetingRoomEvents(fromDate, toDate),
-                    getMeetingRoomList()
+                    groupToUse ? getMeetingRoomList(groupToUse) : Promise.resolve([])
                 ]);
                 
                 const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
@@ -928,6 +1018,9 @@ const MeetingRoomBooking = () => {
                 if (reloadedMeetingRooms && reloadedMeetingRooms.length > 0) {
                     setMeetingRooms(reloadedMeetingRooms);
                 }
+                
+                // Reset ref sau khi đã sử dụng
+                dialogSelectionRef.current = { group: null, meetingRoom: null };
                 
                 if (process.env.NODE_ENV === 'development') {
                     console.log('Events reloaded after save:', eventsWithColors.length, 'events');
@@ -1201,12 +1294,24 @@ const MeetingRoomBooking = () => {
                                     {t('today')}
                                 </Button>
                                 <Select
+                                    value={selectedGroup}
+                                    onChange={(e) => setSelectedGroup(e.target.value)}
+                                    className="h-8 px-2 py-0 text-xs sm:text-sm min-w-[120px] sm:min-w-[150px] max-w-[200px] flex-shrink-0 leading-normal"
+                                    style={{ lineHeight: '32px', paddingTop: '0', paddingBottom: '0' }}
+                                >
+                                    {groupBookingRooms.map((group) => (
+                                        <option key={group.value} value={group.value}>
+                                            {group.label}
+                                        </option>
+                                    ))}
+                                </Select>
+                                <Select
                                     value={selectedMeetingRoomFilter}
                                     onChange={(e) => setSelectedMeetingRoomFilter(e.target.value)}
                                     className="h-8 px-2 py-0 text-xs sm:text-sm min-w-[120px] sm:min-w-[150px] max-w-[200px] flex-shrink-0 leading-normal"
                                     style={{ lineHeight: '32px', paddingTop: '0', paddingBottom: '0' }}
+                                    disabled={!selectedGroup}
                                 >
-                                    <option value="">{t('meeting_room_all_rooms') || 'Tất cả phòng'}</option>
                                     {meetingRooms.map((room) => (
                                         <option key={room.value} value={room.value}>
                                             {room.label}
@@ -1416,6 +1521,7 @@ const MeetingRoomBooking = () => {
                 meetingRooms={meetingRooms}
                 isHoliday={isHoliday}
                 defaultMeetingRoom={selectedMeetingRoomFilter || undefined}
+                onSelectionChange={handleSelectionChange}
             />
 
             {/* Popup chi tiết event */}

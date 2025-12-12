@@ -1,0 +1,61 @@
+/* Import Tailwind CSS */
+@import '../../index.css';
+
+/* Styles for Temporary Residence Page */
+.temporary-residence-booking-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Mobile optimizations for Temporary Residence */
+@media (max-width: 640px) {
+  /* Custom scrollbar cho mobile - mỏng hơn */
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 3px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  
+  /* Tối ưu calendar grid cho mobile */
+  .temporary-residence-calendar-grid {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  
+  /* Chiều cao cột cho mobile */
+  .temporary-residence-day-columns {
+    max-height: calc(100vh - 350px) !important;
+    height: calc(100vh - 350px) !important;
+  }
+  
+  .temporary-residence-day-cell {
+    height: calc(100vh - 350px) !important;
+  }
+}
+
+/* Tablet và Desktop */
+@media (min-width: 641px) {
+  .temporary-residence-day-columns {
+    max-height: calc(100vh - 300px) !important;
+    height: calc(100vh - 300px) !important;
+  }
+  
+  .temporary-residence-day-cell {
+    height: calc(100vh - 300px) !important;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
