@@ -142,96 +142,97 @@ const HomePage = () => {
   return (
     <>
       <Box className="s-home">
-        <Container maxWidth="xl">
-          <h3 className="s-home-title">
-            {t("service")} <span>{t("provide")}</span>
-          </h3>
-          <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing}>
-          {(() => {
-              // Kiểm tra quyền xem menu
-              const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447";
-              const canViewJobPositionMenu = jobPosition !== null && (Number(jobPosition) <= 180 || Number(jobPosition) === 300);
-              
-              // Logic hiển thị menu:
-              // 1. EXP hoặc emp_id đặc biệt → thấy hết 4 menu (001, 002, 003, 004)
-              // 2. jobPosition <= 180 hoặc = 300 → thấy 3 menu (001, 002, 004)
-              // 3. Ngược lại → chỉ thấy menu 001
-
-            // {filteredAndSortedOptions.map((item) => {
-            //   // Menu 003 vẫn sử dụng handleOpen cho warning modal
-            //   const handleClick = item.id === "003"  
-            //     ? handleOpen 
-            //     : () => handleNavigate(item.id);
-
-              // Thu thập tất cả các cards sẽ hiển thị
-              const visibleCards = [];
-              
-              optionData.forEach((item) => {
-                // Luôn hiển thị menu 001
-                if (item.id === "001") {
-                  visibleCards.push(item);
-                }
-                // Menu 002: hiển thị nếu EXP/special emp
-                else if (item.id === "002") {
-                  if (isExpOrSpecialEmp) {
+        <Container maxWidth="xl" className="s-home-container">
+          <Box className="s-home-grid-wrapper">
+            <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing} className="s-home-grid">
+            {(() => {
+                // Kiểm tra quyền xem menu
+                const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447";
+                const canViewJobPositionMenu = jobPosition !== null && (Number(jobPosition) <= 180 || Number(jobPosition) === 300);
+                
+                // Thu thập tất cả các cards sẽ hiển thị
+                const visibleCards = [];
+                
+                optionData.forEach((item) => {
+                  // Luôn hiển thị menu 001 và 005
+                  if (item.id === "001" || item.id === "005") {
                     visibleCards.push(item);
                   }
-                }
-                // Menu 004, 005, 006: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
-                else if (item.id === "004" || item.id === "005" || item.id === "006") {
-                  if (isExpOrSpecialEmp || canViewJobPositionMenu) {
-                    visibleCards.push(item);
+                  // Menu 002 và 006: hiển thị nếu EXP/special emp
+                  else if (item.id === "002" || item.id === "006") {
+                    if (isExpOrSpecialEmp) {
+                      visibleCards.push(item);
+                    }
                   }
-                }
-              });
+                  // Menu 004: hiển thị nếu EXP/special emp hoặc jobPosition thỏa
+                  else if (item.id === "004") {
+                    if (isExpOrSpecialEmp || canViewJobPositionMenu) {
+                      visibleCards.push(item);
+                    }
+                  }
+                });
 
-              // Render cards với layout: 3 cards trên, 2 cards dưới (căn giữa)
-              const result = [];
-              
-              visibleCards.forEach((item, index) => {
-                // Nếu có 5 cards và đang ở card thứ 4 (index 3), thêm Grid item rỗng ở đầu để offset căn giữa
-                if (visibleCards.length === 5 && index === 3) {
-                  result.push(
-                    <Grid item lg={2} md={0} xs={0} key={`spacer-start-${item.id}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
-                  );
+                // Sắp xếp cards theo sort_order để đảm bảo thứ tự đúng
+                visibleCards.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+                // Render cards với layout tự động fit viewport
+                const result = [];
+                const cardCount = visibleCards.length;
+                
+                // Tính toán số cột dựa trên số lượng cards để fit viewport
+                let lgSize = 4; // Mặc định 3 cột
+                if (cardCount === 1) {
+                  lgSize = 12; // 1 card = full width
+                } else if (cardCount === 2) {
+                  lgSize = 6; // 2 cards = 2 cột
+                } else if (cardCount === 3) {
+                  lgSize = 4; // 3 cards = 3 cột
+                } else if (cardCount === 4) {
+                  lgSize = 3; // 4 cards = 4 cột
+                } else if (cardCount === 5) {
+                  lgSize = 4; // 5 cards = 3-2 layout (3 trên, 2 dưới)
                 }
                 
-                result.push(
-                  <Grid 
-                    item 
-                    lg={4} 
-                    md={6} 
-                    xs={12} 
-                    key={item.id} 
-                    style={{ height: "100%" }}
-                  >
-                    <CardPrimary
-                      data={item}
-                      handleClick={()=>handleNavigate(item.id)}
-                    />
-                  </Grid>
-                );
-                
-                // Nếu có 5 cards và đang ở card cuối cùng (index 4), thêm Grid item rỗng ở cuối để căn giữa hoàn hảo
-                if (visibleCards.length === 5 && index === 4) {
+                visibleCards.forEach((item, index) => {
+                  // Với 5 cards: layout 3 trên, 2 dưới (căn giữa)
+                  if (cardCount === 5 && index === 3) {
+                    result.push(
+                      <Grid item lg={2} md={0} xs={0} key={`spacer-start-${index}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
+                    );
+                  }
+                  
                   result.push(
-                    <Grid item lg={2} md={0} xs={0} key={`spacer-end-${item.id}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
+                    <Grid 
+                      item 
+                      lg={lgSize} 
+                      md={6} 
+                      xs={12} 
+                      key={item.id} 
+                      sx={{ 
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column"
+                      }}
+                    >
+                      <CardPrimary
+                        data={item}
+                        handleClick={()=>handleNavigate(item.id)}
+                      />
+                    </Grid>
                   );
-                }
-              });
-              
-              return result;
-            })()}
-              {/* return (
-                <Grid item lg={3} md={6} xs={12} key={item.id} style={{ height: "100%" }}>
-                  <CardPrimary
-                    data={item}
-                    handleClick={handleClick}
-                  />
-                </Grid>
-              );
-            })} */}
-          </Grid>
+                  
+                  // Với 5 cards: thêm spacer ở cuối
+                  if (cardCount === 5 && index === 4) {
+                    result.push(
+                      <Grid item lg={2} md={0} xs={0} key={`spacer-end-${index}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
+                    );
+                  }
+                });
+                
+                return result;
+              })()}
+            </Grid>
+          </Box>
         </Container>
       </Box>
       <ModalWarning
