@@ -171,6 +171,56 @@ const TemporaryResidence = () => {
         });
     };
 
+    // Hàm nhóm các periods liền kề
+    const groupConsecutivePeriods = (events) => {
+        if (!events || events.length === 0) return [];
+
+        // Sắp xếp events theo start date
+        const sortedEvents = [...events].sort((a, b) => 
+            a.start.getTime() - b.start.getTime()
+        );
+
+        const groupedPeriods = [];
+        let currentGroup = {
+            start: sortedEvents[0].start,
+            end: sortedEvents[0].end
+        };
+
+        for (let i = 1; i < sortedEvents.length; i++) {
+            // Lấy end date của group hiện tại và start date của event tiếp theo
+            const prevEndDate = new Date(currentGroup.end);
+            prevEndDate.setHours(0, 0, 0, 0);
+            
+            const nextStartDate = new Date(sortedEvents[i].start);
+            nextStartDate.setHours(0, 0, 0, 0);
+            
+            // Tính số ngày chênh lệch (end date + 1 ngày = start date tiếp theo)
+            // Ví dụ: end 05/01, start tiếp theo 06/01 => chênh lệch 1 ngày (liền kề)
+            const prevEndPlusOne = addDays(prevEndDate, 1);
+            const daysDiff = Math.floor((nextStartDate - prevEndPlusOne) / (1000 * 60 * 60 * 24));
+
+            // Nếu liền kề (chênh lệch <= 0 ngày, tức là nextStart <= prevEnd + 1), merge vào group hiện tại
+            if (daysDiff <= 0) {
+                // Cập nhật end date nếu event mới có end date lớn hơn
+                if (sortedEvents[i].end > currentGroup.end) {
+                    currentGroup.end = sortedEvents[i].end;
+                }
+            } else {
+                // Không liền kề (có khoảng cách), lưu group hiện tại và bắt đầu group mới
+                groupedPeriods.push({ ...currentGroup });
+                currentGroup = {
+                    start: sortedEvents[i].start,
+                    end: sortedEvents[i].end
+                };
+            }
+        }
+
+        // Thêm group cuối cùng
+        groupedPeriods.push(currentGroup);
+
+        return groupedPeriods;
+    };
+
     // Xử lý click vào ngày để thêm event
     const handleDayClick = (date) => {
         const today = new Date();
@@ -444,8 +494,11 @@ const TemporaryResidence = () => {
                                 <table className="w-full border-collapse">
                                     <thead className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
                                         <tr>
-                                            <th className="border p-2 text-left font-semibold bg-gray-50/60 backdrop-blur-sm min-w-[150px]">
+                                            <th className="border p-2 text-left font-semibold bg-gray-50/60 backdrop-blur-sm min-w-[150px] sticky left-0 z-20">
                                                 {t('meeting_room_booker_name') || 'Người đăng ký'}
+                                            </th>
+                                            <th className="border p-2 text-left font-semibold bg-gray-50/60 backdrop-blur-sm min-w-[200px] sticky left-[150px] z-20">
+                                                {t('period') || 'Period'}
                                             </th>
                                             {monthDays.map((day, index) => {
                                                 const isTodayDate = isToday(day);
@@ -455,7 +508,7 @@ const TemporaryResidence = () => {
                                                 return (
                                                     <th
                                                         key={index}
-                                                        className={`border p-1 sm:p-2 text-center font-semibold min-w-[80px] ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm' : 'bg-gray-50/60 backdrop-blur-sm'}`}
+                                                        className={`border p-1 sm:p-2 text-center font-semibold min-w-[80px] relative z-0 ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm' : 'bg-gray-50/60 backdrop-blur-sm'}`}
                                                     >
                                                         <div className="text-[10px] sm:text-xs text-gray-600">{format(day, 'EEE')}</div>
                                                         <div className={`text-xs sm:text-sm md:text-base ${textColor}`}>
@@ -468,10 +521,32 @@ const TemporaryResidence = () => {
                                     </thead>
                                     <tbody>
                                         {userNames.length > 0 ? (
-                                            userNames.map((userName, userIndex) => (
+                                            userNames.map((userName, userIndex) => {
+                                                // Lấy tất cả events của user
+                                                const userEvents = getEventsByUser[userName] || [];
+                                                // Nhóm các periods liền kề
+                                                const groupedPeriods = groupConsecutivePeriods(userEvents);
+                                                
+                                                return (
                                                 <tr key={userIndex} className="hover:bg-gray-50/30">
-                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-0 z-5">
+                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-0 z-15 align-top">
                                                         {userName}
+                                                    </td>
+                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-[150px] z-15 align-top">
+                                                        {groupedPeriods.length > 0 ? (
+                                                            <div className="space-y-1">
+                                                                {groupedPeriods.map((period, periodIdx) => (
+                                                                    <div 
+                                                                        key={periodIdx}
+                                                                        className="text-xs sm:text-sm text-gray-700 whitespace-nowrap"
+                                                                    >
+                                                                        {format(period.start, 'dd/MM/yyyy')} - {format(period.end, 'dd/MM/yyyy')}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-xs sm:text-sm text-gray-400">-</span>
+                                                        )}
                                                     </td>
                                                     {monthDays.map((day, dayIndex) => {
                                                         const userDayEvents = getUserEventsForDay(userName, day);
@@ -481,27 +556,30 @@ const TemporaryResidence = () => {
                                                         return (
                                                             <td
                                                                 key={dayIndex}
-                                                                className={`py-1 sm:py-2 text-center align-top min-h-[60px] ${past ? 'bg-gray-100/40 backdrop-blur-sm opacity-50' : 'bg-white/60 backdrop-blur-sm'} ${isTodayDate ? 'bg-blue-50/60 backdrop-blur-sm' : ''}`}
+                                                                className={`py-1 sm:py-2 text-center align-top min-h-[60px] relative z-0 ${past ? 'bg-gray-100/40 backdrop-blur-sm opacity-50' : 'bg-white/60 backdrop-blur-sm'} ${isTodayDate ? 'bg-blue-50/60 backdrop-blur-sm' : ''}`}
                                                                 style={{
                                                                     cursor: past ? 'not-allowed' : 'pointer',
+                                                                    zIndex: -1,
                                                                 }}
                                                                 onClick={() => !past && handleDayClick(day)}
                                                             >
                                                                 {userDayEvents.length > 0 && (
-                                                                    <div className="space-y-1">
+                                                                    <div className="space-y-1 relative" style={{ zIndex: 0 }}>
                                                                         {userDayEvents.map((event, eventIndex) => (
                                                                             <div
                                                                                 key={event.id || eventIndex}
-                                                                                className=" text-[10px] sm:text-xs cursor-pointer  relative overflow-hidden"
+                                                                                className=" text-[10px] sm:text-xs cursor-pointer relative overflow-hidden"
                                                                                 style={{
                                                                                     backgroundColor: "navy",
+                                                                                    zIndex: 0,
+                                                                                    position: "relative",
                                                                                 }}
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
                                                                                     handleEventClick(event);
                                                                                 }}
                                                                             >
-                                                                                <div className="flex items-center justify-center" title={`${format(event.start, 'dd/MM/yyyy')} - ${format(event.end, 'dd/MM/yyyy')}`}>
+                                                                                <div className="flex items-center justify-center" style={{ zIndex: 0 }} title={`${format(event.start, 'dd/MM/yyyy')} - ${format(event.end, 'dd/MM/yyyy')}`}>
                                                                                     <PlaneTakeoff style={{
                                                                                         color:"navy",
                                                                                     }} className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-sm" />
@@ -514,10 +592,11 @@ const TemporaryResidence = () => {
                                                         );
                                                     })}
                                                 </tr>
-                                            ))
+                                                );
+                                            })
                                         ) : (
                                             <tr>
-                                                <td colSpan={monthDays.length + 1} className="border p-4 text-center text-gray-500">
+                                                <td colSpan={monthDays.length + 2} className="border p-4 text-center text-gray-500">
                                                     {t('no_data') || 'Không có dữ liệu'}
                                                 </td>
                                             </tr>

@@ -43,11 +43,14 @@
         }
     }
 
-    // Đảm bảo Grid items có cùng height và width
+    // Đảm bảo Grid items có cùng height và width cố định
     .MuiGrid-container {
         align-items: stretch;
         width: 100%;
         margin: 0 !important;
+        justify-content: center !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
     }
 
     .MuiGrid-item {
@@ -60,6 +63,13 @@
             width: 100% !important;
             height: 100% !important;
             flex: 1 1 auto !important;
+        }
+
+        // Đặt width cố định cho cards trên màn hình lớn
+        @media screen and (min-width: 1280px) {
+            max-width: 400px !important;
+            width: 400px !important;
+            flex: 0 0 400px !important;
         }
     }
 

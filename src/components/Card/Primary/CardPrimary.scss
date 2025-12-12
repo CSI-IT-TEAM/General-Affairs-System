@@ -17,11 +17,13 @@
     max-height: none !important;
     box-sizing: border-box;
 
-    // Đảm bảo tất cả cards có cùng kích thước
+    // Đảm bảo tất cả cards có cùng kích thước và width cố định
     @media screen and (min-width: 1280px) {
         min-height: 0 !important;
         height: 100% !important;
         max-height: 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
         flex: 1 1 auto !important;
     }
 

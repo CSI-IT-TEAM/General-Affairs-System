@@ -144,10 +144,11 @@ const HomePage = () => {
       <Box className="s-home">
         <Container maxWidth="xl" className="s-home-container">
           <Box className="s-home-grid-wrapper">
-            <Grid justifyContent={"center"} alignItems="stretch" container spacing={colSpacing} className="s-home-grid">
+            <Grid justifyContent={"flex-start"} alignItems="stretch" container spacing={colSpacing} className="s-home-grid">
             {(() => {
                 // Kiểm tra quyền xem menu
-                const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447";
+                const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" ;
+                const isAdminGA = emp_id === "02026154"|| emp_id === "05110243"
                 const canViewJobPositionMenu = jobPosition !== null && (Number(jobPosition) <= 180 || Number(jobPosition) === 300);
                 
                 // Thu thập tất cả các cards sẽ hiển thị
@@ -160,7 +161,7 @@ const HomePage = () => {
                   }
                   // Menu 002 và 006: hiển thị nếu EXP/special emp
                   else if (item.id === "002" || item.id === "006") {
-                    if (isExpOrSpecialEmp) {
+                    if (isExpOrSpecialEmp || isAdminGA) {
                       visibleCards.push(item);
                     }
                   }
@@ -175,59 +176,114 @@ const HomePage = () => {
                 // Sắp xếp cards theo sort_order để đảm bảo thứ tự đúng
                 visibleCards.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
-                // Render cards với layout tự động fit viewport
+                // Render cards với width cố định và căn giữa
                 const result = [];
                 const cardCount = visibleCards.length;
                 
-                // Tính toán số cột dựa trên số lượng cards để fit viewport
-                let lgSize = 4; // Mặc định 3 cột
-                if (cardCount === 1) {
-                  lgSize = 12; // 1 card = full width
-                } else if (cardCount === 2) {
-                  lgSize = 6; // 2 cards = 2 cột
-                } else if (cardCount === 3) {
-                  lgSize = 4; // 3 cards = 3 cột
-                } else if (cardCount === 4) {
-                  lgSize = 3; // 4 cards = 4 cột
-                } else if (cardCount === 5) {
-                  lgSize = 4; // 5 cards = 3-2 layout (3 trên, 2 dưới)
-                }
-                
-                visibleCards.forEach((item, index) => {
-                  // Với 5 cards: layout 3 trên, 2 dưới (căn giữa)
-                  if (cardCount === 5 && index === 3) {
+                // Với 5 cards: layout đặc biệt 3 trên, 2 dưới (căn giữa)
+                if (cardCount === 5) {
+                  // 3 cards đầu tiên
+                  visibleCards.slice(0, 3).forEach((item) => {
                     result.push(
-                      <Grid item lg={2} md={0} xs={0} key={`spacer-start-${index}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
+                      <Grid 
+                        item 
+                        lg="auto"
+                        md={6} 
+                        xs={12} 
+                        key={item.id} 
+                        sx={{ 
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          maxWidth: { lg: '400px', md: '100%', xs: '100%' },
+                          width: { lg: '400px', md: '100%', xs: '100%' },
+                          flex: { lg: '0 0 400px', md: '1 1 auto', xs: '1 1 auto' }
+                        }}
+                      >
+                        <CardPrimary
+                          data={item}
+                          handleClick={()=>handleNavigate(item.id)}
+                        />
+                      </Grid>
                     );
-                  }
+                  });
                   
+                  // Wrapper để căn giữa 2 cards dưới
+                  // Sử dụng Grid item với width 100% và flex để căn giữa nội dung bên trong
                   result.push(
                     <Grid 
                       item 
-                      lg={lgSize} 
-                      md={6} 
+                      lg={12}
+                      md={12} 
                       xs={12} 
-                      key={item.id} 
+                      key="wrapper-5cards-bottom" 
                       sx={{ 
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column"
-                      }}
+                        display: 'flex',
+                        justifyContent: 'center',
+                        width: '100%',
+                        flex: '0 0 100%',
+                        padding: 0,
+                        margin: 0
+                      }} 
                     >
-                      <CardPrimary
-                        data={item}
-                        handleClick={()=>handleNavigate(item.id)}
-                      />
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: `${colSpacing * 8}px`, // MUI spacing unit (8px per unit)
+                        justifyContent: 'center',
+                        alignItems: 'stretch',
+                        width: '100%',
+                        '@media (min-width: 1280px)': {
+                          maxWidth: '816px' // 2 cards (800px) + 1 spacing (16px)
+                        }
+                      }}>
+                        {visibleCards.slice(3, 5).map((item) => (
+                          <Box
+                            key={item.id}
+                            sx={{
+                              height: "100%",
+                              display: "flex",
+                              flexDirection: "column",
+                              maxWidth: { lg: '400px', md: 'calc(50% - 16px)', xs: '100%' },
+                              width: { lg: '400px', md: 'calc(50% - 16px)', xs: '100%' },
+                              flex: { lg: '0 0 400px', md: '0 0 calc(50% - 16px)', xs: '1 1 auto' }
+                            }}
+                          >
+                            <CardPrimary
+                              data={item}
+                              handleClick={()=>handleNavigate(item.id)}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
                     </Grid>
                   );
-                  
-                  // Với 5 cards: thêm spacer ở cuối
-                  if (cardCount === 5 && index === 4) {
+                } else {
+                  // Các trường hợp khác: render bình thường
+                  visibleCards.forEach((item) => {
                     result.push(
-                      <Grid item lg={2} md={0} xs={0} key={`spacer-end-${index}`} sx={{ display: { xs: 'none', md: 'none', lg: 'block' } }} />
+                      <Grid 
+                        item 
+                        lg="auto"
+                        md={6} 
+                        xs={12} 
+                        key={item.id} 
+                        sx={{ 
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          maxWidth: { lg: '400px', md: '100%', xs: '100%' },
+                          width: { lg: '400px', md: '100%', xs: '100%' },
+                          flex: { lg: '0 0 400px', md: '1 1 auto', xs: '1 1 auto' }
+                        }}
+                      >
+                        <CardPrimary
+                          data={item}
+                          handleClick={()=>handleNavigate(item.id)}
+                        />
+                      </Grid>
                     );
-                  }
-                });
+                  });
+                }
                 
                 return result;
               })()}
