@@ -253,7 +253,8 @@ export const getTemporaryResidenceEvents = async (fromDate, toDate) => {
         end: new Date(item.END_DATE),
         description: item.DESCRIPTION || '',
         bgColor: item.COLOR || '#8b5cf6',
-        department: item.DEPARTMENT || '',
+        department: item.DEPT || item.DEPARTMENT || '', // Ưu tiên DEPT (code) từ SELECT_EVENT_LIST
+        DEPT: item.DEPT || '', // Lưu thêm DEPT riêng để đảm bảo
       }));
     }
 

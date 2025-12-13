@@ -4,7 +4,7 @@ import './TemporaryResidence.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, Plus, X, Trash, FileText, User, PlaneTakeoff } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, Plus, X, Trash, FileText, User, PlaneTakeoff, Edit } from 'lucide-react';
 import AddEventDialog from './components/AddEventDialog';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,43 +19,46 @@ import dayjs from 'dayjs';
 const TemporaryResidence = () => {
     const { t } = useTranslation();
 
-    // Danh sách màu cho booking events
+    // Danh sách màu cho booking events (khoảng 25 màu)
     const colorSwatches = [
         '#8b5cf6', // Purple - Màu chính
         '#FFB6C1', // Light Pink
         '#FFD700', // Gold
         '#90EE90', // Light Green
         '#87CEFA', // Light Sky Blue
+        '#FF6347', // Tomato
+        '#20B2AA', // Light Sea Green
+        '#FF69B4', // Hot Pink
+        '#32CD32', // Lime Green
+        '#1E90FF', // Dodger Blue
+        '#FF1493', // Deep Pink
+        '#00CED1', // Dark Turquoise
+        '#FF4500', // Orange Red
+        '#9370DB', // Medium Purple
+        '#00FA9A', // Medium Spring Green
+        '#FF8C00', // Dark Orange
+        '#48D1CC', // Medium Turquoise
+        '#DC143C', // Crimson
+        '#00BFFF', // Deep Sky Blue
+        '#FF00FF', // Magenta
+        '#00FF00', // Lime
+        '#FFA500', // Orange
+        '#8A2BE2', // Blue Violet
+        '#FF7F50', // Coral
+        '#40E0D0', // Turquoise
     ];
 
     // Hàm gán màu cho events dựa trên thứ tự trong cùng một ngày
     const assignColorsToEvents = (eventsList) => {
         if (!eventsList || eventsList.length === 0) return eventsList;
 
-        // Nhóm events theo ngày (start date)
-        const eventsByDate = {};
+        // Giữ nguyên màu từ API, không gán lại
+        // Chỉ gán màu mặc định nếu event chưa có màu
         eventsList.forEach(event => {
-            const dateKey = format(event.start, 'yyyy-MM-dd');
-            if (!eventsByDate[dateKey]) {
-                eventsByDate[dateKey] = [];
+            if (!event.bgColor) {
+                event.bgColor = colorSwatches[0] || '#8b5cf6';
             }
-            eventsByDate[dateKey].push(event);
-        });
-
-        // Sắp xếp và gán màu cho events trong mỗi ngày
-        Object.keys(eventsByDate).forEach(dateKey => {
-            const dayEvents = eventsByDate[dateKey];
-
-            // Sắp xếp events theo thời gian bắt đầu
-            dayEvents.sort((a, b) => {
-                return a.start.getTime() - b.start.getTime();
-            });
-
-            // Gán màu theo thứ tự
-            dayEvents.forEach((event, index) => {
-                const colorIndex = index % colorSwatches.length;
-                event.bgColor = colorSwatches[colorIndex];
-            });
+            // Nếu event đã có bgColor từ API, giữ nguyên
         });
 
         return eventsList;
@@ -83,7 +86,9 @@ const TemporaryResidence = () => {
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [editingEvent, setEditingEvent] = useState(null);
     const [currentMonth, setCurrentMonth] = useState(() => {
         return new Date();
     });
@@ -183,7 +188,8 @@ const TemporaryResidence = () => {
         const groupedPeriods = [];
         let currentGroup = {
             start: sortedEvents[0].start,
-            end: sortedEvents[0].end
+            end: sortedEvents[0].end,
+            events: [sortedEvents[0]] // Lưu events trong group
         };
 
         for (let i = 1; i < sortedEvents.length; i++) {
@@ -205,12 +211,15 @@ const TemporaryResidence = () => {
                 if (sortedEvents[i].end > currentGroup.end) {
                     currentGroup.end = sortedEvents[i].end;
                 }
+                // Thêm event vào group
+                currentGroup.events.push(sortedEvents[i]);
             } else {
                 // Không liền kề (có khoảng cách), lưu group hiện tại và bắt đầu group mới
                 groupedPeriods.push({ ...currentGroup });
                 currentGroup = {
                     start: sortedEvents[i].start,
-                    end: sortedEvents[i].end
+                    end: sortedEvents[i].end,
+                    events: [sortedEvents[i]]
                 };
             }
         }
@@ -381,6 +390,130 @@ const TemporaryResidence = () => {
         }
     };
 
+    // Hàm xử lý edit event
+    const handleEditEvent = (event) => {
+        setEditingEvent(event);
+        setStartDate(format(event.start, 'yyyy-MM-dd'));
+        setEndDate(format(event.end, 'yyyy-MM-dd'));
+        setIsEditDialogOpen(true);
+    };
+
+    // Hàm xử lý update event
+    const handleUpdateEvent = async (eventsData) => {
+        if (!editingEvent || !editingEvent.id) {
+            alert(t('event_not_found_to_update') || 'Không tìm thấy sự kiện để cập nhật!');
+            return;
+        }
+
+        const userInfo = getCurrentUserInfo();
+
+        try {
+            const eventData = eventsData[0];
+            // Lấy DEPT từ event SELECT_EVENT_LIST (đảm bảo thống nhất, ưu tiên DEPT code)
+            const eventDepartment = editingEvent.DEPT || editingEvent.department || '';
+            
+            const eventPayload = {
+                id: editingEvent.id, // ID của event cần update
+                startDate: format(eventData.start, 'yyyy-MM-dd'),
+                endDate: format(eventData.end, 'yyyy-MM-dd'),
+                title: editingEvent.title || 'Temporary Residence Registration',
+                color: editingEvent.bgColor || colorSwatches[0],
+                description: editingEvent.description || '',
+                department: eventDepartment, // Luôn lấy DEPT từ event SELECT_EVENT_LIST
+                userId: editingEvent.cardNumber || editingEvent.userId || userInfo.empId,
+                empId: userInfo.empId,
+                userLogin: userInfo.userLogin,
+            };
+
+            if (!eventPayload.userId || !eventPayload.userLogin || !eventPayload.empId) {
+                throw new Error('Thiếu thông tin người dùng. Vui lòng đăng nhập lại!');
+            }
+
+            const result = await saveTemporaryResidenceEvent(eventPayload);
+
+            if (result && result.success === false) {
+                const errorMsg = result.error?.message || result.error || 'Có lỗi xảy ra khi cập nhật sự kiện';
+                throw new Error(errorMsg);
+            }
+
+            setIsEditDialogOpen(false);
+            setEditingEvent(null);
+
+            // Reload events
+            try {
+                const monthStart = startOfMonth(currentMonth);
+                const monthEnd = endOfMonth(currentMonth);
+
+                const fromDate = format(monthStart, 'yyyy-MM-dd');
+                const toDate = format(monthEnd, 'yyyy-MM-dd');
+
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                const reloadedEvents = await getTemporaryResidenceEvents(fromDate, toDate);
+                const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+                setEvents(eventsWithColors);
+            } catch (reloadError) {
+                console.error('Error reloading events after update:', reloadError);
+            }
+        } catch (error) {
+            console.error('Error updating event:', error);
+            let errorMessage = 'Có lỗi xảy ra khi cập nhật sự kiện. Vui lòng thử lại!';
+
+            if (error.message) {
+                if (error.message.includes('conflict') || error.message.includes('trùng')) {
+                    errorMessage = 'Khoảng thời gian này đã có khai báo. Vui lòng chọn khoảng thời gian khác!';
+                } else if (error.message.includes('HTTP error')) {
+                    errorMessage = 'Lỗi kết nối server. Vui lòng thử lại sau!';
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
+            alert(errorMessage);
+        }
+    };
+
+    // Hàm xử lý xóa event từ dialog
+    const handleDeleteEventFromDialog = async () => {
+        if (!editingEvent || !editingEvent.id) {
+            alert(t('event_not_found_to_delete') || 'Không tìm thấy sự kiện để xóa!');
+            return;
+        }
+
+        // Xác nhận trước khi xóa
+        const confirmDelete = window.confirm(t('confirm_delete_event') || 'Bạn có chắc chắn muốn xóa sự kiện này?');
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            const result = await deleteTemporaryResidenceEvent(editingEvent.id);
+
+            if (result && result.success) {
+                setIsEditDialogOpen(false);
+                setEditingEvent(null);
+
+                // Reload events for current month
+                const monthStart = startOfMonth(currentMonth);
+                const monthEnd = endOfMonth(currentMonth);
+
+                const fromDate = format(monthStart, 'yyyy-MM-dd');
+                const toDate = format(monthEnd, 'yyyy-MM-dd');
+
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                const reloadedEvents = await getTemporaryResidenceEvents(fromDate, toDate);
+                const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+                setEvents(eventsWithColors);
+            } else {
+                alert(t('error_deleting_event') || 'Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            alert(t('error_deleting_event') || 'Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
+        }
+    };
+
     const handleDeleteEvent = async () => {
         if (selectedEvent && selectedEvent.id) {
             try {
@@ -400,11 +533,11 @@ const TemporaryResidence = () => {
                     const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
                     setEvents(eventsWithColors);
                 } else {
-                    alert('Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
+                    alert(t('error_deleting_event') || 'Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
                 }
             } catch (error) {
                 console.error('Error deleting event:', error);
-                alert('Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
+                alert(t('error_deleting_event') || 'Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
             }
         }
     };
@@ -524,25 +657,62 @@ const TemporaryResidence = () => {
                                             userNames.map((userName, userIndex) => {
                                                 // Lấy tất cả events của user
                                                 const userEvents = getEventsByUser[userName] || [];
-                                                // Nhóm các periods liền kề
-                                                const groupedPeriods = groupConsecutivePeriods(userEvents);
+                                                // Sắp xếp events theo start date để hiển thị theo thứ tự
+                                                const sortedEvents = [...userEvents].sort((a, b) => 
+                                                    a.start.getTime() - b.start.getTime()
+                                                );
                                                 
                                                 return (
                                                 <tr key={userIndex} className="hover:bg-gray-50/30">
-                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-0 z-15 align-top">
+                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-0 z-20 align-middle" style={{ verticalAlign: 'middle', zIndex: 20 }}>
                                                         {userName}
                                                     </td>
-                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-[150px] z-15 align-top">
-                                                        {groupedPeriods.length > 0 ? (
-                                                            <div className="space-y-1">
-                                                                {groupedPeriods.map((period, periodIdx) => (
-                                                                    <div 
-                                                                        key={periodIdx}
-                                                                        className="text-xs sm:text-sm text-gray-700 whitespace-nowrap"
-                                                                    >
-                                                                        {format(period.start, 'dd/MM/yyyy')} - {format(period.end, 'dd/MM/yyyy')}
-                                                                    </div>
-                                                                ))}
+                                                    <td className="border p-2 font-medium bg-gray-50/40 backdrop-blur-sm sticky left-[150px] z-20 align-middle" style={{ verticalAlign: 'middle', zIndex: 20 }}>
+                                                        {sortedEvents.length > 0 ? (
+                                                            <div className="space-y-2">
+                                                                {sortedEvents.map((event, eventIdx) => {
+                                                                    // Kiểm tra quyền edit
+                                                                    const userInfo = getCurrentUserInfo();
+                                                                    const currentUserEmpId = userInfo?.empId || '';
+                                                                    const eventEmpId = event?.cardNumber || event?.userId || '';
+                                                                    const currentUserEmpIdNormalized = String(currentUserEmpId).trim().toUpperCase();
+                                                                    const eventEmpIdNormalized = String(eventEmpId).trim().toUpperCase();
+                                                                    const isOwner = currentUserEmpIdNormalized && eventEmpIdNormalized &&
+                                                                        currentUserEmpIdNormalized === eventEmpIdNormalized;
+                                                                    
+                                                                    // Lấy DEPT từ current user (không phải từ event)
+                                                                    const currentUserDept = userInfo?.department || '';
+                                                                    const currentUserDeptNormalized = String(currentUserDept).trim().toUpperCase();
+                                                                    
+                                                                    // Nếu DEPT của current user là V1AK010000 hoặc V1AK000000 thì có thể edit tất cả events
+                                                                    const canEditAll = currentUserDeptNormalized === 'V1AK010000' || currentUserDeptNormalized === 'V1AK000000';
+                                                                    const canEdit = ( isOwner) && event && event.id;
+
+                                                                    return (
+                                                                        <div 
+                                                                            key={event.id || eventIdx}
+                                                                            className="flex items-center justify-between gap-2 text-xs sm:text-sm text-gray-700 whitespace-nowrap min-h-[28px]"
+                                                                        >
+                                                                            <span className="flex-1">
+                                                                                {format(event.start, 'dd/MM/yyyy')} - {format(event.end, 'dd/MM/yyyy')}
+                                                                            </span>
+                                                                            {canEdit && (
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="sm"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleEditEvent(event);
+                                                                                    }}
+                                                                                    className="h-6 w-6 p-0 flex-shrink-0 hover:bg-primary/10 ml-auto"
+                                                                                    title={t('edit') || 'Chỉnh sửa'}
+                                                                                >
+                                                                                    <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                                                                                </Button>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         ) : (
                                                             <span className="text-xs sm:text-sm text-gray-400">-</span>
@@ -556,37 +726,64 @@ const TemporaryResidence = () => {
                                                         return (
                                                             <td
                                                                 key={dayIndex}
-                                                                className={`py-1 sm:py-2 text-center align-top min-h-[60px] relative z-0 ${past ? 'bg-gray-100/40 backdrop-blur-sm opacity-50' : 'bg-white/60 backdrop-blur-sm'} ${isTodayDate ? 'bg-blue-50/60 backdrop-blur-sm' : ''}`}
+                                                                className={`p-0 text-center align-middle h-[60px] relative ${past ? 'bg-gray-100/40 backdrop-blur-sm opacity-50' : 'bg-white/60 backdrop-blur-sm'} ${isTodayDate ? 'bg-blue-50/60 backdrop-blur-sm' : ''}`}
                                                                 style={{
                                                                     cursor: past ? 'not-allowed' : 'pointer',
-                                                                    zIndex: -1,
+                                                                    verticalAlign: 'middle',
+                                                                    height: '100%',
+                                                                    position: 'relative',
+                                                                    zIndex: 0,
                                                                 }}
                                                                 onClick={() => !past && handleDayClick(day)}
                                                             >
-                                                                {userDayEvents.length > 0 && (
-                                                                    <div className="space-y-1 relative" style={{ zIndex: 0 }}>
-                                                                        {userDayEvents.map((event, eventIndex) => (
-                                                                            <div
-                                                                                key={event.id || eventIndex}
-                                                                                className=" text-[10px] sm:text-xs cursor-pointer relative overflow-hidden"
-                                                                                style={{
-                                                                                    backgroundColor: "navy",
-                                                                                    zIndex: 0,
-                                                                                    position: "relative",
-                                                                                }}
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    handleEventClick(event);
-                                                                                }}
-                                                                            >
-                                                                                <div className="flex items-center justify-center" style={{ zIndex: 0 }} title={`${format(event.start, 'dd/MM/yyyy')} - ${format(event.end, 'dd/MM/yyyy')}`}>
-                                                                                    <PlaneTakeoff style={{
-                                                                                        color:"navy",
-                                                                                    }} className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-sm" />
+                                                                {userDayEvents.length > 0 ? (
+                                                                    <div className="flex flex-col items-center justify-center gap-1 relative w-full h-full" style={{ pointerEvents: 'auto' }}>
+                                                                        {userDayEvents.map((event, eventIndex) => {
+                                                                            const eventColor = event.bgColor || "navy";
+                                                                            const startDateStr = format(event.start, 'dd/MM/yyyy');
+                                                                            const endDateStr = format(event.end, 'dd/MM/yyyy');
+                                                                            const title = `${startDateStr} - ${endDateStr} - ${userName}`;
+                                                                            return (
+                                                                                <div
+                                                                                    key={event.id || eventIndex}
+                                                                                    className="w-full text-[10px] sm:text-xs cursor-pointer relative overflow-hidden flex-shrink-0 border-t-2 border-blue-950 border-b-2"
+                                                                                    style={{
+                                                                                        backgroundColor: eventColor,
+                                                                                        position: "relative",
+                                                                                        height: '30px',
+                                                                                        minHeight: '30px',
+                                                                                        maxHeight: '30px',
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                        flexShrink: 0,
+                                                                                        pointerEvents: 'auto',
+                                                                                        zIndex: 0,
+                                                                                    }}
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        e.preventDefault();
+                                                                                        handleEventClick(event);
+                                                                                    }}
+                                                                                    onMouseEnter={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                    }}
+                                                                                    onMouseDown={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                    }}
+                                                                                    title={title}
+                                                                                >
+                                                                                    <div className="flex items-center justify-center w-full h-full" style={{ pointerEvents: 'none' }}>
+                                                                                        <PlaneTakeoff style={{
+                                                                                            color: eventColor,
+                                                                                        }} className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-sm" />
+                                                                                    </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        ))}
+                                                                            );
+                                                                        })}
                                                                     </div>
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center"></div>
                                                                 )}
                                                             </td>
                                                         );
@@ -618,6 +815,22 @@ const TemporaryResidence = () => {
                 initialEndDate={endDate}
                 colorSwatches={colorSwatches}
                 events={events}
+            />
+
+            {/* Popup edit event */}
+            <AddEventDialog
+                isOpen={isEditDialogOpen}
+                onClose={() => {
+                    setIsEditDialogOpen(false);
+                    setEditingEvent(null);
+                }}
+                onSubmit={handleUpdateEvent}
+                initialStartDate={editingEvent ? format(editingEvent.start, 'yyyy-MM-dd') : startDate}
+                initialEndDate={editingEvent ? format(editingEvent.end, 'yyyy-MM-dd') : endDate}
+                colorSwatches={colorSwatches}
+                events={events}
+                editingEvent={editingEvent}
+                onDelete={handleDeleteEventFromDialog}
             />
 
             {/* Popup chi tiết event */}

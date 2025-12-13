@@ -11,7 +11,13 @@
     "title_second": "Thông tin đăng ký",
     "reset_password": "Đặt lại mật khẩu",
     "not_found": "Không tìm thấy dữ liệu!!!",
-
+    "update": "Cập Nhật",
+    "edit": "Chỉnh Sửa",
+    "delete": "Xóa",
+    "confirm_delete_event": "Bạn có chắc chắn muốn xóa sự kiện này?",
+    "end_date_must_after_start_date": "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu!",
+    "date_already_registered_single": "Ngày {{date}} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn ngày khác!",
+    "date_already_registered_range": "Các ngày từ {{startDate}} đến {{endDate}} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn khoảng thời gian khác!",
     "text_uploader_infor":"Vui lòng chọn các file có định dạng được hỗ trợ. (pdf)",
 
     "vehicle_title": "Yêu Cầu Xe",

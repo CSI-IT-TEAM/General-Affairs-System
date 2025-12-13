@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import { Card, CardHeader, CardContent, CardTitle } from '../../../components/ui/card';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
-import { Calendar as CalendarIcon, User, X } from 'lucide-react';
+import { Calendar as CalendarIcon, User, X, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { DatePickerDay } from '../../../components/ui/date-picker-day';
@@ -16,6 +17,8 @@ const AddEventDialog = ({
     initialEndDate,
     colorSwatches,
     events = [],
+    editingEvent = null,
+    onDelete = null,
 }) => {
     const { t } = useTranslation();
     const [startDate, setStartDate] = useState(initialStartDate);
@@ -51,8 +54,12 @@ const AddEventDialog = ({
         const currentEmpId = getCurrentEmpId();
         if (!currentEmpId) return new Set();
 
-        // Filter events của empId hiện tại
+        // Filter events của empId hiện tại, loại trừ event đang edit
         const userEvents = events.filter(event => {
+            // Loại trừ event đang edit
+            if (editingEvent && event.id === editingEvent.id) {
+                return false;
+            }
             const eventEmpId = String(event.cardNumber || event.userId || '').trim().toUpperCase();
             const currentEmpIdNormalized = String(currentEmpId).trim().toUpperCase();
             return eventEmpId === currentEmpIdNormalized;
@@ -71,13 +78,19 @@ const AddEventDialog = ({
         });
 
         return occupiedDatesSet;
-    }, [events]);
+    }, [events, editingEvent]);
 
     // Function để check xem một ngày có bị disable không
+    // Chỉ disable khi add mode, không disable khi edit mode
     const isDateDisabled = React.useCallback((date) => {
+        // Edit mode: không disable ngày nào
+        if (editingEvent) {
+            return false;
+        }
+        // Add mode: disable ngày đã bị chiếm
         const dateStr = dayjs(date).format('YYYY-MM-DD');
         return getOccupiedDates.has(dateStr);
-    }, [getOccupiedDates]);
+    }, [getOccupiedDates, editingEvent]);
 
     // Tìm ngày khả dụng tiếp theo (ngày đầu tiên không có event, từ hôm nay trở đi)
     const getNextAvailableDate = React.useCallback(() => {
@@ -126,14 +139,23 @@ const AddEventDialog = ({
             // Tạo message chi tiết về các ngày đã bị chiếm
             if (occupiedDates.length === 1) {
                 const occupiedDate = dayjs(occupiedDates[0]);
+                const dateStr = occupiedDate.format('DD/MM/YYYY');
+                const message = t('date_already_registered_single');
                 setOverlapMessage(
-                    `Ngày ${occupiedDate.format('DD/MM/YYYY')} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn ngày khác!`
+                    message && message !== 'date_already_registered_single'
+                        ? message.replace('{{date}}', dateStr)
+                        : `Ngày ${dateStr} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn ngày khác!`
                 );
             } else {
                 const firstOccupied = dayjs(occupiedDates[0]);
                 const lastOccupied = dayjs(occupiedDates[occupiedDates.length - 1]);
+                const startDateStr = firstOccupied.format('DD/MM/YYYY');
+                const endDateStr = lastOccupied.format('DD/MM/YYYY');
+                const message = t('date_already_registered_range');
                 setOverlapMessage(
-                    `Các ngày từ ${firstOccupied.format('DD/MM/YYYY')} đến ${lastOccupied.format('DD/MM/YYYY')} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn khoảng thời gian khác!`
+                    message && message !== 'date_already_registered_range'
+                        ? message.replace('{{startDate}}', startDateStr).replace('{{endDate}}', endDateStr)
+                        : `Các ngày từ ${startDateStr} đến ${endDateStr} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn khoảng thời gian khác!`
                 );
             }
             return true;
@@ -156,11 +178,12 @@ const AddEventDialog = ({
         const start = dayjs(startDate);
         const end = dayjs(endDate);
         if (end.isBefore(start, 'day')) {
-            alert('Ngày kết thúc phải sau hoặc bằng ngày bắt đầu!');
+            alert(t('end_date_must_after_start_date') || 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu!');
             return;
         }
 
         // Kiểm tra overlap trước khi submit - đảm bảo không có ngày nào trong khoảng đã bị chiếm
+        // (getOccupiedDates đã loại trừ event đang edit, nên cả Add và Edit mode đều dùng chung logic này)
         const occupiedDatesInRange = [];
         let current = start;
         
@@ -176,11 +199,24 @@ const AddEventDialog = ({
             // Có ít nhất 1 ngày trong khoảng đã bị chiếm
             if (occupiedDatesInRange.length === 1) {
                 const occupiedDate = dayjs(occupiedDatesInRange[0]);
-                alert(`Ngày ${occupiedDate.format('DD/MM/YYYY')} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn ngày khác!`);
+                const dateStr = occupiedDate.format('DD/MM/YYYY');
+                const message = t('date_already_registered_single');
+                alert(
+                    message && message !== 'date_already_registered_single'
+                        ? message.replace('{{date}}', dateStr)
+                        : `Ngày ${dateStr} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn ngày khác!`
+                );
             } else {
                 const firstOccupied = dayjs(occupiedDatesInRange[0]);
                 const lastOccupied = dayjs(occupiedDatesInRange[occupiedDatesInRange.length - 1]);
-                alert(`Các ngày từ ${firstOccupied.format('DD/MM/YYYY')} đến ${lastOccupied.format('DD/MM/YYYY')} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn khoảng thời gian khác!`);
+                const startDateStr = firstOccupied.format('DD/MM/YYYY');
+                const endDateStr = lastOccupied.format('DD/MM/YYYY');
+                const message = t('date_already_registered_range');
+                alert(
+                    message && message !== 'date_already_registered_range'
+                        ? message.replace('{{startDate}}', startDateStr).replace('{{endDate}}', endDateStr)
+                        : `Các ngày từ ${startDateStr} đến ${endDateStr} đã có khai báo. Mỗi ngày chỉ được khai báo 1 lần. Vui lòng chọn khoảng thời gian khác!`
+                );
             }
             return;
         }
@@ -204,29 +240,68 @@ const AddEventDialog = ({
         setEndDate(initialEndDate);
     };
 
+    // Chỉ khởi tạo state khi dialog mở lần đầu
+    const [isInitialized, setIsInitialized] = React.useState(false);
+
     React.useEffect(() => {
-        if (isOpen) {
-            // Tìm ngày khả dụng tiếp theo
-            const nextAvailableDate = getNextAvailableDate();
-            
-            // Nếu initialStartDate là ngày đã bị chiếm, dùng ngày khả dụng tiếp theo
-            const initialStart = initialStartDate && !getOccupiedDates.has(initialStartDate) 
-                ? initialStartDate 
-                : nextAvailableDate;
-            
-            setStartDate(initialStart);
-            setEndDate(initialEndDate && !getOccupiedDates.has(initialEndDate) 
-                ? initialEndDate 
-                : initialStart);
-            setColor(colorSwatches[0]);
+        if (isOpen && !isInitialized) {
+            if (editingEvent) {
+                // Edit mode: sử dụng dates từ editingEvent
+                // Đảm bảo start và end là Date objects
+                const start = editingEvent.start instanceof Date 
+                    ? editingEvent.start 
+                    : new Date(editingEvent.start);
+                const end = editingEvent.end instanceof Date 
+                    ? editingEvent.end 
+                    : new Date(editingEvent.end);
+                
+                setStartDate(format(start, 'yyyy-MM-dd'));
+                setEndDate(format(end, 'yyyy-MM-dd'));
+                setColor(editingEvent.bgColor || colorSwatches[0]);
+            } else {
+                // Add mode: tìm ngày khả dụng tiếp theo
+                const nextAvailableDate = getNextAvailableDate();
+                
+                // Nếu initialStartDate là ngày đã bị chiếm, dùng ngày khả dụng tiếp theo
+                const initialStart = initialStartDate && !getOccupiedDates.has(initialStartDate) 
+                    ? initialStartDate 
+                    : nextAvailableDate;
+                
+                setStartDate(initialStart);
+                setEndDate(initialEndDate && !getOccupiedDates.has(initialEndDate) 
+                    ? initialEndDate 
+                    : initialStart);
+                
+                // Tìm màu tiếp theo dựa trên số events đã có của user
+                const currentEmpId = getCurrentEmpId();
+                const userEvents = events.filter(event => {
+                    const eventEmpId = String(event.cardNumber || event.userId || '').trim().toUpperCase();
+                    const currentEmpIdNormalized = String(currentEmpId).trim().toUpperCase();
+                    return eventEmpId === currentEmpIdNormalized;
+                });
+                
+                // Số events đã có = index của màu tiếp theo
+                const colorIndex = userEvents.length % colorSwatches.length;
+                setColor(colorSwatches[colorIndex]);
+            }
             setHasOverlap(false);
             setOverlapMessage('');
+            setIsInitialized(true);
+        } else if (!isOpen) {
+            // Reset khi dialog đóng
+            setIsInitialized(false);
         }
         // eslint-disable-next-line
-    }, [isOpen, initialStartDate, initialEndDate, colorSwatches, getOccupiedDates, getNextAvailableDate]);
+    }, [isOpen, initialStartDate, initialEndDate, colorSwatches, getOccupiedDates, getNextAvailableDate, editingEvent, isInitialized]);
 
-    // Đảm bảo endDate không nhỏ hơn startDate và không bị chiếm
+    // Đảm bảo endDate không nhỏ hơn startDate và không bị chiếm (chỉ cho add mode)
     React.useEffect(() => {
+        // Edit mode: không tự động điều chỉnh dates
+        if (editingEvent) {
+            return;
+        }
+
+        // Add mode: điều chỉnh dates nếu cần
         if (startDate && endDate) {
             const start = dayjs(startDate);
             const end = dayjs(endDate);
@@ -267,10 +342,11 @@ const AddEventDialog = ({
             }
         }
         // eslint-disable-next-line
-    }, [startDate, endDate, getOccupiedDates]);
+    }, [startDate, endDate, getOccupiedDates, editingEvent]);
 
-    // Kiểm tra overlap khi startDate hoặc endDate thay đổi
+    // Kiểm tra overlap khi startDate hoặc endDate thay đổi (cho cả add và edit mode)
     React.useEffect(() => {
+        // Check overlap cho cả Add và Edit mode (getOccupiedDates đã loại trừ event đang edit)
         if (startDate && endDate) {
             checkOverlap(startDate, endDate);
         } else {
@@ -278,7 +354,7 @@ const AddEventDialog = ({
             setOverlapMessage('');
         }
         // eslint-disable-next-line
-    }, [startDate, endDate, events]);
+    }, [startDate, endDate, events, editingEvent, getOccupiedDates]);
 
     return (
         <AnimatePresence>
@@ -310,7 +386,12 @@ const AddEventDialog = ({
                                     <div className="flex flex-col gap-1">
                                         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                                             <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                                            <span className="truncate">{t('temporary_residence_title') || 'Khai Báo Tạm Trú Tạm Vắng'}</span>
+                                            <span className="truncate">
+                                                {editingEvent 
+                                                    ? `${t('edit') || 'Chỉnh Sửa'} ${t('temporary_residence_title') || 'Khai Báo Tạm Trú Tạm Vắng'}`
+                                                    : (t('temporary_residence_title') || 'Khai Báo Tạm Trú Tạm Vắng')
+                                                }
+                                            </span>
                                         </CardTitle>
                                         {/* Hiển thị EMP_NM */}
                                         <div className="flex items-center gap-2 text-sm text-gray-600 ml-6">
@@ -351,8 +432,20 @@ const AddEventDialog = ({
                                             <DatePickerDay
                                                 value={startDate}
                                                 onChange={(newStartDate) => {
-                                                    // Chỉ cho phép chọn nếu ngày không bị chiếm
-                                                    if (newStartDate && !getOccupiedDates.has(newStartDate)) {
+                                                    if (!newStartDate) return;
+                                                    
+                                                    // Edit mode: cho phép chọn bất kỳ ngày nào
+                                                    if (editingEvent) {
+                                                        setStartDate(newStartDate);
+                                                        // Nếu startDate mới lớn hơn endDate hiện tại, cập nhật endDate
+                                                        if (endDate && newStartDate > endDate) {
+                                                            setEndDate(newStartDate);
+                                                        }
+                                                        return;
+                                                    }
+                                                    
+                                                    // Add mode: chỉ cho phép chọn nếu ngày không bị chiếm
+                                                    if (!getOccupiedDates.has(newStartDate)) {
                                                         setStartDate(newStartDate);
                                                         // Nếu startDate mới lớn hơn endDate hiện tại, cập nhật endDate
                                                         if (endDate && newStartDate > endDate) {
@@ -387,8 +480,25 @@ const AddEventDialog = ({
                                             <DatePickerDay
                                                 value={endDate}
                                                 onChange={(newEndDate) => {
-                                                    // Chỉ cho phép chọn nếu ngày không bị chiếm
-                                                    if (newEndDate && !getOccupiedDates.has(newEndDate)) {
+                                                    if (!newEndDate) return;
+                                                    
+                                                    // Edit mode: cho phép chọn bất kỳ ngày nào (chỉ cần >= startDate)
+                                                    if (editingEvent) {
+                                                        const start = dayjs(startDate);
+                                                        const end = dayjs(newEndDate);
+                                                        // Chỉ cập nhật nếu endDate >= startDate
+                                                        if (end.isSameOrAfter(start, 'day')) {
+                                                            setEndDate(newEndDate);
+                                                        } else {
+                                                            // Nếu endDate < startDate, cảnh báo nhưng vẫn cho phép trong edit mode
+                                                            // (hoặc có thể tự động cập nhật startDate)
+                                                            alert(t('end_date_must_after_start_date') || 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu!');
+                                                        }
+                                                        return;
+                                                    }
+                                                    
+                                                    // Add mode: chỉ cho phép chọn nếu ngày không bị chiếm
+                                                    if (!getOccupiedDates.has(newEndDate)) {
                                                         setEndDate(newEndDate);
                                                     }
                                                 }}
@@ -407,13 +517,27 @@ const AddEventDialog = ({
                                     )}
                                 </CardContent>
                                 <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 p-3 sm:p-6 pt-3 sm:pt-4 flex-shrink-0 border-t bg-background sticky bottom-0">
-                                    <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10">{t('btn_cancel')}</Button>
+                                    {editingEvent && onDelete && (
+                                        <Button 
+                                            type="button" 
+                                            variant="destructive" 
+                                            onClick={onDelete} 
+                                            className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10 order-3 sm:order-1"
+                                        >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            {t('delete') || 'Xóa'}
+                                        </Button>
+                                    )}
+                                    <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10 order-2">{t('btn_cancel')}</Button>
                                     <Button 
                                         type="submit" 
-                                        className="bg-primary hover:bg-primary/90 w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10"
+                                        className="bg-primary hover:bg-primary/90 w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10 order-1 sm:order-3"
                                         disabled={hasOverlap}
                                     >
-                                        {t('register_now') || 'Đăng Ký Ngay'}
+                                        {editingEvent 
+                                            ? (t('update') || 'Cập Nhật')
+                                            : (t('register_now') || 'Đăng Ký Ngay')
+                                        }
                                     </Button>
                                 </div>
                             </form>
