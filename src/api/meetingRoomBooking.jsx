@@ -272,18 +272,22 @@ export const getMeetingRoomEvents = async (fromDate, toDate) => {
     // Transform data to match frontend format
     // Response structure: { success: true, data: { OUT_CURSOR: [...] } }
     if (data && data.success && data.data && data.data.OUT_CURSOR && Array.isArray(data.data.OUT_CURSOR)) {
-      return data.data.OUT_CURSOR.map((item) => ({
-        id: item.ID,
-        title: item.TITLE,
-        meetingRoom: item.MEETING_ROOM , // Use MEETING_ROOM from API
-        cardNumber: String(item.USER_ID), // Convert to string
-        userName: item.USER_NAME,
-        start: new Date(`${item.START_DATE}T${item.START_TIME}`),
-        end: new Date(`${item.END_DATE}T${item.END_TIME}`),
-        description: item.DESCRIPTION || '',
-        bgColor: item.COLOR || '#FFB6C1',
-        department: item.DEPARTMENT || '',
-      }));
+      return data.data.OUT_CURSOR.map((item) => {
+        const userIdStr = String(item.USER_ID || '').trim();
+        return {
+          id: item.ID,
+          title: item.TITLE,
+          meetingRoom: item.MEETING_ROOM , // Use MEETING_ROOM from API
+          cardNumber: userIdStr, // Convert to string
+          userId: userIdStr, // Thêm userId để đảm bảo có cả hai trường
+          userName: item.USER_NAME,
+          start: new Date(`${item.START_DATE}T${item.START_TIME}`),
+          end: new Date(`${item.END_DATE}T${item.END_TIME}`),
+          description: item.DESCRIPTION || '',
+          bgColor: item.COLOR || '#FFB6C1',
+          department: item.DEPARTMENT || '',
+        };
+      });
     }
 
     // Return empty array if API fails or no data

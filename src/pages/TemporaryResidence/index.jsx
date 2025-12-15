@@ -21,7 +21,7 @@ const TemporaryResidence = () => {
 
     // Danh sách màu cho booking events (khoảng 25 màu)
     const colorSwatches = [
-        '#8b5cf6', // Purple - Màu chính
+        '#0a0a54', // Navy - Màu chính
         '#FFB6C1', // Light Pink
         '#FFD700', // Gold
         '#90EE90', // Light Green
@@ -641,7 +641,7 @@ const TemporaryResidence = () => {
                                                 return (
                                                     <th
                                                         key={index}
-                                                        className={`border p-1 sm:p-2 text-center font-semibold min-w-[80px] relative z-0 ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm' : 'bg-gray-50/60 backdrop-blur-sm'}`}
+                                                        className={`border p-1 sm:p-2 text-center font-semibold min-w-[40px] relative z-0 ${isTodayDate ? 'bg-blue-100/60 backdrop-blur-sm' : 'bg-gray-50/60 backdrop-blur-sm'}`}
                                                     >
                                                         <div className="text-[10px] sm:text-xs text-gray-600">{format(day, 'EEE')}</div>
                                                         <div className={`text-xs sm:text-sm md:text-base ${textColor}`}>
@@ -892,13 +892,15 @@ const TemporaryResidence = () => {
                                         </div>
                                     </div>
 
-                                    {selectedEvent.department && (
+                                    {(selectedEvent.DEPARTMENT || selectedEvent.department) && (
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2 text-base md:text-lg lg:text-xl font-semibold">
                                                 <User className="h-4 w-4 text-primary" />
                                                 {t('frm_depart') || 'Phòng ban'}
                                             </div>
-                                            <p className="text-base md:text-lg lg:text-xl text-muted-foreground pl-6 font-bold">{selectedEvent.department}</p>
+                                            <p className="text-base md:text-lg lg:text-xl text-muted-foreground pl-6 font-bold">
+                                                {selectedEvent.DEPARTMENT || selectedEvent.department}
+                                            </p>
                                         </div>
                                     )}
 

@@ -25,7 +25,7 @@ import pageBackground from '../../assets/images/meeting_room_bg.jpeg';
 dayjs.extend(isSameOrBefore);
 
 // Component Gantt Chart cho Report
-const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, meetingRooms }) => {
+const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, meetingRooms, selectedGroup }) => {
     // Giờ bắt đầu và kết thúc: 07:30 đến 16:30
     const startHour = 7;
     const startMinute = 30;
@@ -162,11 +162,24 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, me
             const weekEnd = format(weekDays[6], 'yyyy-MM-dd');
             const dateInWeek = eventDate >= weekStart && eventDate <= weekEnd;
             
-            // Nếu có filter phòng họp, chỉ lấy phòng được chọn
-            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter !== '') {
+            // Nếu có filter phòng họp (không phải "All"), chỉ lấy phòng được chọn
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim() !== '' && selectedMeetingRoomFilter.trim().toUpperCase() !== 'ALL') {
                 const filterRoom = String(selectedMeetingRoomFilter).trim();
                 return roomMatches && dateInWeek && 
                        (eventRoom === filterRoom || eventRoom.toLowerCase() === filterRoom.toLowerCase());
+            }
+            
+            // Nếu chọn "All", chỉ lấy events của các phòng thuộc selectedGroup (meetingRooms)
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim().toUpperCase() === 'ALL') {
+                if (!meetingRooms || meetingRooms.length === 0) {
+                    return false; // Không có phòng nào trong group
+                }
+                // Kiểm tra xem eventRoom có trong danh sách meetingRooms không
+                const roomInGroup = meetingRooms.some(room => {
+                    const roomValue = String(room.value || '').trim();
+                    return roomValue === eventRoom || roomValue.toLowerCase() === eventRoom.toLowerCase();
+                });
+                return roomMatches && dateInWeek && roomInGroup;
             }
             
             return roomMatches && dateInWeek;
@@ -198,8 +211,8 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, me
             const eventDateKey = format(event.start, 'yyyy-MM-dd');
             const dateMatches = eventDateKey === dateKey;
             
-            // Nếu có filter phòng họp, kiểm tra thêm
-            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter !== '') {
+            // Nếu có filter phòng họp (không phải "All"), kiểm tra thêm
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim() !== '' && selectedMeetingRoomFilter.trim().toUpperCase() !== 'ALL') {
                 const eventRoom = String(event.meetingRoom || '').trim();
                 const filterRoom = String(selectedMeetingRoomFilter).trim();
                 const roomMatches = eventRoom === filterRoom || 
@@ -285,13 +298,27 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, me
             const eventDateKey = format(event.start, 'yyyy-MM-dd');
             const dateMatches = eventDateKey === dateKey;
             
-            // Nếu có filter phòng họp, kiểm tra thêm
-            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter !== '') {
+            // Nếu có filter phòng họp (không phải "All"), kiểm tra thêm
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim() !== '' && selectedMeetingRoomFilter.trim().toUpperCase() !== 'ALL') {
                 const eventRoom = String(event.meetingRoom || '').trim();
                 const filterRoom = String(selectedMeetingRoomFilter).trim();
                 const roomMatches = eventRoom === filterRoom || 
                                    eventRoom.toLowerCase() === filterRoom.toLowerCase();
                 return dateMatches && roomMatches;
+            }
+            
+            // Nếu chọn "All", chỉ lấy events của các phòng thuộc selectedGroup (meetingRooms)
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim().toUpperCase() === 'ALL') {
+                if (!meetingRooms || meetingRooms.length === 0) {
+                    return false; // Không có phòng nào trong group
+                }
+                const eventRoom = String(event.meetingRoom || '').trim();
+                // Kiểm tra xem eventRoom có trong danh sách meetingRooms không
+                const roomInGroup = meetingRooms.some(room => {
+                    const roomValue = String(room.value || '').trim();
+                    return roomValue === eventRoom || roomValue.toLowerCase() === eventRoom.toLowerCase();
+                });
+                return dateMatches && roomInGroup;
             }
             
             return dateMatches;
@@ -310,8 +337,10 @@ const GanttChart = ({ weekDays, events, format, t, selectedMeetingRoomFilter, me
         return eventsByRoom;
     };
 
-    // Kiểm tra xem có filter phòng cụ thể không
-    const hasRoomFilter = selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim() !== '';
+    // Kiểm tra xem có filter phòng cụ thể không (loại trừ "All")
+    const hasRoomFilter = selectedMeetingRoomFilter && 
+                          selectedMeetingRoomFilter.trim() !== '' && 
+                          selectedMeetingRoomFilter.trim().toUpperCase() !== 'ALL';
 
     return (
         <div className="w-full h-full max-h-[600px] flex flex-col">
@@ -594,35 +623,60 @@ const MeetingRoomBooking = () => {
         '#FF8C00'  // Dark Orange - Màu 20
     ];
 
-    // Hàm gán màu cho events dựa trên thứ tự trong cùng một ngày
-    const assignColorsToEvents = (eventsList) => {
+    // Hàm gán màu cho events dựa trên Group Meeting, Meeting Room và thứ tự trong cùng một ngày
+    const assignColorsToEvents = (eventsList, roomsList = [], groupValue = '') => {
         if (!eventsList || eventsList.length === 0) return eventsList;
 
-        // Nhóm events theo ngày (start date)
-        const eventsByDate = {};
+        // Tạo map để lưu meetingRoom -> group mapping (nếu có)
+        const roomToGroupMap = {};
+        if (roomsList && roomsList.length > 0 && groupValue) {
+            roomsList.forEach(room => {
+                const roomValue = String(room.value || '').trim();
+                roomToGroupMap[roomValue] = groupValue;
+            });
+        }
+
+        // Nhóm events theo Group Meeting và Meeting Room trước
+        // Cấu trúc: { groupValue: { meetingRoom: { date: [events] } } }
+        const eventsByGroupAndRoom = {};
+        
         eventsList.forEach(event => {
-            const dateKey = format(event.start, 'yyyy-MM-dd');
-            if (!eventsByDate[dateKey]) {
-                eventsByDate[dateKey] = [];
+            const eventRoom = String(event.meetingRoom || '').trim();
+            const eventGroup = roomToGroupMap[eventRoom] || 'OTHER'; // Nếu không thuộc group nào thì đặt là 'OTHER'
+            
+            if (!eventsByGroupAndRoom[eventGroup]) {
+                eventsByGroupAndRoom[eventGroup] = {};
             }
-            eventsByDate[dateKey].push(event);
+            if (!eventsByGroupAndRoom[eventGroup][eventRoom]) {
+                eventsByGroupAndRoom[eventGroup][eventRoom] = {};
+            }
+            
+            const dateKey = format(event.start, 'yyyy-MM-dd');
+            if (!eventsByGroupAndRoom[eventGroup][eventRoom][dateKey]) {
+                eventsByGroupAndRoom[eventGroup][eventRoom][dateKey] = [];
+            }
+            eventsByGroupAndRoom[eventGroup][eventRoom][dateKey].push(event);
         });
 
-        // Sắp xếp và gán màu cho events trong mỗi ngày
-        Object.keys(eventsByDate).forEach(dateKey => {
-            const dayEvents = eventsByDate[dateKey];
+        // Gán màu cho events: theo Group -> Meeting Room -> Ngày -> Thứ tự trong ngày
+        Object.keys(eventsByGroupAndRoom).forEach(groupKey => {
+            Object.keys(eventsByGroupAndRoom[groupKey]).forEach(roomKey => {
+                Object.keys(eventsByGroupAndRoom[groupKey][roomKey]).forEach(dateKey => {
+                    const dayEvents = eventsByGroupAndRoom[groupKey][roomKey][dateKey];
+                    
+                    // Sắp xếp events theo thời gian bắt đầu (start time)
+                    dayEvents.sort((a, b) => {
+                        const timeA = format(a.start, 'HH:mm');
+                        const timeB = format(b.start, 'HH:mm');
+                        return timeA.localeCompare(timeB);
+                    });
 
-            // Sắp xếp events theo thời gian bắt đầu (start time)
-            dayEvents.sort((a, b) => {
-                const timeA = format(a.start, 'HH:mm');
-                const timeB = format(b.start, 'HH:mm');
-                return timeA.localeCompare(timeB);
-            });
-
-            // Gán màu theo thứ tự: event đầu tiên = màu 0, event thứ 2 = màu 1, ...
-            dayEvents.forEach((event, index) => {
-                const colorIndex = index % colorSwatches.length; // Lặp lại nếu > 20 events
-                event.bgColor = colorSwatches[colorIndex];
+                    // Gán màu theo thứ tự: event đầu tiên = màu 0, event thứ 2 = màu 1, ...
+                    dayEvents.forEach((event, index) => {
+                        const colorIndex = index % colorSwatches.length; // Lặp lại nếu > 20 events
+                        event.bgColor = colorSwatches[colorIndex];
+                    });
+                });
             });
         });
 
@@ -749,7 +803,7 @@ const MeetingRoomBooking = () => {
                 const fromDate = format(weekStart, 'yyyy-MM-dd');
                 const toDate = format(weekEnd, 'yyyy-MM-dd');
                 const eventsData = await getMeetingRoomEvents(fromDate, toDate);
-                const eventsWithColors = assignColorsToEvents(eventsData || []);
+                const eventsWithColors = assignColorsToEvents(eventsData || [], meetingRooms, selectedGroup);
                 setEvents(eventsWithColors);
             } catch (error) {
                 if (process.env.NODE_ENV === 'development') {
@@ -771,8 +825,8 @@ const MeetingRoomBooking = () => {
             const eventDateKey = format(event.start, 'yyyy-MM-dd');
             const dateMatches = eventDateKey === dateKey;
             
-            // Nếu có filter phòng họp, kiểm tra thêm
-            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter !== '') {
+            // Nếu có filter phòng họp (không phải "All"), kiểm tra thêm
+            if (selectedMeetingRoomFilter && selectedMeetingRoomFilter.trim() !== '' && selectedMeetingRoomFilter.trim().toUpperCase() !== 'ALL') {
                 const eventRoom = String(event.meetingRoom || '').trim();
                 const filterRoom = String(selectedMeetingRoomFilter).trim();
                 const roomMatches = eventRoom === filterRoom || 
@@ -877,7 +931,7 @@ const MeetingRoomBooking = () => {
             }
 
             const eventsData = await getMeetingRoomEvents(fromDate, toDate);
-            const eventsWithColors = assignColorsToEvents(eventsData || []);
+            const eventsWithColors = assignColorsToEvents(eventsData || [], meetingRooms, selectedGroup);
             setEvents(eventsWithColors);
         } catch (error) {
             if (process.env.NODE_ENV === 'development') {
@@ -1011,7 +1065,7 @@ const MeetingRoomBooking = () => {
                     groupToUse ? getMeetingRoomList(groupToUse) : Promise.resolve([])
                 ]);
                 
-                const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+                const eventsWithColors = assignColorsToEvents(reloadedEvents || [], reloadedMeetingRooms || meetingRooms, groupToUse || selectedGroup);
                 setEvents(eventsWithColors);
                 
                 // Cập nhật meeting rooms nếu có thay đổi
@@ -1064,7 +1118,7 @@ const MeetingRoomBooking = () => {
                     const fromDate = format(weekStart, 'yyyy-MM-dd');
                     const toDate = format(weekEnd, 'yyyy-MM-dd');
                     const reloadedEvents = await getMeetingRoomEvents(fromDate, toDate);
-                    const eventsWithColors = assignColorsToEvents(reloadedEvents || []);
+                    const eventsWithColors = assignColorsToEvents(reloadedEvents || [], meetingRooms, selectedGroup);
                     setEvents(eventsWithColors);
                 } else {
                     alert('Có lỗi xảy ra khi xóa sự kiện. Vui lòng thử lại!');
@@ -1312,6 +1366,9 @@ const MeetingRoomBooking = () => {
                                     style={{ lineHeight: '32px', paddingTop: '0', paddingBottom: '0' }}
                                     disabled={!selectedGroup}
                                 >
+                                    {activeTab === 'report' && (
+                                        <option value="All">{'All Rooms'}</option>
+                                    )}
                                     {meetingRooms.map((room) => (
                                         <option key={room.value} value={room.value}>
                                             {room.label}
@@ -1499,6 +1556,7 @@ const MeetingRoomBooking = () => {
                                         t={t}
                                         selectedMeetingRoomFilter={selectedMeetingRoomFilter}
                                         meetingRooms={meetingRooms}
+                                        selectedGroup={selectedGroup}
                                     />
                                 </div>
                             )}
@@ -1648,11 +1706,23 @@ const MeetingRoomBooking = () => {
                                         // Kiểm tra emp_id của event (có thể là cardNumber hoặc userId)
                                         const eventEmpId = selectedEvent.cardNumber || selectedEvent.userId || '';
                                         
-                                        // So sánh case-insensitive và trim
-                                        const currentUserEmpIdNormalized = String(currentUserEmpId).trim().toUpperCase();
-                                        const eventEmpIdNormalized = String(eventEmpId).trim().toUpperCase();
-                                        const isOwner = currentUserEmpIdNormalized && eventEmpIdNormalized &&
-                                            currentUserEmpIdNormalized === eventEmpIdNormalized;
+                                        // Normalize: trim, uppercase, và loại bỏ leading zeros
+                                        const normalizeEmpId = (empId) => {
+                                            if (!empId) return '';
+                                            const str = String(empId).trim().toUpperCase();
+                                            // Loại bỏ leading zeros nhưng giữ lại ít nhất 1 chữ số
+                                            // Ví dụ: "07080752" -> "7080752", "000" -> "0"
+                                            const withoutLeadingZeros = str.replace(/^0+/, '') || '0';
+                                            return withoutLeadingZeros;
+                                        };
+                                        
+                                        const currentUserEmpIdNormalized = normalizeEmpId(currentUserEmpId);
+                                        const eventEmpIdNormalized = normalizeEmpId(eventEmpId);
+                                        
+                                        // Kiểm tra owner: cả hai phải có giá trị và khớp nhau
+                                        const isOwner = currentUserEmpIdNormalized && 
+                                                       eventEmpIdNormalized && 
+                                                       currentUserEmpIdNormalized === eventEmpIdNormalized;
 
                                         // Debug log (chỉ trong development)
                                         if (process.env.NODE_ENV === 'development') {
@@ -1661,11 +1731,14 @@ const MeetingRoomBooking = () => {
                                                 isOwner,
                                                 currentUserEmpId: currentUserEmpIdNormalized,
                                                 eventEmpId: eventEmpIdNormalized,
+                                                currentUserEmpIdRaw: currentUserEmpId,
+                                                eventEmpIdRaw: eventEmpId,
                                                 selectedEvent: {
                                                     id: selectedEvent.id,
                                                     cardNumber: selectedEvent.cardNumber,
                                                     userId: selectedEvent.userId
-                                                }
+                                                },
+                                                userInfo: userInfo
                                             });
                                         }
 

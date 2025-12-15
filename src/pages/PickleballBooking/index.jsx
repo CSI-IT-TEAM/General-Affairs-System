@@ -269,6 +269,19 @@ const GanttChart = ({ weekDays, events, format, t }) => {
                                         // Sử dụng màu từ event.bgColor (đã được gán bởi assignColorsToEvents)
                                         const eventColor = event.bgColor || '#13005f';
 
+                                        // Tạo tooltip với thông tin chi tiết
+                                        const tooltipParts = [];
+                                        if (event.title) {
+                                            tooltipParts.push(`Booker: ${event.title}`);
+                                        }
+                                        tooltipParts.push(`Ngày: ${format(event.start, 'dd/MM/yyyy')}`);
+                                        tooltipParts.push(`Thời gian: ${format(event.start, 'HH:mm')} - ${format(event.end, 'HH:mm')}`);
+                                       
+                                        if (event.description) {
+                                            tooltipParts.push(`Mô tả: ${event.description}`);
+                                        }
+                                        const tooltipText = tooltipParts.join('\n');
+
                                         return (
                                             <div
                                                 key={`event-${event.id || eventIndex}`}
@@ -280,6 +293,7 @@ const GanttChart = ({ weekDays, events, format, t }) => {
                                                     top: '50%',
                                                     transform: 'translateY(-50%)',
                                                 }}
+                                                title={tooltipText}
                                             >
                                                 <span className="text-[9px] sm:text-xs font-semibold  whitespace-nowrap">{format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}</span>
                                             </div>
