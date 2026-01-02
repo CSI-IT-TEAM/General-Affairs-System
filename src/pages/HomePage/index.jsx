@@ -228,7 +228,8 @@ const HomePage = () => {
                     >
                       <Box sx={{ 
                         display: 'flex', 
-                        gap: `${colSpacing * 8}px`, // MUI spacing unit (8px per unit)
+                        flexDirection: { xs: 'column', md: 'row' },
+                        gap: { xs: `${colSpacing * 8}px`, md: `${colSpacing * 8}px` },
                         justifyContent: 'center',
                         alignItems: 'stretch',
                         width: '100%',

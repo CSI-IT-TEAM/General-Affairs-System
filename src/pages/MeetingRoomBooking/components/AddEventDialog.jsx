@@ -33,7 +33,8 @@ const AddEventDialog = ({
     events = [],
     meetingRooms = [],
     isHoliday = false, // Nhận thông tin ngày nghỉ từ props
-    defaultMeetingRoom = undefined, // Phòng mặc định từ filter
+    selectedGroup: externalSelectedGroup = undefined, // Group được chọn từ bên ngoài
+    selectedMeetingRoom: externalSelectedMeetingRoom = undefined, // Meeting Room được chọn từ bên ngoài
     onSelectionChange = undefined // Callback để truyền selectedGroup và selectedMeetingRoom ra ngoài
 }) => {
     const { t } = useTranslation();
@@ -47,7 +48,7 @@ const AddEventDialog = ({
     const [color, setColor] = useState(colorSwatches[0]);
     const [isEndTimeManual, setIsEndTimeManual] = useState(false); // Flag để theo dõi người dùng có chỉnh thủ công endTime không
     const [groupBookingRooms, setGroupBookingRooms] = useState([]);
-    const [selectedGroup, setSelectedGroup] = useState('');
+    const [selectedGroup, setSelectedGroup] = useState(externalSelectedGroup || '');
     const [localMeetingRooms, setLocalMeetingRooms] = useState(meetingRooms);
 
     // Tính toán thời gian bắt đầu mặc định: 07:30
@@ -1043,14 +1044,6 @@ const AddEventDialog = ({
 
             console.log('✅ No conflicts found. Creating', eventsToAdd.length, 'event(s)');
             
-            // Truyền selectedGroup và selectedMeetingRoom ra ngoài TRƯỚC khi submit
-            if (onSelectionChange && typeof onSelectionChange === 'function') {
-                onSelectionChange({
-                    group: selectedGroup,
-                    meetingRoom: values.meetingRoom
-                });
-            }
-            
             onSubmit(eventsToAdd);
             resetForm();
             setColor(colorSwatches[0]);
@@ -1150,6 +1143,22 @@ const AddEventDialog = ({
         // eslint-disable-next-line
     }, [startDate, endDate, formik.values.meetingRoom, isOpen]);
 
+    // Đồng bộ selectedGroup với props từ bên ngoài
+    React.useEffect(() => {
+        if (externalSelectedGroup && externalSelectedGroup !== selectedGroup) {
+            setSelectedGroup(externalSelectedGroup);
+        }
+        // eslint-disable-next-line
+    }, [externalSelectedGroup]);
+
+    // Đồng bộ meetingRoom với props từ bên ngoài
+    React.useEffect(() => {
+        if (externalSelectedMeetingRoom && externalSelectedMeetingRoom !== formik.values.meetingRoom) {
+            formik.setFieldValue('meetingRoom', externalSelectedMeetingRoom);
+        }
+        // eslint-disable-next-line
+    }, [externalSelectedMeetingRoom]);
+
     // Load group booking rooms when dialog opens
     React.useEffect(() => {
         if (isOpen) {
@@ -1158,8 +1167,10 @@ const AddEventDialog = ({
                     const groups = await getGroupBookingRoomList();
                     if (groups && groups.length > 0) {
                         setGroupBookingRooms(groups);
-                        // Set default group to first one
-                        if (!selectedGroup && groups.length > 0) {
+                        // Set default group: ưu tiên externalSelectedGroup, nếu không có thì dùng selectedGroup hiện tại, nếu không có thì dùng group đầu tiên
+                        if (externalSelectedGroup && groups.some(g => g.value === externalSelectedGroup)) {
+                            setSelectedGroup(externalSelectedGroup);
+                        } else if (!selectedGroup && groups.length > 0) {
                             setSelectedGroup(groups[0].value);
                         }
                     }
@@ -1173,7 +1184,7 @@ const AddEventDialog = ({
             loadGroups();
         }
         // eslint-disable-next-line
-    }, [isOpen]);
+    }, [isOpen, externalSelectedGroup]);
 
     // Load meeting rooms when selectedGroup changes
     React.useEffect(() => {
@@ -1183,13 +1194,44 @@ const AddEventDialog = ({
                     const rooms = await getMeetingRoomList(selectedGroup);
                     if (rooms && rooms.length > 0) {
                         setLocalMeetingRooms(rooms);
-                        // Set default room to first one
-                        if (formik.values.meetingRoom === '' || !rooms.some(r => r.value === formik.values.meetingRoom)) {
-                            formik.setFieldValue('meetingRoom', rooms[0].value);
+                        // Set default room: ưu tiên externalSelectedMeetingRoom nếu có và hợp lệ, nếu không thì dùng room đầu tiên
+                        let newMeetingRoom = '';
+                        if (externalSelectedMeetingRoom && rooms.some(r => r.value === externalSelectedMeetingRoom)) {
+                            newMeetingRoom = externalSelectedMeetingRoom;
+                        } else if (formik.values.meetingRoom === '' || !rooms.some(r => r.value === formik.values.meetingRoom)) {
+                            newMeetingRoom = rooms[0].value;
+                        } else {
+                            newMeetingRoom = formik.values.meetingRoom;
+                        }
+                        
+                        if (newMeetingRoom && newMeetingRoom !== formik.values.meetingRoom) {
+                            formik.setFieldValue('meetingRoom', newMeetingRoom);
+                            // Gọi callback khi meetingRoom thay đổi do selectedGroup thay đổi
+                            if (onSelectionChange && typeof onSelectionChange === 'function') {
+                                onSelectionChange({
+                                    group: selectedGroup,
+                                    meetingRoom: newMeetingRoom
+                                });
+                            }
+                        } else if (newMeetingRoom === formik.values.meetingRoom) {
+                            // Nếu meetingRoom không thay đổi nhưng selectedGroup đã thay đổi, vẫn gọi callback
+                            if (onSelectionChange && typeof onSelectionChange === 'function') {
+                                onSelectionChange({
+                                    group: selectedGroup,
+                                    meetingRoom: formik.values.meetingRoom
+                                });
+                            }
                         }
                     } else {
                         setLocalMeetingRooms([]);
                         formik.setFieldValue('meetingRoom', '');
+                        // Gọi callback khi không có room nào
+                        if (onSelectionChange && typeof onSelectionChange === 'function') {
+                            onSelectionChange({
+                                group: selectedGroup,
+                                meetingRoom: ''
+                            });
+                        }
                     }
                 } catch (error) {
                     if (process.env.NODE_ENV === 'development') {
@@ -1223,24 +1265,29 @@ const AddEventDialog = ({
             const currentEmpId = getCurrentEmpId();
             const currentEmpName = getCurrentEmpName();
             
+            // Set selectedGroup từ externalSelectedGroup nếu có
+            if (externalSelectedGroup && externalSelectedGroup !== selectedGroup) {
+                setSelectedGroup(externalSelectedGroup);
+            }
+            
             // Set meetingRoom trước để có thể tìm giờ khả dụng
-            // Ưu tiên dùng defaultMeetingRoom từ props (từ filter), nếu không có thì dùng localMeetingRooms[0]
+            // Ưu tiên dùng externalSelectedMeetingRoom từ props (từ filter), nếu không có thì dùng localMeetingRooms[0]
             let selectedMeetingRoom = '';
-            if (defaultMeetingRoom && defaultMeetingRoom.trim() !== '') {
-                // Kiểm tra xem defaultMeetingRoom có tồn tại trong localMeetingRooms không
+            if (externalSelectedMeetingRoom && externalSelectedMeetingRoom.trim() !== '') {
+                // Kiểm tra xem externalSelectedMeetingRoom có tồn tại trong localMeetingRooms không
                 const existsInRooms = localMeetingRooms.some(room => {
                     const roomValue = String(room.value || '').trim();
-                    const defaultValue = String(defaultMeetingRoom).trim();
+                    const defaultValue = String(externalSelectedMeetingRoom).trim();
                     return roomValue === defaultValue || roomValue.toLowerCase() === defaultValue.toLowerCase();
                 });
                 if (existsInRooms) {
-                    selectedMeetingRoom = defaultMeetingRoom;
+                    selectedMeetingRoom = externalSelectedMeetingRoom;
                 } else {
                     // Nếu không tồn tại, dùng localMeetingRooms[0]
                     selectedMeetingRoom = localMeetingRooms.length > 0 ? localMeetingRooms[0].value : '';
                 }
             } else {
-                // Nếu không có defaultMeetingRoom, dùng localMeetingRooms[0]
+                // Nếu không có externalSelectedMeetingRoom, dùng localMeetingRooms[0]
                 selectedMeetingRoom = localMeetingRooms.length > 0 ? localMeetingRooms[0].value : '';
             }
             
@@ -1275,7 +1322,7 @@ const AddEventDialog = ({
             }, 0);
         }
         // eslint-disable-next-line
-    }, [isOpen, initialStartDate, initialEndDate, initialStartTime, initialEndTime, localMeetingRooms, defaultMeetingRoom]);
+    }, [isOpen, initialStartDate, initialEndDate, initialStartTime, initialEndTime, localMeetingRooms, externalSelectedGroup, externalSelectedMeetingRoom]);
 
     // Cập nhật startTime khi meetingRoom thay đổi
     // Sử dụng useRef để theo dõi meetingRoom trước đó và chỉ cập nhật khi thực sự thay đổi
@@ -1375,7 +1422,17 @@ const AddEventDialog = ({
                                         </Label>
                                         <Select
                                             value={selectedGroup}
-                                            onChange={(e) => setSelectedGroup(e.target.value)}
+                                            onChange={(e) => {
+                                                const newGroup = e.target.value;
+                                                setSelectedGroup(newGroup);
+                                                // Gọi callback ngay khi thay đổi
+                                                if (onSelectionChange && typeof onSelectionChange === 'function') {
+                                                    onSelectionChange({
+                                                        group: newGroup,
+                                                        meetingRoom: formik.values.meetingRoom
+                                                    });
+                                                }
+                                            }}
                                             className="w-full h-9 sm:h-11 text-sm sm:text-base"
                                         >
                                             {groupBookingRooms.map((group) => (
@@ -1425,6 +1482,13 @@ const AddEventDialog = ({
                                                                         formik.setFieldValue('meetingRoom', meetingRoom.value);
                                                                         setMeetingRoomInput("");
                                                                         setOpenMeetingRoom(false);
+                                                                        // Gọi callback ngay khi thay đổi
+                                                                        if (onSelectionChange && typeof onSelectionChange === 'function') {
+                                                                            onSelectionChange({
+                                                                                group: selectedGroup,
+                                                                                meetingRoom: meetingRoom.value
+                                                                            });
+                                                                        }
                                                                     }}
                                                                     className="cursor-pointer py-2 px-4"
                                                                 >

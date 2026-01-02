@@ -1463,7 +1463,7 @@ const MeetingRoomBooking = () => {
                                                                 dayEvents.map((event, eventIndex) => (
                                                                     <div
                                                                         key={event.id || eventIndex}
-                                                                        className="rounded-lg sm:rounded-xl p-1.5 sm:p-3 text-xs cursor-pointer hover:scale-[1.02] transition-all duration-200 shadow-md border border-white/30 sm:border-2 relative overflow-hidden"
+                                                                        className="group rounded-lg sm:rounded-xl p-1.5 sm:p-3 text-xs cursor-pointer hover:scale-[1.02] transition-all duration-200 shadow-md border border-white/30 sm:border-2 relative overflow-hidden"
                                                                         style={{
                                                                             backgroundColor: event.bgColor || colorSwatches[0],
                                                                             backgroundSize: 'cover, cover, cover',
@@ -1471,6 +1471,7 @@ const MeetingRoomBooking = () => {
                                                                             backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
                                                                             backgroundBlendMode: 'normal, multiply, overlay',
                                                                         }}
+                                                                        // title={event.title}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
                                                                             handleEventClick(event);
@@ -1513,7 +1514,7 @@ const MeetingRoomBooking = () => {
                                                                             <div className="font-extrabold text-xs sm:text-sm md:text-2xl text-gray-900 drop-shadow-sm whitespace-nowrap">
                                                                                 {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
                                                                             </div>
-                                                                            <div className="text-[8px] sm:text-xs md:text-lg text-gray-800 sm:font-semibold font-light truncate drop-shadow-sm text-right mt-0.5 sm:mt-1">{event.title}</div>
+                                                                            <div className="text-[8px] sm:text-xs md:text-lg text-gray-800 sm:font-semibold font-light truncate group-hover:whitespace-normal group-hover:break-words group-hover:font-bold group-hover:text-gray-900 drop-shadow-sm text-right mt-0.5 sm:mt-1 transition-all duration-200">{event.title}</div>
                                                                             {event.department && (
                                                                                 <div className="text-[7px] sm:text-[10px] md:text-sm text-gray-700 font-medium truncate drop-shadow-sm text-right mt-0.5 sm:mt-1 opacity-90">
                                                                                     {event.department}
@@ -1578,7 +1579,8 @@ const MeetingRoomBooking = () => {
                 events={events}
                 meetingRooms={meetingRooms}
                 isHoliday={isHoliday}
-                defaultMeetingRoom={selectedMeetingRoomFilter || undefined}
+                selectedGroup={selectedGroup}
+                selectedMeetingRoom={selectedMeetingRoomFilter || undefined}
                 onSelectionChange={handleSelectionChange}
             />
 
