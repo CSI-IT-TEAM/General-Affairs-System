@@ -647,7 +647,12 @@ const CanteenAttendanceRegistration = () => {
                         onClick={() => {
                             formik.resetForm();
                             setVisitorDepartment('');
-                            setSelectedDateRows(buildNextSevenDays(weekOffset));
+                            setWeekOffset(0);
+                            setActiveTab('self');
+                            const fresh = buildNextSevenDays(0);
+                            setSelectedDateRows(fresh);
+                            setAllWeekData({ 0: { self: fresh, visitor: fresh } });
+                            allWeekDataRef.current = { 0: { self: fresh, visitor: fresh } };
                         }}
                         style={{
                             background: '#dc2626',
