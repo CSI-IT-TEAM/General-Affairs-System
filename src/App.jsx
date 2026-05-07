@@ -15,6 +15,7 @@ import HistoryMedicalPage from "./pages/HistoryPage/HistoryMedicalPage";
 import PickleballBooking from "./pages/PickleballBooking";
 import MeetingRoomBooking from "./pages/MeetingRoomBooking";
 import TemporaryResidence from "./pages/TemporaryResidence";
+import CanteenAttendanceRegistration from "./pages/CanteenAttendanceRegistration";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -103,6 +104,15 @@ const router = createBrowserRouter([
         ),
     },
     {
+        path: "/registration/canteen-attendance",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <CanteenAttendanceRegistration />
+            </Layout>
+        ),
+    },
+    {
         path: "*",
         element: (
             <ErrorPage />
@@ -114,4 +124,4 @@ const App = () => {
     return <RouterProvider router={router} />;
 };
 
-export default App;
+export default App;
