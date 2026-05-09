@@ -127,6 +127,9 @@ const HomePage = () => {
       case "006":
         navigate("/registration/temporary-residence");
         break;
+      case "007":
+        navigate("/registration/canteen-attendance");
+        break;
       default: {
         navigate("/");
         break;
@@ -156,7 +159,7 @@ const HomePage = () => {
                 
                 optionData.forEach((item) => {
                   // Luôn hiển thị menu 001 và 005
-                  if (item.id === "001" || item.id === "005") {
+                  if (item.id === "001" || item.id === "005" || item.id === "007") {
                     visibleCards.push(item);
                   }
                   // Menu 002 và 006: hiển thị nếu EXP/special emp

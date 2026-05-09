@@ -35,6 +35,8 @@
     "temporary_residence_booker_name": "Registrant Name",
     "business_immigration_declaration_title": "Business Immigration Declaration",
     "business_immigration_declaration_desc": "Business immigration declaration with Vietnam Immigration Office",
+   "canteen_attendance_title": "Canteen Attendance Registration",
+    "canteen_attendance_desc": "Register for canteen attendance for yourself or visitors",
     "register_now": "Register Now",
     "meeting_room_add_booking": "Add Meeting Room Booking",
     "meeting_room_booking_for": "Booking for",

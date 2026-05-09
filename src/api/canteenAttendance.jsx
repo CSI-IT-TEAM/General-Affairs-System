@@ -147,6 +147,7 @@ export const saveCanteenRegistration = async (registrationData) => {
  * @param {Object} params - Query parameters
  * @param {number|null} params.argRegId - Registration ID (optional)
  * @param {string|null} params.argEmpNo - Employee number (optional)
+ * @param {string} params.argRegType - Registration type (SELF/VISITOR) - REQUIRED
  * @param {string|null} params.argFromDate - From date in format YYYY-MM-DD (optional)
  * @param {string|null} params.argToDate - To date in format YYYY-MM-DD (optional)
  * @param {string|null} params.argVisitorDept - Visitor department filter (optional)
@@ -156,6 +157,7 @@ export const saveCanteenRegistration = async (registrationData) => {
 export const getCanteenRegistration = async ({
   argRegId = null,
   argEmpNo = null,
+  argRegType = null,
   argFromDate = null,
   argToDate = null,
   argVisitorDept = null,
@@ -165,6 +167,7 @@ export const getCanteenRegistration = async ({
     const data = await callProcedure('SMT_GET_CAN_REG', {
       ARG_REG_ID: { value: argRegId, type: "IN" },
       ARG_EMP_NO: { value: argEmpNo, type: "IN" },
+      ARG_REG_TYPE: { value: argRegType, type: "IN" },
       ARG_FROM_DATE: { value: argFromDate, type: "IN" },
       ARG_TO_DATE: { value: argToDate, type: "IN" },
       ARG_VISITOR_DEPT: { value: argVisitorDept, type: "IN" },

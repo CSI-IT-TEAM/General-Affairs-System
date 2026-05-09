@@ -50,7 +50,7 @@ const optionData = [
         btn_order_text: "order",
         sort_order: 5,
         visible: false,
-    },    
+    },
     {
         id: '005',
         title: 'Meeting Room Booking',
@@ -88,6 +88,19 @@ const optionData = [
         link: '',
         btn_order_text: "register_now",
         sort_order: 6,
+        visible: true,
+    },
+    {
+        id: '007',
+        title: 'Canteen Attendance Registration',
+        thumb: pickleballBanner, // Ảnh icon - đang sử dụng
+        // thumb: canteenAttendanceBanner, // Ảnh banner - comment lại
+        desc: 'Register for canteen attendance',
+        desc_color: "#000000",
+        bgColor: '#8b5cf6',
+        link: '/canteen-attendance',
+        btn_order_text: "register_now",
+        sort_order: 7,
         visible: true,
     }
 ]

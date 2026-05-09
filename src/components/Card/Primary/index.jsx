@@ -106,6 +106,7 @@ const CardPrimary = ({ data, handleClick }) => {
       "004": { r: 255, g: 183, b: 77 },    // Cam nhạt (Pickleball)
       "005": { r: 255, g: 183, b: 77 },    // Cam nhạt (Meeting Room)
       "006": { r: 186, g: 124, b: 246 },    // Tím nhạt (Temporary Residence)
+      "007": { r: 255, g: 183, b: 77 },    // Cam nhạt (Canteen Attendance)
     };
     
     const color = colorMap[data.id] || { r: 245, g: 247, b: 250 };
@@ -138,10 +139,14 @@ const CardPrimary = ({ data, handleClick }) => {
         title = t("meeting_room_title");
         desc = t("meeting_room_desc");
         break;
-      case "006":
-        title = t("business_immigration_declaration_title"); // Business immigration declaration
+        case "006":
+          title = t("business_immigration_declaration_title"); // Business immigration declaration
 
-        desc = t("business_immigration_declaration_desc"); // Business immigration declaration
+          desc = t("business_immigration_declaration_desc"); // Business immigration declaration
+          break;
+      case "007":
+        title = t("canteen_attendance_title");
+        desc = t("canteen_attendance_desc");
         break;
       default:
         break;

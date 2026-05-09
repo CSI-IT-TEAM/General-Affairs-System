@@ -45,12 +45,15 @@ const CanteenAttendanceRegistration = () => {
     const [allWeekData, setAllWeekData] = useState({ 0: { self: buildNextSevenDays(0), visitor: buildNextSevenDays(0) } });
     const allWeekDataRef = useRef({ 0: { self: buildNextSevenDays(0), visitor: buildNextSevenDays(0) } });
     const [visitorDepartment, setVisitorDepartment] = useState('');
+    const visitorDeptRef = useRef('');
     const [deptList, setDeptList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [justRegistered, setJustRegistered] = useState(false);
     const [originalData, setOriginalData] = useState([]);
+    // Separate state for SELF data - not affected by visitor operations
+    const [selfWeekData, setSelfWeekData] = useState({});
 
     const showSelfTab = userPersType !== 'EMP';
 
@@ -73,6 +76,7 @@ const CanteenAttendanceRegistration = () => {
     const handleVisitorDepartmentChange = (value) => {
         setJustRegistered(false);
         setVisitorDepartment(value);
+        visitorDeptRef.current = value;
         formik.setFieldValue('visitorDepartment', value);
 
         // Clear visitor data for current week to avoid showing stale data
@@ -126,25 +130,104 @@ const CanteenAttendanceRegistration = () => {
     // Fetch registration data for self tab on initial load
     useEffect(() => {
         const fetchSelfData = async () => {
-            if (activeTab !== 'self') return;
-
             const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
             if (!rawUserData) return;
             const parsedUserData = JSON.parse(rawUserData);
             const empNo = parsedUserData?.EMPID || '';
             if (empNo) {
-                // Fetch self registration data (no department filter)
-                await fetchRegistrationDataForWeek(empNo, weekOffset, null);
+                // Fetch self registration data with null department
+                setIsLoading(true);
+                try {
+                    const today = new Date();
+                    today.setDate(today.getDate() + weekOffset * 7);
+                    const startDate = new Date(today);
+                    startDate.setDate(today.getDate());
+                    const endDate = new Date(today);
+                    endDate.setDate(today.getDate() + 6);
+                    const fromDate = startDate.toISOString().slice(0, 10);
+                    const toDate = endDate.toISOString().slice(0, 10);
+
+                    const result = await getCanteenRegistration({
+                        argEmpNo: empNo,
+                        argRegType: 'SELF',
+                        argFromDate: fromDate,
+                        argToDate: toDate,
+                        argVisitorDept: null,
+                    });
+
+                    if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                        const selfRegMap = {};
+
+                        result.data.forEach((item) => {
+                            // Only process SELF records
+                            if (item.REG_TYPE !== 'SELF') return;
+
+                            let mealKey = '';
+                            switch (item.MEAL_TYPE) {
+                                case 'LUNCH': mealKey = 'lunch'; break;
+                                case 'BREAKFAST': mealKey = 'breakfast'; break;
+                                case 'DINNER': mealKey = 'dinner'; break;
+                                default: mealKey = item.MEAL_TYPE?.toLowerCase() || '';
+                            }
+                            const key = `${item.REG_DATE}-${mealKey}`;
+                            selfRegMap[key] = {
+                                factoryCode: item.FACTORY_CODE,
+                                breakfastNote: item.MEAL_NOTE || '',
+                                visitorCnt: item.VISITOR_CNT || 1,
+                            };
+                        });
+
+                        // Build rows with SELF data
+                        const weekSelfRows = buildNextSevenDays(weekOffset).map((row) => {
+                            const key = `${row.date}-${row.mealKey}`;
+                            const regData = selfRegMap[key];
+                            if (regData) {
+                                return { ...row, ...regData };
+                            }
+                            return row;
+                        });
+
+                        // Store to separate SELF data store
+                        selfDataRef.current = { [weekOffset]: weekSelfRows };
+                        setSelfWeekData({ [weekOffset]: weekSelfRows });
+
+                        // If on self tab, update UI
+                        if (activeTab === 'self') {
+                            setSelectedDateRows(weekSelfRows);
+                            setOriginalData(JSON.parse(JSON.stringify(weekSelfRows)));
+                        }
+                    } else {
+                        // No data - store empty rows
+                        const emptyRows = buildNextSevenDays(weekOffset);
+                        selfDataRef.current = { [weekOffset]: emptyRows };
+                        setSelfWeekData({ [weekOffset]: emptyRows });
+                        if (activeTab === 'self') {
+                            setSelectedDateRows(emptyRows);
+                            setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching self registration data:', error);
+                } finally {
+                    setIsLoading(false);
+                }
             }
         };
 
         fetchSelfData();
     }, []);
 
+    // Sync selfDataRef when selfWeekData changes
+    useEffect(() => {
+        selfDataRef.current = selfWeekData;
+    }, [selfWeekData]);
+
     // Fetch registration data for visitor tab based on selected department
     useEffect(() => {
         const fetchVisitorData = async () => {
-            if (activeTab !== 'visitor') return;
+            if (activeTab !== 'visitor') {
+                return;
+            }
 
             const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
             if (!rawUserData) return;
@@ -162,36 +245,109 @@ const CanteenAttendanceRegistration = () => {
                 }
             }
 
-            if (deptToUse) {
-                // Clear old visitor data to avoid showing unfiltered data while loading
+            if (!deptToUse) {
+                const emptyRows = buildNextSevenDays(weekOffset);
                 setAllWeekData((prev) => ({
                     ...prev,
                     [weekOffset]: {
-                        ...(prev[weekOffset] || { self: buildNextSevenDays(weekOffset), visitor: buildNextSevenDays(weekOffset) }),
-                        visitor: buildNextSevenDays(weekOffset),
+                        ...(prev[weekOffset] || {}),
+                        visitor: emptyRows,
                     },
                 }));
-                // Fetch with correct department
-                await fetchRegistrationDataForWeek(empNo, weekOffset, deptToUse);
+                setSelectedDateRows(emptyRows);
+                setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+                isVisitorDataReadyRef.current = true;
+                return;
+            }
+
+            // Fetch visitor data with department filter
+            setIsLoading(true);
+            try {
+                const today = new Date();
+                today.setDate(today.getDate() + weekOffset * 7);
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate());
+                const endDate = new Date(today);
+                endDate.setDate(today.getDate() + 6);
+                const fromDate = startDate.toISOString().slice(0, 10);
+                const toDate = endDate.toISOString().slice(0, 10);
+
+                const result = await getCanteenRegistration({
+                    argEmpNo: empNo,
+                    argRegType: 'VISITOR',
+                    argFromDate: fromDate,
+                    argToDate: toDate,
+                    argVisitorDept: deptToUse,
+                });
+
+                if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                    const visitorRegMap = {};
+
+                    result.data.forEach((item) => {
+                        if (item.REG_TYPE !== 'VISITOR') return;
+                        if (item.VISITOR_DEPT !== deptToUse) return;
+
+                        let mealKey = '';
+                        switch (item.MEAL_TYPE) {
+                            case 'LUNCH': mealKey = 'lunch'; break;
+                            case 'BREAKFAST': mealKey = 'breakfast'; break;
+                            case 'DINNER': mealKey = 'dinner'; break;
+                            default: mealKey = item.MEAL_TYPE?.toLowerCase() || '';
+                        }
+                        const key = `${item.REG_DATE}-${mealKey}`;
+                        visitorRegMap[key] = {
+                            factoryCode: item.FACTORY_CODE,
+                            breakfastNote: item.MEAL_NOTE || '',
+                            visitorCnt: item.VISITOR_CNT || 1,
+                        };
+                    });
+
+                    // Build rows with VISITOR data
+                    const weekVisitorRows = buildNextSevenDays(weekOffset).map((row) => {
+                        const key = `${row.date}-${row.mealKey}`;
+                        const regData = visitorRegMap[key];
+                        if (regData) {
+                            return { ...row, ...regData };
+                        }
+                        return row;
+                    });
+
+                    // Store to visitor data store
+                    setAllWeekData((prev) => ({
+                        ...prev,
+                        [weekOffset]: {
+                            ...(prev[weekOffset] || {}),
+                            visitor: weekVisitorRows,
+                        },
+                    }));
+                    isVisitorDataReadyRef.current = true;
+
+                    // Update UI
+                    setSelectedDateRows(weekVisitorRows);
+                    setOriginalData(JSON.parse(JSON.stringify(weekVisitorRows)));
+                } else {
+                    // No data - show empty visitor rows
+                    const emptyRows = buildNextSevenDays(weekOffset);
+                    setAllWeekData((prev) => ({
+                        ...prev,
+                        [weekOffset]: {
+                            ...(prev[weekOffset] || {}),
+                            visitor: emptyRows,
+                        },
+                    }));
+                    isVisitorDataReadyRef.current = true;
+                    setSelectedDateRows(emptyRows);
+                    setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+                }
+            } catch (error) {
+                console.error('Error fetching visitor data:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchVisitorData();
-    }, [activeTab, deptList]);
-
-    // Re-fetch when department changes manually (user selects different department)
-    useEffect(() => {
-        if (activeTab === 'visitor' && visitorDepartment) {
-            const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
-            if (!rawUserData) return;
-            const parsedUserData = JSON.parse(rawUserData);
-            const empNo = parsedUserData?.EMPID || '';
-            if (empNo) {
-                // Fetch with new department (data will be cleared and updated inside fetch function)
-                fetchRegistrationDataForWeek(empNo, weekOffset, visitorDepartment);
-            }
-        }
-    }, [visitorDepartment]);
+    }, [activeTab, deptList, visitorDepartment, weekOffset]);
 
     useEffect(() => {
         if (!showSelfTab && activeTab === 'self') {
@@ -202,11 +358,13 @@ const CanteenAttendanceRegistration = () => {
     const prevActiveTabRef = useRef(activeTab);
     const isFirstLoadRef = useRef(true);
     const isVisitorDataReadyRef = useRef(false);
+    const isFetchingVisitorDataRef = useRef(false);
+    // Separate ref to store SELF data independently from allWeekData
+    const selfDataRef = useRef({});
 
-    // Clear visitor data on mount and mark as not ready to force re-fetch with correct department
+    // Clear visitor data on mount - but don't touch self data
     useEffect(() => {
-        const freshVisitor = buildNextSevenDays(0);
-        setAllWeekData({ 0: { self: buildNextSevenDays(0), visitor: freshVisitor } });
+        setAllWeekData({});
         isVisitorDataReadyRef.current = false;
     }, []);
 
@@ -214,39 +372,58 @@ const CanteenAttendanceRegistration = () => {
         const prevTab = prevActiveTabRef.current;
         const prevRows = selectedDateRows;
 
-        // On first load, don't use cached data from allWeekData (let fetch functions handle it)
+        // On first load, don't use cached data - let fetch functions handle it
         if (isFirstLoadRef.current) {
             isFirstLoadRef.current = false;
             prevActiveTabRef.current = activeTab;
             return;
         }
 
-        // For visitor tab, only use cached data if it's been explicitly set by fetch with correct department
-        // Otherwise, if switching to visitor tab while data is being fetched, show empty rows
-        if (activeTab === 'visitor') {
-            const saved = allWeekData[weekOffset]?.visitor;
-            // Only use cached data if visitor data has been explicitly fetched with department filter
-            if (isVisitorDataReadyRef.current && saved?.some((row) => row.factoryCode)) {
-                setSelectedDateRows(saved);
-            } else {
-                // Not yet fetched or no data - show empty rows while fetching
-                setSelectedDateRows(buildNextSevenDays(weekOffset));
+        // Save current tab data before switching
+        if (prevTab !== activeTab && prevTab) {
+            if (prevTab === 'self') {
+                // Save self data to selfWeekData
+                setSelfWeekData((prev) => ({
+                    ...prev,
+                    [weekOffset]: prevRows,
+                }));
+            } else if (prevTab === 'visitor') {
+                // Save visitor data to allWeekData
+                setAllWeekData((prevAll) => ({
+                    ...prevAll,
+                    [weekOffset]: {
+                        ...(prevAll[weekOffset] || {}),
+                        visitor: prevRows,
+                    },
+                }));
             }
-        } else {
-            const saved = allWeekData[weekOffset]?.[activeTab];
-            setSelectedDateRows(saved || buildNextSevenDays(weekOffset));
+            // Reset justRegistered when switching tabs
+            setJustRegistered(false);
         }
 
-        if (prevTab !== activeTab && prevTab) {
-            setAllWeekData((prevAll) => ({
-                ...prevAll,
-                [weekOffset]: {
-                    ...(prevAll[weekOffset] || { self: buildNextSevenDays(weekOffset), visitor: buildNextSevenDays(weekOffset) }),
-                    [prevTab]: prevRows,
-                },
-            }));
-            // Reset justRegistered when switching tabs so panel shows correctly
-            setJustRegistered(false);
+        // Restore data for the new active tab
+        if (activeTab === 'self') {
+            const savedSelfData = selfDataRef.current[weekOffset];
+            if (savedSelfData) {
+                setSelectedDateRows(savedSelfData);
+                setOriginalData(JSON.parse(JSON.stringify(savedSelfData)));
+            } else {
+                // No self data yet - show empty rows and fetch
+                const emptyRows = buildNextSevenDays(weekOffset);
+                setSelectedDateRows(emptyRows);
+                setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+            }
+        } else if (activeTab === 'visitor') {
+            const savedVisitorData = allWeekData[weekOffset]?.visitor;
+            if (isVisitorDataReadyRef.current && savedVisitorData) {
+                setSelectedDateRows(savedVisitorData);
+                setOriginalData(JSON.parse(JSON.stringify(savedVisitorData)));
+            } else {
+                // Not yet fetched or no data - show empty rows
+                const emptyRows = buildNextSevenDays(weekOffset);
+                setSelectedDateRows(emptyRows);
+                setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+            }
         }
 
         prevActiveTabRef.current = activeTab;
@@ -342,8 +519,8 @@ const CanteenAttendanceRegistration = () => {
         );
     };
 
-    // Fetch registration data from API and apply to rows (used for initial load only)
-    const fetchAndApplyRegistrationData = async (empNo, offset = weekOffset, filterDept = null) => {
+    // Fetch registration data from API and apply to rows (used after save or cancel)
+    const fetchAndApplyRegistrationData = async (empNo, offset = weekOffset) => {
         setIsLoading(true);
         try {
             const today = new Date();
@@ -351,129 +528,115 @@ const CanteenAttendanceRegistration = () => {
             const startDate = new Date(today);
             startDate.setDate(today.getDate());
             const endDate = new Date(today);
-            endDate.setDate(today.getDate() + 7);
+            endDate.setDate(today.getDate() + 6);
             const fromDate = startDate.toISOString().slice(0, 10);
             const toDate = endDate.toISOString().slice(0, 10);
 
-            // Use filterDept if provided, otherwise fall back to state
-            const deptToFilter = filterDept ?? (activeTab === 'visitor' && visitorDepartment ? visitorDepartment : null);
-
-            const result = await getCanteenRegistration({
+            // Fetch SELF data
+            const selfResult = await getCanteenRegistration({
                 argEmpNo: empNo,
+                argRegType: 'SELF',
                 argFromDate: fromDate,
                 argToDate: toDate,
-                argVisitorDept: deptToFilter,
+                argVisitorDept: null,
             });
 
-            if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-                // Build separate maps for SELF and VISITOR registrations
-                const selfRegMap = {};
-                const visitorRegMap = {};
+            // Fetch VISITOR data with current department
+            const currentDept = visitorDepartment || '';
+            const visitorResult = await getCanteenRegistration({
+                argEmpNo: empNo,
+                argRegType: 'VISITOR',
+                argFromDate: fromDate,
+                argToDate: toDate,
+                argVisitorDept: currentDept || null,
+            });
 
-                result.data.forEach((item) => {
-                    // Skip VISITOR records when fetching for self tab (no department filter)
-                    // VISITOR records should only be fetched when a specific department is selected
-                    if (item.REG_TYPE === 'VISITOR' && !deptToFilter) {
-                        return;
-                    }
+            const selfRegMap = {};
+            const visitorRegMap = {};
 
-                    // Skip VISITOR records that don't match the requested department
-                    if (item.REG_TYPE === 'VISITOR' && deptToFilter && item.VISITOR_DEPT !== deptToFilter) {
-                        return;
-                    }
-
-                    // Determine mealKey from mealType
+            // Process SELF data
+            if (selfResult.success && Array.isArray(selfResult.data)) {
+                selfResult.data.forEach((item) => {
                     let mealKey = '';
                     switch (item.MEAL_TYPE) {
-                        case 'LUNCH':
-                            mealKey = 'lunch';
-                            break;
-                        case 'BREAKFAST':
-                            mealKey = 'breakfast';
-                            break;
-                        case 'DINNER':
-                            mealKey = 'dinner';
-                            break;
-                        default:
-                            mealKey = item.MEAL_TYPE?.toLowerCase() || '';
+                        case 'LUNCH': mealKey = 'lunch'; break;
+                        case 'BREAKFAST': mealKey = 'breakfast'; break;
+                        case 'DINNER': mealKey = 'dinner'; break;
+                        default: mealKey = item.MEAL_TYPE?.toLowerCase() || '';
                     }
                     const key = `${item.REG_DATE}-${mealKey}`;
-                    const regData = {
+                    selfRegMap[key] = {
                         factoryCode: item.FACTORY_CODE,
                         breakfastNote: item.MEAL_NOTE || '',
                         visitorCnt: item.VISITOR_CNT || 1,
                     };
-
-                    // Separate data by REG_TYPE
-                    if (item.REG_TYPE === 'SELF') {
-                        selfRegMap[key] = regData;
-                    } else if (item.REG_TYPE === 'VISITOR') {
-                        visitorRegMap[key] = regData;
-                    }
                 });
-
-                // Build updated rows for SELF tab
-                const updatedSelfRows = selectedDateRows.map((row) => {
-                    const key = `${row.date}-${row.mealKey}`;
-                    const regData = selfRegMap[key];
-                    if (regData) {
-                        return {
-                            ...row,
-                            factoryCode: regData.factoryCode,
-                            breakfastNote: regData.breakfastNote,
-                            visitorCnt: regData.visitorCnt,
-                        };
-                    }
-                    return row;
-                });
-
-                // Build updated rows for VISITOR tab
-                const updatedVisitorRows = selectedDateRows.map((row) => {
-                    const key = `${row.date}-${row.mealKey}`;
-                    const regData = visitorRegMap[key];
-                    if (regData) {
-                        return {
-                            ...row,
-                            factoryCode: regData.factoryCode,
-                            breakfastNote: regData.breakfastNote,
-                            visitorCnt: regData.visitorCnt,
-                        };
-                    }
-                    return row;
-                });
-
-                // Apply to current rows based on active tab and save as original data
-                if (activeTab === 'self') {
-                    setSelectedDateRows(updatedSelfRows);
-                    setOriginalData(JSON.parse(JSON.stringify(updatedSelfRows)));
-                } else {
-                    setSelectedDateRows(updatedVisitorRows);
-                    setOriginalData(JSON.parse(JSON.stringify(updatedVisitorRows)));
-                }
-
-                // Update allWeekData with both self and visitor data
-                setAllWeekData((prev) => ({
-                    ...prev,
-                    [offset]: {
-                        ...(prev[offset] || { self: buildNextSevenDays(offset), visitor: buildNextSevenDays(offset) }),
-                        self: updatedSelfRows,
-                        visitor: updatedVisitorRows,
-                    },
-                }));
-            } else {
-                // No data from API, save current rows as original
-                setOriginalData(JSON.parse(JSON.stringify(selectedDateRows)));
             }
+
+            // Process VISITOR data
+            if (visitorResult.success && Array.isArray(visitorResult.data)) {
+                visitorResult.data.forEach((item) => {
+                    let mealKey = '';
+                    switch (item.MEAL_TYPE) {
+                        case 'LUNCH': mealKey = 'lunch'; break;
+                        case 'BREAKFAST': mealKey = 'breakfast'; break;
+                        case 'DINNER': mealKey = 'dinner'; break;
+                        default: mealKey = item.MEAL_TYPE?.toLowerCase() || '';
+                    }
+                    const key = `${item.REG_DATE}-${mealKey}`;
+                    visitorRegMap[key] = {
+                        factoryCode: item.FACTORY_CODE,
+                        breakfastNote: item.MEAL_NOTE || '',
+                        visitorCnt: item.VISITOR_CNT || 1,
+                    };
+                });
+            }
+
+            // Build SELF rows
+            const selfRows = buildNextSevenDays(offset).map((row) => {
+                const key = `${row.date}-${row.mealKey}`;
+                const regData = selfRegMap[key];
+                return regData ? { ...row, ...regData } : row;
+            });
+
+            // Build VISITOR rows
+            const visitorRows = buildNextSevenDays(offset).map((row) => {
+                const key = `${row.date}-${row.mealKey}`;
+                const regData = visitorRegMap[key];
+                return regData ? { ...row, ...regData } : row;
+            });
+
+            // Update self data store
+            selfDataRef.current = { ...selfDataRef.current, [offset]: selfRows };
+            setSelfWeekData((prev) => ({ ...prev, [offset]: selfRows }));
+
+            // Update visitor data store
+            setAllWeekData((prev) => ({
+                ...prev,
+                [offset]: {
+                    ...(prev[offset] || {}),
+                    visitor: visitorRows,
+                },
+            }));
+
+            // Update UI based on current tab
+            if (activeTab === 'self') {
+                setSelectedDateRows(selfRows);
+                setOriginalData(JSON.parse(JSON.stringify(selfRows)));
+            } else {
+                setSelectedDateRows(visitorRows);
+                setOriginalData(JSON.parse(JSON.stringify(visitorRows)));
+            }
+
+            isVisitorDataReadyRef.current = true;
         } catch (error) {
             console.error('Error fetching registration data:', error);
-            // Save current state as original on error
-            setOriginalData(JSON.parse(JSON.stringify(selectedDateRows)));
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Fetch registration data for a specific week (used during navigation - doesn't overwrite selectedDateRows)
+    // Fetch registration data for a specific week (used during navigation)
     const fetchRegistrationDataForWeek = async (empNo, offset, filterDept = null) => {
         setIsLoading(true);
         try {
@@ -482,127 +645,141 @@ const CanteenAttendanceRegistration = () => {
             const startDate = new Date(today);
             startDate.setDate(today.getDate());
             const endDate = new Date(today);
-            endDate.setDate(today.getDate() + 7);
+            endDate.setDate(today.getDate() + 6);
             const fromDate = startDate.toISOString().slice(0, 10);
             const toDate = endDate.toISOString().slice(0, 10);
 
-            // Use filterDept if provided, otherwise fall back to state
-            const deptToFilter = filterDept ?? (activeTab === 'visitor' && visitorDepartment ? visitorDepartment : null);
-
             const result = await getCanteenRegistration({
                 argEmpNo: empNo,
+                argRegType: filterDept === null ? 'SELF' : 'VISITOR',
                 argFromDate: fromDate,
                 argToDate: toDate,
-                argVisitorDept: deptToFilter,
+                argVisitorDept: filterDept,
             });
 
             if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-                // Build separate maps for SELF and VISITOR registrations
-                const selfRegMap = {};
-                const visitorRegMap = {};
+                // If filterDept is null, this is a SELF fetch - only update self data
+                if (filterDept === null) {
+                    const selfRegMap = {};
 
-                result.data.forEach((item) => {
-                    // Skip VISITOR records when fetching for self tab (no department filter)
-                    // VISITOR records should only be fetched when a specific department is selected
-                    if (item.REG_TYPE === 'VISITOR' && !deptToFilter) {
-                        return;
-                    }
+                    result.data.forEach((item) => {
+                        // Only process SELF records
+                        if (item.REG_TYPE !== 'SELF') return;
 
-                    // Skip VISITOR records that don't match the requested department
-                    if (item.REG_TYPE === 'VISITOR' && deptToFilter && item.VISITOR_DEPT !== deptToFilter) {
-                        return;
-                    }
-
-                    let mealKey = '';
-                    switch (item.MEAL_TYPE) {
-                        case 'LUNCH':
-                            mealKey = 'lunch';
-                            break;
-                        case 'BREAKFAST':
-                            mealKey = 'breakfast';
-                            break;
-                        case 'DINNER':
-                            mealKey = 'dinner';
-                            break;
-                        default:
-                            mealKey = item.MEAL_TYPE?.toLowerCase() || '';
-                    }
-                    const key = `${item.REG_DATE}-${mealKey}`;
-                    const regData = {
-                        factoryCode: item.FACTORY_CODE,
-                        breakfastNote: item.MEAL_NOTE || '',
-                        visitorCnt: item.VISITOR_CNT || 1,
-                    };
-
-                    // Separate data by REG_TYPE
-                    if (item.REG_TYPE === 'SELF') {
-                        selfRegMap[key] = regData;
-                    } else if (item.REG_TYPE === 'VISITOR') {
-                        visitorRegMap[key] = regData;
-                    }
-                });
-
-                // Build rows for the week with SELF registration data
-                const weekSelfRows = buildNextSevenDays(offset).map((row) => {
-                    const key = `${row.date}-${row.mealKey}`;
-                    const regData = selfRegMap[key];
-                    if (regData) {
-                        return {
-                            ...row,
-                            factoryCode: regData.factoryCode,
-                            breakfastNote: regData.breakfastNote,
-                            visitorCnt: regData.visitorCnt,
+                        let mealKey = '';
+                        switch (item.MEAL_TYPE) {
+                            case 'LUNCH': mealKey = 'lunch'; break;
+                            case 'BREAKFAST': mealKey = 'breakfast'; break;
+                            case 'DINNER': mealKey = 'dinner'; break;
+                            default: mealKey = item.MEAL_TYPE?.toLowerCase() || '';
+                        }
+                        const key = `${item.REG_DATE}-${mealKey}`;
+                        selfRegMap[key] = {
+                            factoryCode: item.FACTORY_CODE,
+                            breakfastNote: item.MEAL_NOTE || '',
+                            visitorCnt: item.VISITOR_CNT || 1,
                         };
-                    }
-                    return row;
-                });
+                    });
 
-                // Build rows for the week with VISITOR registration data
-                const weekVisitorRows = buildNextSevenDays(offset).map((row) => {
-                    const key = `${row.date}-${row.mealKey}`;
-                    const regData = visitorRegMap[key];
-                    if (regData) {
-                        return {
-                            ...row,
-                            factoryCode: regData.factoryCode,
-                            breakfastNote: regData.breakfastNote,
-                            visitorCnt: regData.visitorCnt,
-                        };
-                    }
-                    return row;
-                });
+                    const weekSelfRows = buildNextSevenDays(offset).map((row) => {
+                        const key = `${row.date}-${row.mealKey}`;
+                        const regData = selfRegMap[key];
+                        if (regData) {
+                            return { ...row, ...regData };
+                        }
+                        return row;
+                    });
 
-                // Update allWeekData with both self and visitor data
-                setAllWeekData((prev) => ({
-                    ...prev,
-                    [offset]: {
-                        ...(prev[offset] || { self: buildNextSevenDays(offset), visitor: buildNextSevenDays(offset) }),
-                        self: weekSelfRows,
-                        visitor: weekVisitorRows,
-                    },
-                }));
+                    // Update self data store
+                    selfDataRef.current = { ...selfDataRef.current, [offset]: weekSelfRows };
+                    setSelfWeekData((prev) => ({ ...prev, [offset]: weekSelfRows }));
 
-                // Mark visitor data as ready (fetched with correct department filter)
-                if (offset === weekOffset) {
-                    isVisitorDataReadyRef.current = true;
-                }
-
-                // If this is the current week, also update selectedDateRows and originalData based on active tab
-                if (offset === weekOffset) {
-                    if (activeTab === 'self') {
+                    // If on self tab and current week, update UI
+                    if (offset === weekOffset && activeTab === 'self') {
                         setSelectedDateRows(weekSelfRows);
                         setOriginalData(JSON.parse(JSON.stringify(weekSelfRows)));
-                    } else {
+                    }
+                } else {
+                    // filterDept has value - this is a VISITOR fetch
+                    const visitorRegMap = {};
+
+                    result.data.forEach((item) => {
+                        // Only process VISITOR records that match the department
+                        if (item.REG_TYPE !== 'VISITOR') return;
+                        if (item.VISITOR_DEPT !== filterDept) return;
+
+                        let mealKey = '';
+                        switch (item.MEAL_TYPE) {
+                            case 'LUNCH': mealKey = 'lunch'; break;
+                            case 'BREAKFAST': mealKey = 'breakfast'; break;
+                            case 'DINNER': mealKey = 'dinner'; break;
+                            default: mealKey = item.MEAL_TYPE?.toLowerCase() || '';
+                        }
+                        const key = `${item.REG_DATE}-${mealKey}`;
+                        visitorRegMap[key] = {
+                            factoryCode: item.FACTORY_CODE,
+                            breakfastNote: item.MEAL_NOTE || '',
+                            visitorCnt: item.VISITOR_CNT || 1,
+                        };
+                    });
+
+                    const weekVisitorRows = buildNextSevenDays(offset).map((row) => {
+                        const key = `${row.date}-${row.mealKey}`;
+                        const regData = visitorRegMap[key];
+                        if (regData) {
+                            return { ...row, ...regData };
+                        }
+                        return row;
+                    });
+
+                    // Update visitor data store only (don't touch self data)
+                    setAllWeekData((prev) => ({
+                        ...prev,
+                        [offset]: {
+                            ...(prev[offset] || {}),
+                            visitor: weekVisitorRows,
+                        },
+                    }));
+
+                    // Mark visitor data as ready
+                    if (offset === weekOffset) {
+                        isVisitorDataReadyRef.current = true;
+                    }
+
+                    // If on visitor tab and current week, update UI
+                    if (offset === weekOffset && activeTab === 'visitor') {
                         setSelectedDateRows(weekVisitorRows);
                         setOriginalData(JSON.parse(JSON.stringify(weekVisitorRows)));
                     }
                 }
             } else {
-                // No data from API - set fresh empty rows for the current tab
-                if (offset === weekOffset) {
-                    const freshRows = buildNextSevenDays(offset);
-                    setSelectedDateRows(freshRows);
-                    setOriginalData(JSON.parse(JSON.stringify(freshRows)));
+                // No data from API
+                if (filterDept === null) {
+                    // Self - store empty rows
+                    const emptyRows = buildNextSevenDays(offset);
+                    selfDataRef.current = { ...selfDataRef.current, [offset]: emptyRows };
+                    setSelfWeekData((prev) => ({ ...prev, [offset]: emptyRows }));
+                    if (offset === weekOffset && activeTab === 'self') {
+                        setSelectedDateRows(emptyRows);
+                        setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+                    }
+                } else {
+                    // Visitor - store empty rows
+                    const emptyRows = buildNextSevenDays(offset);
+                    setAllWeekData((prev) => ({
+                        ...prev,
+                        [offset]: {
+                            ...(prev[offset] || {}),
+                            visitor: emptyRows,
+                        },
+                    }));
+                    if (offset === weekOffset) {
+                        isVisitorDataReadyRef.current = true;
+                    }
+                    if (offset === weekOffset && activeTab === 'visitor') {
+                        setSelectedDateRows(emptyRows);
+                        setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+                    }
                 }
             }
         } catch (error) {
@@ -611,19 +788,6 @@ const CanteenAttendanceRegistration = () => {
             setIsLoading(false);
         }
     };
-
-    const getAllRowsForTab = (tab) => {
-        return Object.values(allWeekData).flatMap((week) => week[tab] || []);
-    };
-
-    const allSelfRows = getAllRowsForTab('self');
-    const allVisitorRows = getAllRowsForTab('visitor');
-
-    const selfHasAtLeastOneCanteen = allSelfRows.some((row) => Boolean(row.factoryCode));
-    const visitorHasAtLeastOneCanteen = allVisitorRows.some((row) => Boolean(row.factoryCode));
-
-    // Check current week selected rows (for when allWeekData is not yet populated)
-    const currentTabHasCanteen = selectedDateRows.some((row) => Boolean(row.factoryCode));
 
     // Helper function to compare if current data differs from original data
     const hasDataChangedFromOriginal = () => {
@@ -648,11 +812,13 @@ const CanteenAttendanceRegistration = () => {
         return hasRowChanges;
     };
 
-    const canRegister = !justRegistered && hasDataChangedFromOriginal() && (
-        activeTab === 'visitor'
-            ? (selfHasAtLeastOneCanteen || currentTabHasCanteen)
-            : (selfHasAtLeastOneCanteen || currentTabHasCanteen)
-    );
+    // Check if current tab has any canteen selected
+    const currentTabHasAnyCanteen = selectedDateRows.some((row) => Boolean(row.factoryCode));
+
+    const canRegister = !isLoading
+        && !justRegistered
+        && hasDataChangedFromOriginal()
+        && currentTabHasAnyCanteen;
 
     const handleSaveAll = async () => {
         if (!canRegister || isSubmitting) {
@@ -701,7 +867,7 @@ const CanteenAttendanceRegistration = () => {
             const registrationData = {
                 argEmpNo: empNo,
                 argRegType: activeTab === 'visitor' ? 'VISITOR' : 'SELF',
-                argVisitorDept: activeTab === 'visitor' ? formik.values.visitorDepartment : '',
+                argVisitorDept: activeTab === 'visitor' ? (visitorDeptRef.current || formik.values.visitorDepartment) : '',
                 argRemarks: '',
                 argCreatedBy: userId,
                 argDetailJson: detailJson,
@@ -952,8 +1118,8 @@ const CanteenAttendanceRegistration = () => {
 
 
     return (
-        <main style={{ minHeight: '100vh', paddingTop: '96px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: '24px' }}>
-            <div style={{ width: '100%', margin: '0 auto' }}>
+        <main style={{ height: '100vh', paddingTop: '72px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <div
                     style={{
                         display: 'flex',
@@ -1009,40 +1175,23 @@ const CanteenAttendanceRegistration = () => {
                     >
                         Visitors Registration
                     </button>
-
-                    <button
-                        id="tab-report"
-                        type="button"
-                        onClick={() => setActiveTab('report')}
-                        style={{
-                            flex: 1,
-                            padding: '12px 16px',
-                            border: 'none',
-                            borderBottom: activeTab === 'report' ? '2px solid #13005f' : '2px solid transparent',
-                            cursor: 'pointer',
-                            fontWeight: 700,
-                            fontSize: '14px',
-                            backgroundColor: activeTab === 'report' ? '#13005f' : 'transparent',
-                            color: activeTab === 'report' ? '#ffffff' : '#4b5563',
-                            transition: 'all 0.2s ease',
-                        }}
-                    >
-                        Report
-                    </button>
                 </div>
 
                 <section
                     id="canteen-attendance-content"
                     style={{
-                        minHeight: 'calc(100vh - 290px)',
+                        flex: 1,
                         borderRadius: '12px',
                         backgroundColor: '#f8fafc',
                         border: '1px solid #e2e8f0',
-                        padding: '16px',
+                        padding: '12px 16px 20px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                 >
-                    <>
-                        <div style={{ overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                        <div style={{ marginBottom: '14px', flexShrink: 0 }}>
                             {activeTab === 'visitor' && (
                                 <div
                                     style={{
@@ -1112,56 +1261,7 @@ const CanteenAttendanceRegistration = () => {
                                 </div>
                             )}
 
-                            {activeTab === 'report' && (
-                                <div
-                                    style={{
-                                        marginBottom: '14px',
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                                        <label
-                                            htmlFor="report-from-date"
-                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#78350f' }}
-                                        >
-                                            From Date
-                                            <input
-                                                id="report-from-date"
-                                                type="date"
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    border: '2px solid rgb(16, 12, 73)',
-                                                    borderRadius: '10px',
-                                                    background: '#ffffff',
-                                                    color: '#0f172a',
-                                                    fontWeight: 600,
-                                                    outline: 'none',
-                                                }}
-                                            />
-                                        </label>
-                                        <label
-                                            htmlFor="report-to-date"
-                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#78350f' }}
-                                        >
-                                            To Date
-                                            <input
-                                                id="report-to-date"
-                                                type="date"
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    border: '2px solid rgb(16, 12, 73)',
-                                                    borderRadius: '10px',
-                                                    background: '#ffffff',
-                                                    color: '#0f172a',
-                                                    fontWeight: 600,
-                                                    outline: 'none',
-                                                }}
-                                            />
-                                        </label>
-                                    </div>
-                                </div>
-                            )}
- 
-                            {activeTab !== 'report' && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px', gap: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px', gap: '8px' }}>
                                 <button
                                     type="button"
                                     onClick={async () => {
@@ -1191,7 +1291,9 @@ const CanteenAttendanceRegistration = () => {
                                         const parsedUserData = JSON.parse(rawUserData || '{}');
                                         const empNo = parsedUserData?.EMPID || '';
                                         if (empNo) {
-                                            await fetchRegistrationDataForWeek(empNo, newOffset);
+                                            // Fetch with filterDept for VISITOR tab, null for SELF tab
+                                            const filterDept = activeTab === 'visitor' ? (visitorDepartment || null) : null;
+                                            await fetchRegistrationDataForWeek(empNo, newOffset, filterDept);
                                         }
                                     }}
                                     style={{
@@ -1245,7 +1347,9 @@ const CanteenAttendanceRegistration = () => {
                                         const parsedUserData = JSON.parse(rawUserData || '{}');
                                         const empNo = parsedUserData?.EMPID || '';
                                         if (empNo) {
-                                            await fetchRegistrationDataForWeek(empNo, 0);
+                                            // Fetch with filterDept for VISITOR tab, null for SELF tab
+                                            const filterDept = activeTab === 'visitor' ? (visitorDepartment || null) : null;
+                                            await fetchRegistrationDataForWeek(empNo, 0, filterDept);
                                         }
                                     }}
                                     style={{
@@ -1304,7 +1408,9 @@ const CanteenAttendanceRegistration = () => {
                                         const parsedUserData = JSON.parse(rawUserData || '{}');
                                         const empNo = parsedUserData?.EMPID || '';
                                         if (empNo) {
-                                            await fetchRegistrationDataForWeek(empNo, newOffset);
+                                            // Fetch with filterDept for VISITOR tab, null for SELF tab
+                                            const filterDept = activeTab === 'visitor' ? (visitorDepartment || null) : null;
+                                            await fetchRegistrationDataForWeek(empNo, newOffset, filterDept);
                                         }
                                     }}
                                     style={{
@@ -1332,19 +1438,21 @@ const CanteenAttendanceRegistration = () => {
                                 >
                                     Next
                                 </button>
-                            </div>}
+                            </div>
 
-                            {activeTab !== 'report' && <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                                <thead>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, maxHeight: 'calc(100vh - 350px)' }}>
+                                <div style={{ flex: 1, overflowY: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff' }}>
+                                <table style={{ width: '100%', minWidth: activeTab === 'self' ? '600px' : '100%', maxWidth: '100%', margin: 0, borderCollapse: 'collapse', background: '#fff', tableLayout: 'fixed' }}>
+                                    <thead>
                                     <tr>
-                                        <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700 }}>Date</th>
-                                        <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700 }}>Meal</th>
-                                        <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700 }}>Canteen</th>
+                                        <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '2px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700, position: 'sticky', top: 0, zIndex: 10, width: '140px' }}>Date</th>
+                                        <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '2px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700, position: 'sticky', top: 0, zIndex: 10, width: '120px' }}>Meal</th>
+                                        <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '2px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700, position: 'sticky', top: 0, zIndex: 10 }}>Canteen</th>
                                         {activeTab === 'visitor' && (
-                                            <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700 }}>Visitors</th>
+                                            <th style={{ borderRight: '1px solid #e2e8f0', borderBottom: '2px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700, position: 'sticky', top: 0, zIndex: 10, width: '130px' }}>Visitors</th>
                                         )}
                                         {activeTab === 'visitor' && (
-                                            <th style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700 }}>Pre-order Note</th>
+                                            <th style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'center', padding: '10px 12px', color: '#0f172a', background: '#f1f5f9', fontWeight: 700, position: 'sticky', top: 0, zIndex: 10 }}>Pre-order Note</th>
                                         )}
                                     </tr>
                                 </thead>
@@ -1370,7 +1478,7 @@ const CanteenAttendanceRegistration = () => {
                                                     )}
                                                     <td style={{ borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '10px 12px', fontWeight: 600, background: rowColors[colorIdx].bg }}>{row.mealLabel}</td>
                                                     <td style={{ borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '10px 12px', background: rowColors[colorIdx].bg }}>
-                                                        <div style={{ display: 'flex', gap: '0', flexWrap: 'wrap', alignItems: 'stretch' }}>
+                                                        <div style={{ display: 'flex', gap: '0', flexWrap: 'wrap', alignItems: 'center',justifyContent: 'center' }}>
                                                             {factories.map((factory) => {
                                                                 const isSelected = row.factoryCode === factory.code;
                                                                 const isDisabled = isRegistrationDisabled(row.date, row.mealKey);
@@ -1385,6 +1493,7 @@ const CanteenAttendanceRegistration = () => {
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
                                                                             justifyContent: 'center',
+                                                                            maxWidth: '200px',
                                                                             flex: 1,
                                                                             gap: '6px',
                                                                             fontWeight: isSelected ? 700 : 600,
@@ -1494,25 +1603,21 @@ const CanteenAttendanceRegistration = () => {
                                         }),
                                     )}
                                 </tbody>
-                            </table>}
-
-                            {activeTab === 'report' && (
-                                <div style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 800, color: '#0f172a' }}>
-                                    hello world
-                                </div>
-                            )}
+                            </table>
+                            </div>
                         </div>
-                    </>
+                    </div>
+                    </div>
                 </section>
-            </div>
+                </div>
 
             <div
                 style={{
                     position: 'sticky',
-                    bottom: '0',
+                    bottom: '8px',
                     left: 0,
                     width: '100%',
-                    marginTop: '20px',
+                    marginTop: '8px',
                     padding: '14px 18px',
                     borderTop: '1px solid rgba(191, 219, 254, 0.45)',
                     borderBottom: '1px solid rgba(255, 255, 255, 0.32)',
@@ -1536,6 +1641,7 @@ const CanteenAttendanceRegistration = () => {
                         justifyContent: 'flex-end',
                         maxWidth: '996px',
                         margin: '0 auto',
+                        paddingBottom: '4px',
                     }}
                 >
 
