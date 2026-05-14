@@ -12,6 +12,7 @@ import flightBanner from "../assets/images/banners/flight_ticket.png";
 import pickleballBanner from "../assets/images/banners/pickleball.png";
 import meetingRoomBanner from "../assets/images/banners/meeting-room.png";
 import temporaryResidenceBanner from "../assets/images/banners/temporary_residence.png";
+import canteenRegistrationBanner from "../assets/images/banners/Canteen.png"
 const optionData = [
     {
         id: '001',
@@ -93,11 +94,11 @@ const optionData = [
     {
         id: '007',
         title: 'Canteen Attendance Registration',
-        thumb: pickleballBanner, // Ảnh icon - đang sử dụng
+        thumb: canteenRegistrationBanner, // Ảnh icon - đang sử dụng
         // thumb: canteenAttendanceBanner, // Ảnh banner - comment lại
         desc: 'Register for canteen attendance',
         desc_color: "#000000",
-        bgColor: '#8b5cf6',
+        bgColor: '#fc00d2',
         link: '/canteen-attendance',
         btn_order_text: "register_now",
         sort_order: 7,

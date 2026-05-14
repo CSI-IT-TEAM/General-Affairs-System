@@ -39,6 +39,7 @@ const buildNextSevenDays = (weekOffset = 0) => {
 
 const CanteenAttendanceRegistration = () => {
     const [activeTab, setActiveTab] = useState('self');
+    const [tabRefreshToken, setTabRefreshToken] = useState(0);
     const [userPersType, setUserPersType] = useState('');
     const [weekOffset, setWeekOffset] = useState(0);
     const [selectedDateRows, setSelectedDateRows] = useState(() => buildNextSevenDays(0));
@@ -95,6 +96,18 @@ const CanteenAttendanceRegistration = () => {
         }
     };
 
+    const handleTabClick = (tab) => {
+        // Always clear current rows on tab click to avoid stale data flash
+        const emptyRows = buildNextSevenDays(weekOffset);
+        setSelectedDateRows(emptyRows);
+        setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
+        setJustRegistered(false);
+
+        // Trigger refresh even when clicking the same active tab
+        setTabRefreshToken((prev) => prev + 1);
+        setActiveTab(tab);
+    };
+
 
 
     useEffect(() => {
@@ -130,6 +143,8 @@ const CanteenAttendanceRegistration = () => {
     // Fetch registration data for self tab on initial load
     useEffect(() => {
         const fetchSelfData = async () => {
+            if (activeTab !== 'self') return;
+
             const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
             if (!rawUserData) return;
             const parsedUserData = JSON.parse(rawUserData);
@@ -188,8 +203,8 @@ const CanteenAttendanceRegistration = () => {
                         });
 
                         // Store to separate SELF data store
-                        selfDataRef.current = { [weekOffset]: weekSelfRows };
-                        setSelfWeekData({ [weekOffset]: weekSelfRows });
+                        selfDataRef.current = { ...selfDataRef.current, [weekOffset]: weekSelfRows };
+                        setSelfWeekData((prev) => ({ ...prev, [weekOffset]: weekSelfRows }));
 
                         // If on self tab, update UI
                         if (activeTab === 'self') {
@@ -199,8 +214,8 @@ const CanteenAttendanceRegistration = () => {
                     } else {
                         // No data - store empty rows
                         const emptyRows = buildNextSevenDays(weekOffset);
-                        selfDataRef.current = { [weekOffset]: emptyRows };
-                        setSelfWeekData({ [weekOffset]: emptyRows });
+                        selfDataRef.current = { ...selfDataRef.current, [weekOffset]: emptyRows };
+                        setSelfWeekData((prev) => ({ ...prev, [weekOffset]: emptyRows }));
                         if (activeTab === 'self') {
                             setSelectedDateRows(emptyRows);
                             setOriginalData(JSON.parse(JSON.stringify(emptyRows)));
@@ -215,7 +230,7 @@ const CanteenAttendanceRegistration = () => {
         };
 
         fetchSelfData();
-    }, []);
+    }, [activeTab, weekOffset, tabRefreshToken]);
 
     // Sync selfDataRef when selfWeekData changes
     useEffect(() => {
@@ -347,13 +362,13 @@ const CanteenAttendanceRegistration = () => {
         };
 
         fetchVisitorData();
-    }, [activeTab, deptList, visitorDepartment, weekOffset]);
+    }, [activeTab, deptList, visitorDepartment, weekOffset, tabRefreshToken]);
 
-    useEffect(() => {
-        if (!showSelfTab && activeTab === 'self') {
-            setActiveTab('visitor');
-        }
-    }, [showSelfTab, activeTab]);
+    // useEffect(() => {
+    //     if (!showSelfTab && activeTab === 'self') {
+    //         setActiveTab('visitor');
+    //     }
+    // }, [showSelfTab, activeTab]);
 
     const prevActiveTabRef = useRef(activeTab);
     const isFirstLoadRef = useRef(true);
@@ -1134,11 +1149,11 @@ const CanteenAttendanceRegistration = () => {
                     }}
                 >
 
-                    {showSelfTab && (
+                    {/* {showSelfTab && ( */}
                         <button
                             id="tab-self-attendance"
                             type="button"
-                            onClick={() => setActiveTab('self')}
+                            onClick={() => handleTabClick('self')}
                             style={{
                                 flex: 1,
                                 padding: '12px 16px',
@@ -1154,12 +1169,12 @@ const CanteenAttendanceRegistration = () => {
                         >
                             Your Self Registration
                         </button>
-                    )}
+                    {/* )} */}
 
                     <button
                         id="tab-visitor-attendance"
                         type="button"
-                        onClick={() => setActiveTab('visitor')}
+                        onClick={() => handleTabClick('visitor')}
                         style={{
                             flex: 1,
                             padding: '12px 16px',
@@ -1286,15 +1301,7 @@ const CanteenAttendanceRegistration = () => {
                                         // Update originalData for the new week
                                         setOriginalData(JSON.parse(JSON.stringify(newRows)));
 
-                                        // Fetch existing registration data for the new week (in background, don't overwrite)
-                                        const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
-                                        const parsedUserData = JSON.parse(rawUserData || '{}');
-                                        const empNo = parsedUserData?.EMPID || '';
-                                        if (empNo) {
-                                            // Fetch with filterDept for VISITOR tab, null for SELF tab
-                                            const filterDept = activeTab === 'visitor' ? (visitorDepartment || null) : null;
-                                            await fetchRegistrationDataForWeek(empNo, newOffset, filterDept);
-                                        }
+                                        // Data will be fetched by tab/week effect to avoid duplicate API calls
                                     }}
                                     style={{
                                         padding: '6px 16px',
@@ -1342,15 +1349,7 @@ const CanteenAttendanceRegistration = () => {
                                         // Update originalData for the new week
                                         setOriginalData(JSON.parse(JSON.stringify(newRows)));
 
-                                        // Fetch existing registration data for current week (in background, don't overwrite)
-                                        const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
-                                        const parsedUserData = JSON.parse(rawUserData || '{}');
-                                        const empNo = parsedUserData?.EMPID || '';
-                                        if (empNo) {
-                                            // Fetch with filterDept for VISITOR tab, null for SELF tab
-                                            const filterDept = activeTab === 'visitor' ? (visitorDepartment || null) : null;
-                                            await fetchRegistrationDataForWeek(empNo, 0, filterDept);
-                                        }
+                                        // Data will be fetched by tab/week effect to avoid duplicate API calls
                                     }}
                                     style={{
                                         padding: '6px 16px',
@@ -1403,15 +1402,7 @@ const CanteenAttendanceRegistration = () => {
                                         // Update originalData for the new week
                                         setOriginalData(JSON.parse(JSON.stringify(newRows)));
 
-                                        // Fetch existing registration data for the new week (in background, don't overwrite)
-                                        const rawUserData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
-                                        const parsedUserData = JSON.parse(rawUserData || '{}');
-                                        const empNo = parsedUserData?.EMPID || '';
-                                        if (empNo) {
-                                            // Fetch with filterDept for VISITOR tab, null for SELF tab
-                                            const filterDept = activeTab === 'visitor' ? (visitorDepartment || null) : null;
-                                            await fetchRegistrationDataForWeek(empNo, newOffset, filterDept);
-                                        }
+                                        // Data will be fetched by tab/week effect to avoid duplicate API calls
                                     }}
                                     style={{
                                         padding: '6px 16px',
@@ -1552,7 +1543,7 @@ const CanteenAttendanceRegistration = () => {
                                                     )}
                                                     {activeTab === 'visitor' && (
                                                         <td style={{ borderBottom: '1px solid #e2e8f0', padding: '10px 12px', background: rowColors[colorIdx].bg }}>
-                                                            {row.mealKey === 'breakfast' ? (() => {
+                                                            {row.mealKey === 'lunch' ? (() => {
                                                                 const isDisabled = isRegistrationDisabled(row.date, row.mealKey);
                                                                 return (
                                                                     <div style={{ position: 'relative', width: '100%' }}>
