@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignIn from "./pages/SignIn";
 import HomePage from "./pages/HomePage";
 import FormCar from "./pages/FormPage/FormCar";
+
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import Layout from "./components/Layout";
 import ErrorPage from "./pages/ErrorPage";
@@ -16,6 +17,7 @@ import PickleballBooking from "./pages/PickleballBooking";
 import MeetingRoomBooking from "./pages/MeetingRoomBooking";
 import TemporaryResidence from "./pages/TemporaryResidence";
 import CanteenAttendanceRegistration from "./pages/CanteenAttendanceRegistration";
+import BusinessTripForm_NewLayout from "./pages/FormPage/BusinessTripForm_NewLayout";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -112,6 +114,16 @@ const router = createBrowserRouter([
             </Layout>
         ),
     },
+
+    {
+        path: "/registration/business-trip",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <BusinessTripForm_NewLayout />
+            </Layout>
+        ),
+    },
     {
         path: "*",
         element: (
@@ -124,4 +136,4 @@ const App = () => {
     return <RouterProvider router={router} />;
 };
 
-export default App;
+export default App;

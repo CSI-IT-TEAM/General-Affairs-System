@@ -130,6 +130,9 @@ const HomePage = () => {
       case "007":
         navigate("/registration/canteen-attendance");
         break;
+      case "008":
+        navigate("/registration/business-trip");
+        break;        
       default: {
         navigate("/");
         break;
@@ -159,11 +162,11 @@ const HomePage = () => {
                 
                 optionData.forEach((item) => {
                   // Luôn hiển thị menu 001 và 005
-                  if (item.id === "001" || item.id === "005" ) {
+                  if (item.id === "001" || item.id === "005" || item.id === "008") {
                     visibleCards.push(item);
                   }
                   // Menu 002 và 006: hiển thị nếu EXP/special emp
-                  else if (item.id === "002" || item.id === "006"|| item.id === "007") {
+                  else if (item.id === "002" || item.id === "006"|| item.id === "007" ) {
                     if (isExpOrSpecialEmp || isAdminGA) {
                       visibleCards.push(item);
                     }

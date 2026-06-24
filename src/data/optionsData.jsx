@@ -13,6 +13,7 @@ import pickleballBanner from "../assets/images/banners/pickleball.png";
 import meetingRoomBanner from "../assets/images/banners/meeting-room.png";
 import temporaryResidenceBanner from "../assets/images/banners/temporary_residence.png";
 import canteenRegistrationBanner from "../assets/images/banners/Canteen.png"
+import businessTripBanner from "../assets/images/banners/business_trip.png"
 const optionData = [
     {
         id: '001',
@@ -102,6 +103,19 @@ const optionData = [
         link: '/canteen-attendance',
         btn_order_text: "register_now",
         sort_order: 7,
+        visible: true,
+    },
+    {
+        id: '008',
+        title: 'Business Trip Registration',
+        thumb: businessTripBanner, // Ảnh icon - đang sử dụng
+        // thumb: businessTripBanner, // Ảnh banner - comment lại
+        desc: 'Register for business trips',
+        desc_color: "#000000",
+        bgColor: '#fc00d2',
+        link: '/business-trip',
+        btn_order_text: "register_now",
+        sort_order: 8,
         visible: true,
     }
 ]
