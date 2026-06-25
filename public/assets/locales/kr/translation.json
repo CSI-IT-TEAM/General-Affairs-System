@@ -319,6 +319,7 @@
     "mail_warn": "정보 보안을 위해 이 OTP 코드를 누구에게도 제공하지 마세요",
     "mail_define": "는 비밀번호 재설정을 활성화하는 OTP 코드이며 5분 동안 유효합니다",
     "mail_end": "감사합니다",
+    "business_trip": "출장",
     "business_trip_title": "출장 신청",
     "business_trip_desc": "창신 배트남 출장 신청",
     "business_trip_registration_tab": "출장 신청",

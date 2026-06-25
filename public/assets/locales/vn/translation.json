@@ -342,6 +342,7 @@
     "mail_warn": "Vui lòng không cung cấp mã OTP này cho bất kỳ ai để bảo nật thông tin",
     "mail_define": " là mã OTP kích hoạt đặt lại mật khẩu, hiệu lực trong 5 phút",
     "mail_end": "Xin cảm ơn",
+    "business_trip": "Công tác",
     "business_trip_title": "Đăng ký công tác",
     "business_trip_desc": "Đăng ký công tác tại Chang Shin Việt Nam",
     "business_trip_registration_tab": "Đăng ký",

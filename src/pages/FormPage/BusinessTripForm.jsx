@@ -20,7 +20,15 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  IconButton,
+  Select,
+  FormControl,
+  Stack,
 } from "@mui/material";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import i18next from "i18next";
+import { useNavigate } from "react-router-dom";
+import { langData } from "../../data";
 import {
   saveBusinessRegistration,
   getBusinessRegistration,
@@ -247,6 +255,21 @@ export default function BusinessTripFormNewLayout() {
   const [tab, setTab] = useState(0);
 
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Language state
+  const i18_Value =
+    i18next.language !== null &&
+    i18next.language !== undefined &&
+    i18next.language !== ""
+      ? i18next.language
+      : "en";
+  const [lang, setLang] = useState(i18_Value);
+
+  const handleLangChange = (event) => {
+    i18next.changeLanguage(event.target.value);
+    setLang(event.target.value);
+  };
 
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [fileData, setFileData] = useState({ ...EMPTY_FILE_DATA });
@@ -834,7 +857,88 @@ export default function BusinessTripFormNewLayout() {
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#fff" }}>
+    <>
+      {/* ===== Header ===== */}
+      <Box
+        className="s-header"
+        sx={{
+          justifyContent: "space-between",
+          px: { xs: 2, sm: 3 },
+        }}
+      >
+        {/* Left: Back Button */}
+        <IconButton
+          onClick={() => navigate(-1)}
+          sx={{ color: "#fff", mr: 1 }}
+        >
+          <ArrowBackIosNewIcon />
+        </IconButton>
+
+        {/* Center: Title */}
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: { xs: "16px", sm: "20px" },
+            textAlign: "center",
+            flex: 1,
+          }}
+        >
+          {t("business_trip") || "Business Trip"}
+        </Typography>
+
+        {/* Right: Language Selector */}
+        <FormControl
+          size="small"
+          variant="standard"
+          sx={{ minWidth: 60, ml: 1 }}
+        >
+          <Select
+            value={lang}
+            onChange={handleLangChange}
+            sx={{
+              color: "#fff",
+              ".MuiSelect-icon": { color: "#fff" },
+              "&:before": { borderColor: "rgba(255,255,255,0.3)" },
+              "&:hover:not(.Mui-disabled):before": {
+                borderColor: "rgba(255,255,255,0.6)",
+              },
+              fontSize: "12px",
+            }}
+          >
+            {langData.map((item) => (
+              <MenuItem
+                key={item.value}
+                value={item.value}
+                sx={{ fontSize: "12px" }}
+              >
+                <Stack
+                  spacing={1}
+                  direction="row"
+                  alignItems="center"
+                >
+                  <img
+                    alt={item.title}
+                    style={{
+                      width: "36px",
+                      height: "22px",
+                      borderRadius: "2px",
+                    }}
+                    src={item.thumb}
+                  />
+                  <Typography sx={{ fontSize: "12px" }}>
+                    {item.title}
+                  </Typography>
+                </Stack>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* ===== Content ===== */}
+      <Box sx={{ pt: "80px", p: 3, bgcolor: "#fff" }}>
       <Tabs
         className="business-trip-tabs"
         value={tab}
@@ -1334,5 +1438,6 @@ export default function BusinessTripFormNewLayout() {
         </Box>
       )}
     </Box>
+    </>
   );
 }
