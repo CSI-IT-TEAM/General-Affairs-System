@@ -201,6 +201,8 @@
     "frm_txt_total_passenger": "Tổng hành khách",
     "frm_memo_address_detail":"Mô tả chi tiết & địa chỉ & danh sách người đi",
     "frm_select_clinic_helper": "Nếu phòng khám hoặc bệnh viện bạn cần không có trong danh sách vui lòng chọn 'Add New Hospital'.",
+    "plholder_search_hospital": "🔍 Tìm bệnh viện...",
+    "frm_no_hospital_found": "Không tìm thấy bệnh viện",
     
     "frm_account_name": "Tên tài khoản",
     "frm_account_no": "Số tài khoản",
