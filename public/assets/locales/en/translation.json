@@ -389,6 +389,8 @@
       "hotel": "Hotel",
       "google_maps": "Google Maps",
       "e_visa_apec_card": "E-Visa / APEC Card",
-      "flight_ticket": "Flight Ticket"
+      "flight_ticket": "Flight Ticket",
+      "business_trip_hotel_reservation_date_from": "Hotel Reservation Date From",
+      "business_trip_hotel_reservation_date_to": "Hotel Reservation Date To"
 
 }

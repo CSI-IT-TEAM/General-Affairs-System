@@ -26,6 +26,8 @@ import {
   getBusinessRegistration,
 } from "../../api/businessTrip";
 
+import "./Form.scss";
+
 const EMPTY_FORM = {
   affiliDiv: "CDC",
   visitorDept: "",
@@ -41,6 +43,7 @@ const EMPTY_FORM = {
   entryDateTime: "",
   exitDateTime: "",
   hotelReserveDate: "",
+  hotelReserveDateTo: "",
   airportPickupYn: "Y",
   airportDropoffTime: "",
 };
@@ -86,9 +89,28 @@ const POSITION_OPTIONS = [
 
 const STATUS_FILTER_OPTIONS = [
   { value: "ALL", label: "ALL" },
-  { value: "PENDING", label: "PENDING" }, 
+  { value: "PENDING", label: "PENDING" },
   { value: "CONFIRMED", label: "CONFIRMED" },
+  { value: "DENIED", label: "DENIED" },
 ];
+
+
+const LANGUAGE_OPTIONS = [
+  { value: "en", label: "US English", flag: "🇺🇸" },
+  { value: "kr", label: "한국어", flag: "🇰🇷" },
+  { value: "vn", label: "Tiếng Việt", flag: "🇻🇳" },
+];
+
+const normalizeLanguage = (language) => {
+  const baseLanguage = String(language || "en").split("-")[0].toLowerCase();
+
+  if (baseLanguage === "ko") return "kr";
+  if (baseLanguage === "vi") return "vn";
+
+  return LANGUAGE_OPTIONS.some((option) => option.value === baseLanguage)
+    ? baseLanguage
+    : "en";
+};
 
 const POCKETBASE_BASE_URL = "http://vjweb.dskorea.com:8090";
 const POCKETBASE_COLLECTION = "GA_BUSINESS_TRIP_FILES";
@@ -142,6 +164,15 @@ const getStatusCellSx = (statusValue) => {
 
   if (status === "PENDING") {
     return {
+      bgcolor: "#FFEB3B",
+      color: "#000",
+      fontWeight: 700,
+      textAlign: "center",
+    };
+  }
+
+  if (status === "CONFIRMED" || status === "CONFIRM") {
+    return {
       bgcolor: "#32CD32",
       color: "#000",
       fontWeight: 700,
@@ -149,7 +180,7 @@ const getStatusCellSx = (statusValue) => {
     };
   }
 
-  if (status === "CONFIRM" || status === "CONFIRMED") {
+  if (status === "DENIED") {
     return {
       bgcolor: "#F44336",
       color: "#fff",
@@ -246,7 +277,8 @@ const renderFileLinks = (value) => {
 export default function BusinessTripFormNewLayout() {
   const [tab, setTab] = useState(0);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [language, setLanguage] = useState(() => normalizeLanguage(i18n.language));
 
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [fileData, setFileData] = useState({ ...EMPTY_FILE_DATA });
@@ -257,6 +289,33 @@ export default function BusinessTripFormNewLayout() {
   const [isLoadingTracking, setIsLoadingTracking] = useState(false);
   const [trackingError, setTrackingError] = useState("");
   const [hasLoadedTracking, setHasLoadedTracking] = useState(false);
+
+  useEffect(() => {
+    setLanguage(normalizeLanguage(i18n.language));
+  }, [i18n.language]);
+
+  const handleLanguageChange = (event) => {
+    const nextLanguage = event.target.value;
+
+    setLanguage(nextLanguage);
+    i18n.changeLanguage(nextLanguage);
+    localStorage.setItem("i18nextLng", nextLanguage);
+  };
+
+  const renderSelectedLanguage = (selectedLanguage) => {
+    const option = LANGUAGE_OPTIONS.find((item) => item.value === selectedLanguage) || LANGUAGE_OPTIONS[0];
+
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box component="span" sx={{ fontSize: 28, lineHeight: 1 }}>
+          {option.flag}
+        </Box>
+        <Typography sx={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>
+          {option.label}
+        </Typography>
+      </Box>
+    );
+  };
 
   const handleInputChange = (field) => (event) => {
     setFormData((prev) => ({
@@ -304,6 +363,7 @@ export default function BusinessTripFormNewLayout() {
     setFormData((prev) => ({
       ...prev,
       exitDateTime,
+      hotelReserveDateTo: getDateFromDateTime(exitDateTime),
       airportDropoffTime: getDefaultAirportDropoffTime(exitDateTime),
     }));
   };
@@ -589,6 +649,7 @@ export default function BusinessTripFormNewLayout() {
     entryDateTimeForSave,
     exitDateTimeForSave,
     hotelReserveDateForSave,
+    hotelReserveDateToForSave,
     airportDropoffTimeForSave,
   }) => {
     const businessTripPeriod =
@@ -596,6 +657,10 @@ export default function BusinessTripFormNewLayout() {
 
     const arrivalDepartureInVietnam =
       `${formatEmailDateTime(entryDateTimeForSave)} ~ ${formatEmailDateTime(exitDateTimeForSave)}`;
+
+    const hotelBookingPeriod = hotelReserveDateToForSave
+      ? `${formatEmailDateOnly(hotelReserveDateForSave)} ~ ${formatEmailDateOnly(hotelReserveDateToForSave)}`
+      : formatEmailDateOnly(hotelReserveDateForSave);
 
     const airportDropoffText = formData.airportPickupYn === "Y"
       ? formatEmailDateTime(airportDropoffTimeForSave)
@@ -610,7 +675,7 @@ export default function BusinessTripFormNewLayout() {
       buildEmailTableRow("Arrival / Departure in Vietnam", escapeHtml(arrivalDepartureInVietnam)),
       buildEmailTableRow("Airline tickets", renderEmailTableFileLink(flightTicketForSave, "Click to view flight tickets")),
       buildEmailTableRow("E-Visa / APEC Card", renderEmailTableFileLink(eVisaForSave, "Click to view E-VISA / APEC CARD")),
-      buildEmailTableRow("Hotel booking date", escapeHtml(formatEmailDateOnly(hotelReserveDateForSave))),
+      buildEmailTableRow("Hotel booking date", escapeHtml(hotelBookingPeriod)),
       buildEmailTableRow("Relevant departments", escapeHtml(formData.relateDept)),
       buildEmailTableRow("Airport Pick-up", formData.airportPickupYn === "Y" ? "Required" : "Not Needed"),
       buildEmailTableRow("Airport Drop-off Time", escapeHtml(airportDropoffText)),
@@ -636,6 +701,7 @@ export default function BusinessTripFormNewLayout() {
     entryDateTimeForSave,
     exitDateTimeForSave,
     hotelReserveDateForSave,
+    hotelReserveDateToForSave,
     airportDropoffTimeForSave,
   }) => {
     const payload = {
@@ -651,6 +717,7 @@ export default function BusinessTripFormNewLayout() {
         entryDateTimeForSave,
         exitDateTimeForSave,
         hotelReserveDateForSave,
+        hotelReserveDateToForSave,
         airportDropoffTimeForSave,
       }),
     };
@@ -729,6 +796,7 @@ export default function BusinessTripFormNewLayout() {
       const entryDateTimeForSave = formatDateTimeForSave(formData.entryDateTime);
       const exitDateTimeForSave = formatDateTimeForSave(formData.exitDateTime);
       const hotelReserveDateForSave = formatDateForSave(formData.hotelReserveDate);
+      const hotelReserveDateToForSave = formatDateForSave(formData.hotelReserveDateTo);
       const airportDropoffTimeForSave = formatDateTimeForSave(formData.airportDropoffTime);
 
       const detailJson = [
@@ -775,6 +843,9 @@ export default function BusinessTripFormNewLayout() {
           HOTEL_RESERVE_DATE: hotelReserveDateForSave,
           hotelReserveDate: hotelReserveDateForSave,
 
+          HOTEL_RESERVE_DATE_TO: hotelReserveDateToForSave,
+          hotelReserveDateTo: hotelReserveDateToForSave,
+
           AIRPORT_PICKUP_YN: formData.airportPickupYn,
           airportPickupYn: formData.airportPickupYn,
 
@@ -806,6 +877,7 @@ export default function BusinessTripFormNewLayout() {
             entryDateTimeForSave,
             exitDateTimeForSave,
             hotelReserveDateForSave,
+            hotelReserveDateToForSave,
             airportDropoffTimeForSave,
           });
           emailSent = true;
@@ -834,7 +906,128 @@ export default function BusinessTripFormNewLayout() {
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#fff" }}>
+    <Box className="business-trip-form" sx={{ bgcolor: "#fff" }}>
+      <Box
+        className="business-trip-header"
+        sx={{
+          minHeight: 64,
+          px: 3,
+          py: 1,
+          bgcolor: "#1b0065",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+        }}
+      >
+        <Box
+          className="business-trip-header-title"
+          sx={{
+            color: "#fff",
+            lineHeight: 1,
+            fontWeight: 800,
+            letterSpacing: 0.2,
+          }}
+        >
+          <Typography
+            component="div"
+            sx={{
+              color: "#fff",
+              fontSize: 24,
+              fontWeight: 800,
+              fontStyle: "italic",
+              lineHeight: 1,
+            }}
+          >
+            General Affairs
+          </Typography>
+          <Typography
+            component="div"
+            sx={{
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 700,
+              textAlign: "center",
+              mt: 0.25,
+            }}
+          >
+            System
+          </Typography>
+        </Box>
+
+        <Box
+          className="business-trip-language-bar"
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
+          <TextField
+            select
+            variant="standard"
+            value={language}
+            onChange={handleLanguageChange}
+            SelectProps={{
+              renderValue: renderSelectedLanguage,
+              disableUnderline: true,
+            }}
+            InputProps={{
+              disableUnderline: true,
+            }}
+            sx={{
+              minWidth: 150,
+              bgcolor: "#1b0065 !important",
+              border: "1px solid rgba(255,255,255,0.45)",
+              borderRadius: 1,
+              px: 1,
+              py: 0.25,
+              "& .MuiInputBase-root": {
+                bgcolor: "#1b0065 !important",
+                color: "#fff !important",
+              },
+              "& .MuiInputBase-root:before": {
+                borderBottom: "0 !important",
+              },
+              "& .MuiInputBase-root:after": {
+                borderBottom: "0 !important",
+              },
+              "& .MuiInputBase-root:hover:not(.Mui-disabled):before": {
+                borderBottom: "0 !important",
+              },
+              "& .MuiSelect-select": {
+                bgcolor: "#1b0065 !important",
+                color: "#fff !important",
+                display: "flex",
+                alignItems: "center",
+                py: "6px !important",
+              },
+              "& .MuiTypography-root": {
+                color: "#fff !important",
+              },
+              "& .MuiSelect-icon": {
+                color: "#fff !important",
+              },
+              "& .MuiInputBase-input": {
+                color: "#fff !important",
+                py: 0.5,
+              },
+            }}
+          >
+            {LANGUAGE_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box component="span" sx={{ fontSize: 24, lineHeight: 1 }}>
+                    {option.flag}
+                  </Box>
+                  <Typography>{option.label}</Typography>
+                </Box>
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
+      </Box>
+
       <Tabs
         className="business-trip-tabs"
         value={tab}
@@ -845,12 +1038,12 @@ export default function BusinessTripFormNewLayout() {
       </Tabs>
 
       {tab === 0 && (
-        <Box sx={{ border: "1px solid #ccc", p: 3 }}>
+        <Box className="business-trip-card business-trip-register-card" sx={{ border: "1px solid #ccc", p: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
             {t("business_trip_title")}
           </Typography>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} className="business-trip-grid">
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -988,7 +1181,7 @@ export default function BusinessTripFormNewLayout() {
               )}
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 type="datetime-local"
@@ -999,7 +1192,7 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 type="datetime-local"
@@ -1010,13 +1203,24 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 type="date"
-                label={t("business_trip_hotel_reservation_date")}
+                label={t("business_trip_hotel_reservation_date_from", "Hotel Reservation Date From")}
                 value={formData.hotelReserveDate}
                 onChange={handleInputChange("hotelReserveDate")}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                type="date"
+                label={t("business_trip_hotel_reservation_date_to", "Hotel Reservation Date To")}
+                value={formData.hotelReserveDateTo}
+                onChange={handleInputChange("hotelReserveDateTo")}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -1067,6 +1271,7 @@ export default function BusinessTripFormNewLayout() {
 
       {tab === 1 && (
         <Box
+          className="business-trip-card business-trip-tracking-card"
           sx={{
             border: "1px solid #ccc",
             minHeight: 600,
@@ -1077,7 +1282,7 @@ export default function BusinessTripFormNewLayout() {
             {t("business_trip_tracking") || "Business Trip Tracking"}
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid container spacing={2} className="business-trip-filter-grid" sx={{ mb: 2 }}>
                         <Grid item xs={12} md={2}>
               <TextField
                 fullWidth
@@ -1148,8 +1353,6 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-
-
             <Grid item xs={12} sx={{ textAlign: "right" }}>
               <Button
                 variant="outlined"
@@ -1181,6 +1384,7 @@ export default function BusinessTripFormNewLayout() {
             </Box>
           ) : (
             <TableContainer
+              className="business-trip-tracking-table"
               component={Paper}
               sx={{
                 maxHeight: 520,
@@ -1240,7 +1444,7 @@ export default function BusinessTripFormNewLayout() {
                 size="small"
                 sx={{
                   width: "100%",
-                  minWidth: 2300,
+                  minWidth: 2450,
                   tableLayout: "fixed",
                 }}
               >
@@ -1257,7 +1461,8 @@ export default function BusinessTripFormNewLayout() {
                     <TableCell className="tracking-col-lg">{t("business_trip_purpose") || "Purpose"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_entry_time") || "Entry"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_exit_time") || "Exit"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date") || "Hotel Date"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date_from", "Hotel Date From")}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date_to", "Hotel Date To")}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_airport_pickup_required") || "Airport"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("e_visa_apec_card") || "E-Visa / APEC"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("flight_ticket") || "Flight Ticket"}</TableCell>
@@ -1269,7 +1474,7 @@ export default function BusinessTripFormNewLayout() {
                 <TableBody>
                   {filteredTrackingRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={18} align="center">
+                      <TableCell colSpan={19} align="center">
                         No data
                       </TableCell>
                     </TableRow>
@@ -1288,6 +1493,7 @@ export default function BusinessTripFormNewLayout() {
                         <TableCell>{formatDateDisplay(getRowValue(row, ["ENTRY_DATE_TIME", "entryDateTime"]))}</TableCell>
                         <TableCell>{formatDateDisplay(getRowValue(row, ["EXIT_DATE_TIME", "exitDateTime"]))}</TableCell>
                         <TableCell>{formatDateDisplay(getRowValue(row, ["HOTEL_RESERVE_DATE", "hotelReserveDate"]))}</TableCell>
+                        <TableCell>{formatDateDisplay(getRowValue(row, ["HOTEL_RESERVE_DATE_TO", "hotelReserveDateTo"]))}</TableCell>
                         <TableCell>
                           {getRowValue(row, ["AIRPORT_PICKUP_YN", "airportPickupYn"]) === "Y" ? "Required" : "Not Needed"}
                           <br />

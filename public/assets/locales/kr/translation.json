@@ -356,7 +356,10 @@
     "hotel": "호텔",
     "google_maps": "구글 지도",
     "e_visa_apec_card": "E-Visa / APEC Card",
-    "flight_ticket": "항공권"
+    "flight_ticket": "항공권",
+    "business_trip_hotel_reservation_date_from": "호텔 예약 일자 (시작)",
+    "business_trip_hotel_reservation_date_to": "호텔 예약 일자 (종료)"
+    
 
 
 }
