@@ -30,6 +30,8 @@ import loginImage from "../../assets/images/sign-in.png";
 import otpImage from "../../assets/images/logos/otp.png";
 import AvatarImage from "../../assets/images/avatar.png";
 
+import businessTripBanner from "../../assets/images/banners/business_trip.png"
+
 const SignIn = () => {
     /////// Translate Lang
     const { t } = useTranslation();
@@ -769,7 +771,7 @@ const SignIn = () => {
                 {/* ---- Left Panel: Login Form ---- */}
                 <Box className="s-form left-form">
                     <Typography variant="h1" className="p-title">
-                        General Affairs System
+                        {t("main_title")}
                     </Typography>
                     <Box className="b-thumb">
                         <img src={loginImage} alt="Login Illustration" />
@@ -875,19 +877,40 @@ const SignIn = () => {
                 <Box className="s-form right-form">
                     <Typography
                         variant="h1"
-                        className="p-title p-title-card"
+                        className="p-title"
                     >
-                        Business Trip
+                        {t("business_trip_to_changshin")}
                     </Typography>
-                    <Box className="b-thumb">
+                    <Box
+                        className="b-thumb business-trip-banner-thumb"
+                        sx={{
+                            width: "100%",
+                            maxWidth: "360px !important",
+                            mx: "auto",
+                            my: 1.5,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                            borderRadius: "12px",
+                            "& img": {
+                                width: "100% !important",
+                                maxWidth: "100% !important",
+                                height: "auto !important",
+                                objectFit: "cover",
+                                borderRadius: "12px",
+                                display: "block",
+                            },
+                        }}
+                    >
                         <img
-                            src={loginImage}
+                            src={businessTripBanner}
                             alt="Business Trip Illustration"
                         />
                     </Box>
-                    <Box className="s-mid">
+                    <Box className="s-small-text">
                         <ButtonPrimary
-                            title="Registration"
+                            title={t("register_now")}
                             handleClick={() =>
                                 navigate("/registration/business-trip")
                             }

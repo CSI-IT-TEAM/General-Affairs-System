@@ -394,6 +394,8 @@
       "e_visa_apec_card": "E-Visa / APEC Card",
       "flight_ticket": "Flight Ticket",
       "business_trip_hotel_reservation_date_from": "Hotel Reservation Date From",
-      "business_trip_hotel_reservation_date_to": "Hotel Reservation Date To"
+      "business_trip_hotel_reservation_date_to": "Hotel Reservation Date To",
+      "main_title": "General Affairs System",
+      "business_trip_to_changshin": "Business Trip to ChangShin Vietnam"
 
 }

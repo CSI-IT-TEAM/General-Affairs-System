@@ -104,7 +104,7 @@ const STATUS_FILTER_OPTIONS = [
 
 
 const LANGUAGE_OPTIONS = [
-  { value: "en", label: "US English", flag: "🇺🇸" },
+  { value: "en", label: "English", flag: "🇺🇸" },
   { value: "kr", label: "한국어", flag: "🇰🇷" },
   { value: "vn", label: "Tiếng Việt", flag: "🇻🇳" },
 ];
@@ -283,6 +283,7 @@ const renderFileLinks = (value) => {
 };
 
 export default function BusinessTripFormNewLayout() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState(0);
 
   const { t, i18n } = useTranslation();
@@ -314,11 +315,35 @@ export default function BusinessTripFormNewLayout() {
     const option = LANGUAGE_OPTIONS.find((item) => item.value === selectedLanguage) || LANGUAGE_OPTIONS[0];
 
     return (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box component="span" sx={{ fontSize: 28, lineHeight: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          color: "#fff",
+          lineHeight: 1,
+        }}
+      >
+        <Box
+          component="span"
+          sx={{
+            fontSize: 30,
+            lineHeight: 1,
+            display: "inline-flex",
+            alignItems: "center",
+          }}
+        >
           {option.flag}
         </Box>
-        <Typography sx={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>
+        <Typography
+          component="span"
+          sx={{
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: 14,
+            lineHeight: 1,
+          }}
+        >
           {option.label}
         </Typography>
       </Box>
@@ -929,12 +954,25 @@ export default function BusinessTripFormNewLayout() {
         }}
       >
         <Box
+          component="button"
+          type="button"
           className="business-trip-header-title"
+          onClick={() => navigate("/signin")}
+          title="Back to Sign In"
           sx={{
             color: "#fff",
             lineHeight: 1,
             fontWeight: 800,
             letterSpacing: 0.2,
+            cursor: "pointer",
+            border: 0,
+            background: "transparent",
+            p: 0,
+            m: 0,
+            textAlign: "left",
+            "&:hover": {
+              opacity: 0.85,
+            },
           }}
         >
           <Typography
@@ -971,68 +1009,78 @@ export default function BusinessTripFormNewLayout() {
             alignItems: "center",
           }}
         >
-          <TextField
-            select
+          <FormControl
             variant="standard"
-            value={language}
-            onChange={handleLanguageChange}
-            SelectProps={{
-              renderValue: renderSelectedLanguage,
-              disableUnderline: true,
-            }}
-            InputProps={{
-              disableUnderline: true,
-            }}
             sx={{
-              minWidth: 150,
-              bgcolor: "#1b0065 !important",
-              border: "1px solid rgba(255,255,255,0.45)",
-              borderRadius: 1,
-              px: 1,
-              py: 0.25,
-              "& .MuiInputBase-root": {
-                bgcolor: "#1b0065 !important",
-                color: "#fff !important",
-              },
-              "& .MuiInputBase-root:before": {
-                borderBottom: "0 !important",
-              },
-              "& .MuiInputBase-root:after": {
-                borderBottom: "0 !important",
-              },
-              "& .MuiInputBase-root:hover:not(.Mui-disabled):before": {
-                borderBottom: "0 !important",
-              },
-              "& .MuiSelect-select": {
-                bgcolor: "#1b0065 !important",
-                color: "#fff !important",
-                display: "flex",
-                alignItems: "center",
-                py: "6px !important",
-              },
-              "& .MuiTypography-root": {
-                color: "#fff !important",
-              },
-              "& .MuiSelect-icon": {
-                color: "#fff !important",
-              },
-              "& .MuiInputBase-input": {
-                color: "#fff !important",
-                py: 0.5,
-              },
+              minWidth: 128,
+              bgcolor: "transparent",
             }}
           >
-            {LANGUAGE_OPTIONS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box component="span" sx={{ fontSize: 24, lineHeight: 1 }}>
-                    {option.flag}
+            <Select
+              disableUnderline
+              value={language}
+              onChange={handleLanguageChange}
+              renderValue={renderSelectedLanguage}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    mt: 1,
+                    borderRadius: 1.5,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+                    "& .MuiMenuItem-root": {
+                      minHeight: 42,
+                      gap: 1,
+                    },
+                  },
+                },
+              }}
+              sx={{
+                height: 42,
+                minWidth: 128,
+                color: "#fff",
+                bgcolor: "transparent",
+                border: "0 !important",
+                boxShadow: "none !important",
+                "&:before": {
+                  borderBottom: "0 !important",
+                },
+                "&:after": {
+                  borderBottom: "0 !important",
+                },
+                "&:hover:not(.Mui-disabled):before": {
+                  borderBottom: "0 !important",
+                },
+                "& .MuiSelect-select": {
+                  display: "flex",
+                  alignItems: "center",
+                  py: "0 !important",
+                  pl: "0 !important",
+                  pr: "28px !important",
+                  color: "#fff !important",
+                  bgcolor: "transparent !important",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#fff !important",
+                  right: 0,
+                  fontSize: 22,
+                },
+                "& .MuiTypography-root": {
+                  color: "#fff !important",
+                },
+              }}
+            >
+              {LANGUAGE_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box component="span" sx={{ fontSize: 26, lineHeight: 1 }}>
+                      {option.flag}
+                    </Box>
+                    <Typography sx={{ fontWeight: 700 }}>{option.label}</Typography>
                   </Box>
-                  <Typography>{option.label}</Typography>
-                </Box>
-              </MenuItem>
-            ))}
-          </TextField>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </Box>
 
@@ -1040,6 +1088,19 @@ export default function BusinessTripFormNewLayout() {
         className="business-trip-tabs"
         value={tab}
         onChange={(e, value) => setTab(value)}
+        sx={{
+          mt: "8px !important",
+          mb: "8px !important",
+          minHeight: "44px",
+          borderBottom: "1px solid #ddd",
+          px: 1.5,
+          "& .MuiTab-root": {
+            minHeight: "44px",
+            py: 1,
+            textTransform: "none",
+            fontWeight: 700,
+          },
+        }}
       >
         <Tab label={t("business_trip_register")} />
         <Tab label={t("business_trip_tracking")} />
@@ -1047,9 +1108,28 @@ export default function BusinessTripFormNewLayout() {
 
       {tab === 0 && (
         <Box className="business-trip-card business-trip-register-card" sx={{ border: "1px solid #ccc", p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-            {t("business_trip_title")}
-          </Typography>
+          <Box
+            sx={{
+              mb: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {t("business_trip_title")}
+            </Typography>
+
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={isSubmitting}
+              sx={{ minWidth: 90 }}
+            >
+              {isSubmitting ? t("saving") || "Saving..." : t("save")}
+            </Button>
+          </Box>
 
           <Grid container spacing={2} className="business-trip-grid">
             <Grid item xs={12} md={4}>
@@ -1264,15 +1344,6 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-            <Grid item xs={12} sx={{ textAlign: "right" }}>
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? t("saving") || "Saving..." : t("save")}
-              </Button>
-            </Grid>
           </Grid>
         </Box>
       )}
@@ -1286,12 +1357,39 @@ export default function BusinessTripFormNewLayout() {
             p: 3,
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-            {t("business_trip_tracking") || "Business Trip Tracking"}
-          </Typography>
+          <Box
+            sx={{
+              mb: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {t("business_trip_tracking") || "Business Trip Tracking"}
+            </Typography>
+
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                onClick={handleResetTracking}
+                disabled={isLoadingTracking}
+              >
+                {t("reset") || "Reset"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSearchTracking}
+                disabled={isLoadingTracking}
+              >
+                {isLoadingTracking ? "Loading..." : t("search") || "Search"}
+              </Button>
+            </Stack>
+          </Box>
 
           <Grid container spacing={2} className="business-trip-filter-grid" sx={{ mb: 2 }}>
-                        <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={2}>
               <TextField
                 fullWidth
                 type="date"
@@ -1361,23 +1459,6 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-            <Grid item xs={12} sx={{ textAlign: "right" }}>
-              <Button
-                variant="outlined"
-                onClick={handleResetTracking}
-                disabled={isLoadingTracking}
-                sx={{ mr: 1 }}
-              >
-                {t("reset") || "Reset"}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSearchTracking}
-                disabled={isLoadingTracking}
-              >
-                {isLoadingTracking ? "Loading..." : t("search") || "Search"}
-              </Button>
-            </Grid>
           </Grid>
 
           {trackingError && (
@@ -1404,13 +1485,20 @@ export default function BusinessTripFormNewLayout() {
                   fontSize: "0.875rem",
                 },
                 "& .MuiTableCell-head": {
+                  bgcolor: "#E3F2FD",
+                  color: "#000",
                   fontWeight: 700,
+                  textAlign: "center",
                   whiteSpace: "normal",
                   lineHeight: 1.25,
                   minWidth: 110,
                   maxWidth: 150,
                   wordBreak: "normal",
                   overflowWrap: "break-word",
+                  borderRight: "1px solid #D0D7DE",
+                  borderBottom: "2px solid #90CAF9",
+                  verticalAlign: "middle",
+                  zIndex: 3,
                 },
                 "& .MuiTableCell-body": {
                   whiteSpace: "normal",
@@ -1458,6 +1546,7 @@ export default function BusinessTripFormNewLayout() {
               >
                 <TableHead>
                   <TableRow>
+                    <TableCell className="tracking-col-sm">{t("status") || "Status"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("requestDate") || "Request Date"}</TableCell>
                     <TableCell className="tracking-col-xs">{t("from") || "From"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_name_en") || "English Name"}</TableCell>
@@ -1473,8 +1562,7 @@ export default function BusinessTripFormNewLayout() {
                     <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date_to", "Hotel Date To")}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_airport_pickup_required") || "Airport"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("e_visa_apec_card") || "E-Visa / APEC"}</TableCell>
-                    <TableCell className="tracking-col-sm">{t("flight_ticket") || "Flight Ticket"}</TableCell>
-                    <TableCell className="tracking-col-sm">{t("status") || "Status"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("flight_ticket") || "Flight Ticket"}</TableCell>                    
                     <TableCell className="tracking-col-sm">{t("hotel") || "Hotel"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("google_maps") || "Google Maps"}</TableCell>
                   </TableRow>
@@ -1488,7 +1576,17 @@ export default function BusinessTripFormNewLayout() {
                     </TableRow>
                   ) : (
                     filteredTrackingRows.map((row, index) => (
-                      <TableRow key={getRowValue(row, ["REG_ID", "regId"], index)} hover>                        
+                      <TableRow key={getRowValue(row, ["REG_ID", "regId"], index)} hover>     
+                      {(() => {
+                          const statusValue = getRowValue(row, ["STATUS", "status"]);
+
+                          return (
+                            <TableCell sx={getStatusCellSx(statusValue)}>
+                              {statusValue}
+                            </TableCell>
+                          );
+                        })()
+                        }                   
                         <TableCell>{getRowValue(row, ["REQ_DATE", "reqDate"])}</TableCell>
                         <TableCell>{getRowValue(row, ["AFFILI_DIV", "affiliDiv"])}</TableCell>
                         <TableCell>{getRowValue(row, ["VISITOR_NAME_EN", "visitorNameEn"])}</TableCell>
@@ -1509,16 +1607,7 @@ export default function BusinessTripFormNewLayout() {
                         </TableCell>
                         <TableCell>{renderFileLinks(getRowValue(row, ["E_VISA", "eVisa"]))}</TableCell>
                         <TableCell>{renderFileLinks(getRowValue(row, ["BUSINESS_TRIP_FLIGHT_TICKET", "businessTripFlightTicket"]))}</TableCell>
-                        {(() => {
-                          const statusValue = getRowValue(row, ["STATUS", "status"]);
-
-                          return (
-                            <TableCell sx={getStatusCellSx(statusValue)}>
-                              {statusValue}
-                            </TableCell>
-                          );
-                        })()
-                        }
+                        
                         <TableCell>{getRowValue(row, ["HOTEL_NAME", "hotel"])}</TableCell>
                         <TableCell>
                           {(() => {
