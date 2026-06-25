@@ -103,10 +103,98 @@ const STATUS_FILTER_OPTIONS = [
 ];
 
 
+const svgToDataUri = (svg) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
 const LANGUAGE_OPTIONS = [
-  { value: "en", label: "English", flag: "🇺🇸" },
-  { value: "kr", label: "한국어", flag: "🇰🇷" },
-  { value: "vn", label: "Tiếng Việt", flag: "🇻🇳" },
+  {
+    value: "en",
+    label: "English",
+    flagSrc: svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
+        <rect width="60" height="40" fill="#fff"/>
+        <g fill="#b22234">
+          <rect y="0" width="60" height="3.08"/>
+          <rect y="6.16" width="60" height="3.08"/>
+          <rect y="12.32" width="60" height="3.08"/>
+          <rect y="18.48" width="60" height="3.08"/>
+          <rect y="24.64" width="60" height="3.08"/>
+          <rect y="30.8" width="60" height="3.08"/>
+          <rect y="36.96" width="60" height="3.08"/>
+        </g>
+        <rect width="24" height="21.56" fill="#3c3b6e"/>
+        <g fill="#fff">
+          <circle cx="4" cy="4" r="1"/><circle cx="8" cy="4" r="1"/><circle cx="12" cy="4" r="1"/><circle cx="16" cy="4" r="1"/><circle cx="20" cy="4" r="1"/>
+          <circle cx="6" cy="8" r="1"/><circle cx="10" cy="8" r="1"/><circle cx="14" cy="8" r="1"/><circle cx="18" cy="8" r="1"/><circle cx="22" cy="8" r="1"/>
+          <circle cx="4" cy="12" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="20" cy="12" r="1"/>
+          <circle cx="6" cy="16" r="1"/><circle cx="10" cy="16" r="1"/><circle cx="14" cy="16" r="1"/><circle cx="18" cy="16" r="1"/><circle cx="22" cy="16" r="1"/>
+          <circle cx="4" cy="20" r="1"/><circle cx="8" cy="20" r="1"/><circle cx="12" cy="20" r="1"/><circle cx="16" cy="20" r="1"/><circle cx="20" cy="20" r="1"/>
+        </g>
+      </svg>
+    `),
+  },
+  {
+    value: "kr",
+    label: "한국어",
+    flagSrc: svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
+        <rect width="60" height="40" fill="#fff"/>
+
+        <!-- Taegeuk -->
+        <g transform="translate(30 20) rotate(-33.69)">
+          <circle r="8" fill="#cd2e3a"/>
+          <path d="M0 -8a8 8 0 0 1 0 16a4 4 0 0 1 0 -8a4 4 0 0 0 0 -8" fill="#0047a0"/>
+          <path d="M0 8a8 8 0 0 1 0 -16a4 4 0 0 1 0 8a4 4 0 0 0 0 8" fill="#cd2e3a"/>
+        </g>
+
+        <!-- Trigrams -->
+        <g fill="#111">
+          <!-- Geon: three solid bars -->
+          <g transform="translate(14.3 9.4) rotate(-33.69)">
+            <rect x="-5.2" y="-4.2" width="10.4" height="1.35"/>
+            <rect x="-5.2" y="-0.68" width="10.4" height="1.35"/>
+            <rect x="-5.2" y="2.85" width="10.4" height="1.35"/>
+          </g>
+
+          <!-- Gam: broken, solid, broken -->
+          <g transform="translate(45.7 9.4) rotate(33.69)">
+            <rect x="-5.2" y="-4.2" width="4.25" height="1.35"/>
+            <rect x="0.95" y="-4.2" width="4.25" height="1.35"/>
+            <rect x="-5.2" y="-0.68" width="10.4" height="1.35"/>
+            <rect x="-5.2" y="2.85" width="4.25" height="1.35"/>
+            <rect x="0.95" y="2.85" width="4.25" height="1.35"/>
+          </g>
+
+          <!-- Ri: solid, broken, solid -->
+          <g transform="translate(14.3 30.6) rotate(33.69)">
+            <rect x="-5.2" y="-4.2" width="10.4" height="1.35"/>
+            <rect x="-5.2" y="-0.68" width="4.25" height="1.35"/>
+            <rect x="0.95" y="-0.68" width="4.25" height="1.35"/>
+            <rect x="-5.2" y="2.85" width="10.4" height="1.35"/>
+          </g>
+
+          <!-- Gon: three broken bars -->
+          <g transform="translate(45.7 30.6) rotate(-33.69)">
+            <rect x="-5.2" y="-4.2" width="4.25" height="1.35"/>
+            <rect x="0.95" y="-4.2" width="4.25" height="1.35"/>
+            <rect x="-5.2" y="-0.68" width="4.25" height="1.35"/>
+            <rect x="0.95" y="-0.68" width="4.25" height="1.35"/>
+            <rect x="-5.2" y="2.85" width="4.25" height="1.35"/>
+            <rect x="0.95" y="2.85" width="4.25" height="1.35"/>
+          </g>
+        </g>
+      </svg>
+    `),
+  },
+  {
+    value: "vn",
+    label: "Tiếng Việt",
+    flagSrc: svgToDataUri(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
+        <rect width="60" height="40" fill="#da251d"/>
+        <polygon fill="#ff0" points="30,7 33.5,16.5 43.6,16.5 35.4,22.3 38.7,32 30,26 21.3,32 24.6,22.3 16.4,16.5 26.5,16.5"/>
+      </svg>
+    `),
+  },
 ];
 
 const normalizeLanguage = (language) => {
@@ -325,16 +413,19 @@ export default function BusinessTripFormNewLayout() {
         }}
       >
         <Box
-          component="span"
+          component="img"
+          src={option.flagSrc}
+          alt={option.label}
           sx={{
-            fontSize: 30,
-            lineHeight: 1,
+            width: 38,
+            height: 25,
+            objectFit: "cover",
+            borderRadius: "2px",
             display: "inline-flex",
-            alignItems: "center",
+            flexShrink: 0,
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.35)",
           }}
-        >
-          {option.flag}
-        </Box>
+        />
         <Typography
           component="span"
           sx={{
@@ -920,8 +1011,8 @@ export default function BusinessTripFormNewLayout() {
 
         alert(
           emailSent
-            ? `Save successful and email sent. Reg ID: ${result.data?.regId || ""}`
-            : `Save successful but email sending failed. Reg ID: ${result.data?.regId || ""}`
+            ? `Save successful and email sent.`
+            : `Save successful but email sending failed. Please check the email server or send the email manually.`
         );
 
         setFormData({ ...EMPTY_FORM });
@@ -1072,9 +1163,19 @@ export default function BusinessTripFormNewLayout() {
               {LANGUAGE_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box component="span" sx={{ fontSize: 26, lineHeight: 1 }}>
-                      {option.flag}
-                    </Box>
+                    <Box
+                      component="img"
+                      src={option.flagSrc}
+                      alt={option.label}
+                      sx={{
+                        width: 32,
+                        height: 21,
+                        objectFit: "cover",
+                        borderRadius: "2px",
+                        boxShadow: "0 0 0 1px rgba(0,0,0,0.12)",
+                        flexShrink: 0,
+                      }}
+                    />
                     <Typography sx={{ fontWeight: 700 }}>{option.label}</Typography>
                   </Box>
                 </MenuItem>

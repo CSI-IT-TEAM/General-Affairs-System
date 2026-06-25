@@ -771,7 +771,7 @@ const SignIn = () => {
                 {/* ---- Left Panel: Login Form ---- */}
                 <Box className="s-form left-form">
                     <Typography variant="h1" className="p-title">
-                        {t("main_title")}
+                        {t("main_title")||"General Affairs System"}
                     </Typography>
                     <Box className="b-thumb">
                         <img src={loginImage} alt="Login Illustration" />
@@ -879,7 +879,7 @@ const SignIn = () => {
                         variant="h1"
                         className="p-title"
                     >
-                        {t("business_trip_to_changshin")}
+                        {t("business_trip_to_changshin")||"Business Trip to Changshin Vietnam"}
                     </Typography>
                     <Box
                         className="b-thumb business-trip-banner-thumb"
@@ -910,7 +910,7 @@ const SignIn = () => {
                     </Box>
                     <Box className="s-small-text">
                         <ButtonPrimary
-                            title={t("register_now")}
+                            title={t("register_now")||"Register Now"}
                             handleClick={() =>
                                 navigate("/registration/business-trip")
                             }
