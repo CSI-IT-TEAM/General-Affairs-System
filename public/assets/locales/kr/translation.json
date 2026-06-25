@@ -338,11 +338,21 @@
     "business_trip_upload_flight_ticket": "항공권 업로드",
     "business_trip_note": "상세출장내용",
     "business_trip_entry_time": "입국 일시",
-     "business_trip_exit_time": "출국 일시",
-     "business_trip_hotel_reservation_date": "호텔 예약 일자",
-     "business_trip_airport_pickup_required": "출장시 차량 픽업",
-     "business_trip_not_need_airport_pickup": "차량 픽업 불필요",
-      "business_trip_airport_dropoff_required": "복귀시 차량 픽업 요청 (오후 8:30 w자동)",
-      "save": "저장"
+    "business_trip_exit_time": "출국 일시",
+    "business_trip_hotel_reservation_date": "호텔 예약 일자",
+    "business_trip_airport_pickup_required": "출장시 차량 픽업",
+    "business_trip_not_need_airport_pickup": "차량 픽업 불필요",
+    "business_trip_airport_dropoff_required": "복귀시 차량 픽업 요청 (오후 8:30 w자동)",
+    "save": "저장",
+    "fromDate": "조회 시작일",
+    "toDate": "조회 종료일",
+    "status": "상태",
+    "confirmed": "확인됨",
+    "pending": "대기 중",
+    "requestDate": "요청 일자",
+    "from": "부터",
+     "email": "이메일",
+     "reset": "재설정"
+
 
 }

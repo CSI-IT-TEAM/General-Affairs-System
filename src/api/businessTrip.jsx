@@ -68,7 +68,7 @@ const callProcedure = async (procedureName, params = {}) => {
 };
 
 /**
- * Save Canteen Attendance Registration by calling SMT_SAVE_CAN_REG procedure
+ * Save B Registration by calling SMT_SAVE_CAN_REG procedure
  * Uses MERGE to INSERT or UPDATE based on key: EMP_NO + REG_TYPE + REG_DATE + MEAL_TYPE
  * @param {Object} registrationData - Registration data object
  * @param {string} registrationData.argEmpNo - Employee number
@@ -155,22 +155,18 @@ export const saveBusinessRegistration = async (registrationData) => {
  * @returns {Promise<{success: boolean, data: array|null, error: object|null}>}
  */
 export const getBusinessRegistration = async ({
-  argRegId = null,
-  argEmpNo = null,
-  argRegType = null,
   argFromDate = null,
   argToDate = null,
   argVisitorDept = null,
+  argVisitorName = null,
   argStatus = null,
 } = {}) => {
   try {
     const data = await callProcedure('SMT_GET_BUSINESS_REG', {
-      ARG_REG_ID: { value: argRegId, type: "IN" },
-      ARG_EMP_NO: { value: argEmpNo, type: "IN" },
-      ARG_REG_TYPE: { value: argRegType, type: "IN" },
       ARG_FROM_DATE: { value: argFromDate, type: "IN" },
       ARG_TO_DATE: { value: argToDate, type: "IN" },
       ARG_VISITOR_DEPT: { value: argVisitorDept, type: "IN" },
+      ARG_VISITOR_NAME: { value: argVisitorName, type: "IN" },
       ARG_STATUS: { value: argStatus, type: "IN" },
       OUT_CURSOR: { type: "OUT", dataType: "CURSOR" },
     });

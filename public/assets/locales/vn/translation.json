@@ -366,5 +366,14 @@
      "business_trip_airport_pickup_required": "Cần xe đón tại sân bay",
      "business_trip_not_need_airport_pickup": "Không cần xe đón tại sân bay",
      "business_trip_airport_dropoff_required": "Yêu cầu xe đưa ra sân bay",
-     "save": "Lưu"
+     "save": "Lưu",
+     "fromDate": "Từ ngày",
+     "toDate": "Đến ngày",
+     "status": "Trạng thái",
+     "confirmed": "Đã xác nhận",
+     "requestDate": "Ngày đề nghị",
+     "from": "Từ",
+      "email": "Email",
+      "reset": "Đặt lại"
+
      }

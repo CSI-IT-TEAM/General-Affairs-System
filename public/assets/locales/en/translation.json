@@ -376,5 +376,15 @@
       "business_trip_airport_pickup_required": "Airport Pick-up Required",
       "business_trip_not_need_airport_pickup": "Not Needed Airport Pick-up",
        "business_trip_airport_dropoff_required": "Airport Drop-off Required",
-       "save": "Save"
+       "save": "Save",
+       "fromDate": "From Date",
+       "toDate": "To Date",
+       "status": "Status",
+       "confirmed": "Confirmed",
+       "pending": "Pending",
+       "requestDate": "Request Date",
+       "from": "From",
+       "email": "Email",
+       "reset": "Reset"
+
 }
