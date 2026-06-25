@@ -11,7 +11,6 @@ import {
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import OtpInput from 'react-otp-input';
 import InputAdornment from "@mui/material/InputAdornment";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LockIcon from "@mui/icons-material/Lock";
@@ -19,13 +18,17 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { ButtonPrimary, ModalWarning, ModalInfo } from "../../components";
 import { decode as base64_decode, encode as base64_encode } from "base-64";
-import { LoginURL, UserRegisterURL, downloadURL, imageURL, SendEmailURL } from "../../api";
+import {
+    LoginURL,
+    UserRegisterURL,
+    downloadURL,
+    imageURL,
+    SendEmailURL,
+} from "../../api";
 import "./SignIn.scss";
 import loginImage from "../../assets/images/sign-in.png";
 import otpImage from "../../assets/images/logos/otp.png";
 import AvatarImage from "../../assets/images/avatar.png";
-const height = window.innerHeight + "px";
-const width = window.innerWidth;
 
 const SignIn = () => {
     /////// Translate Lang
@@ -36,7 +39,9 @@ const SignIn = () => {
         localStorage.getItem("lastLogin") === null
             ? ""
             : localStorage.getItem("lastLogin");
-    const [data, setData] = useState(lastLogin ? JSON.parse(lastLogin).data : "");
+    const [data, setData] = useState(
+        lastLogin ? JSON.parse(lastLogin).data : ""
+    );
     const [data1, setData1] = useState(
         lastLogin ? JSON.parse(lastLogin).data1 : ""
     );
@@ -44,8 +49,6 @@ const SignIn = () => {
     const [reset, setReset] = useState(false);
     const [dataOTP, setDataOTP] = useState("");
     const [email, setEmail] = useState("");
-
-    const size = width > 479 ? 500 - 110 - 9 * 5 : width * 0.9 - 50 - 9 * 5;
 
     /////// Handle Warning Modal
     const [openWarn, setOpenWarn] = useState(false);
@@ -83,13 +86,6 @@ const SignIn = () => {
     };
 
     const handleSignIn = () => {
-        // const dataConfig = {
-        //   ARG_TYPE: "EMP",
-        //   ARG_EMPID: data,
-        //   OUT_CURSOR: "",
-        // };
-        //fetchDownload(dataConfig);
-
         userLoginHandle();
     };
 
@@ -108,7 +104,6 @@ const SignIn = () => {
             .then((response) => {
                 response.json().then(async (result) => {
                     if (result.length > 0) {
-                        // Store
                         if (
                             result[0].EMAIL === null ||
                             result[0].EMAIL === undefined ||
@@ -116,12 +111,14 @@ const SignIn = () => {
                         ) {
                             handleOpenWarn();
                         } else {
-                            sessionStorage.setItem("userData", JSON.stringify(result[0]));
+                            sessionStorage.setItem(
+                                "userData",
+                                JSON.stringify(result[0])
+                            );
                             localStorage.setItem(
                                 "lastLogin",
                                 JSON.stringify({ data: data, data1: data1 })
                             );
-                            // fetchDownloadImg();
                             userLoginHandle();
                         }
                     } else {
@@ -145,19 +142,20 @@ const SignIn = () => {
         });
 
         if (reset) {
-            setData(data => lastLogin ? JSON.parse(lastLogin).data : "");
+            setData((data) =>
+                lastLogin ? JSON.parse(lastLogin).data : ""
+            );
+        } else {
+            setDataOTP((dataOTP) => "");
         }
-        else {
-            setDataOTP(dataOTP => "");
-        }
-        setData1(data1 => "");
-        setEmail(email => "");
+        setData1((data1) => "");
+        setEmail((email) => "");
 
         setTimeout(() => {
             Swal.close();
-            setReset(reset => !reset);
+            setReset((reset) => !reset);
         }, 1000);
-    }
+    };
 
     ////// Download User Image
     const fetchDownloadImg = async () => {
@@ -177,7 +175,9 @@ const SignIn = () => {
             .then((response) => {
                 response.json().then(async (result) => {
                     if (result.length > 0) {
-                        let imgData = await arrayBufferToBase64(result[0].PHOTO.data);
+                        let imgData = await arrayBufferToBase64(
+                            result[0].PHOTO.data
+                        );
                         if (imgData !== "" && imgData !== null) {
                             sessionStorage.setItem("userImg", imgData);
                             navigate("/");
@@ -209,8 +209,8 @@ const SignIn = () => {
             },
             body: JSON.stringify({
                 ARG_TYPE: "Q",
-                ARG_EMPID: data, //user name
-                ARG_PASSWORD: base64_encode(data1), //password
+                ARG_EMPID: data,
+                ARG_PASSWORD: base64_encode(data1),
                 OUT_CURSOR: "",
             }),
             signal: Timeout(5).signal,
@@ -218,18 +218,18 @@ const SignIn = () => {
             .then((response) => {
                 response.json().then(async (result) => {
                     if (result.length > 0) {
-                        //let imgData = await arrayBufferToBase64(result[0].PHOTO.data);
                         let imgData = null;
                         if (result[0].PHOTO && result[0].PHOTO.data) {
-                            imgData = await arrayBufferToBase64(result[0].PHOTO.data);
+                            imgData = await arrayBufferToBase64(
+                                result[0].PHOTO.data
+                            );
                         } else {
                             console.warn("PHOTO.data is null");
-                            imgData = AvatarImage; // Hoặc gán ảnh mặc định nếu cần
+                            imgData = AvatarImage;
                         }
                         let pwd = await result[0].PASSWORD;
                         let isExist = await result[0].IS_EXIST;
                         if (isExist === 0 && !pwd) {
-                            //case : Chưa đăng ký
                             fetch(UserRegisterURL, {
                                 method: "POST",
                                 mode: "cors",
@@ -239,30 +239,28 @@ const SignIn = () => {
                                 },
                                 body: JSON.stringify({
                                     ARG_TYPE: "S",
-                                    ARG_EMPID: data, //user name
-                                    ARG_PASSWORD: base64_encode(data1), //password
+                                    ARG_EMPID: data,
+                                    ARG_PASSWORD: base64_encode(data1),
                                 }),
                                 signal: Timeout(5).signal,
                             }).then((response) => {
                                 response.json().then(async (rs) => {
-                                    //console.log(result);
                                     if (rs.Result === "OK") {
-                                        //console.log("Đăng ký thành công!");
-                                        // Swal.fire(
-                                        //   t("title_password_change_successfully"),
-                                        //   t("text_user_can_login_with_new_password"),
-                                        //   "success"
-                                        // );
-                                        // setData1(pwd);
                                         sessionStorage.setItem(
                                             "userData",
                                             JSON.stringify(result[0])
                                         );
                                         localStorage.setItem(
                                             "lastLogin",
-                                            JSON.stringify({ data: data, data1: data1 })
+                                            JSON.stringify({
+                                                data: data,
+                                                data1: data1,
+                                            })
                                         );
-                                        sessionStorage.setItem("userImg", imgData);
+                                        sessionStorage.setItem(
+                                            "userImg",
+                                            imgData
+                                        );
                                         navigate("/");
                                     } else {
                                         alert("Network Error!");
@@ -270,7 +268,6 @@ const SignIn = () => {
                                 });
                             });
                         } else if (isExist === 1 && !pwd) {
-                            //case : Có đăng ký nhưng nhập sai pass
                             Swal.fire(
                                 t("title_wrong_password"),
                                 t("text_if_first_time_password"),
@@ -278,29 +275,20 @@ const SignIn = () => {
                             );
                             return;
                         } else {
-                            //Có đăng ký nhập đúng pass
                             if (imgData !== "" && imgData !== null) {
-                                sessionStorage.setItem("userData", JSON.stringify(result[0]));
+                                sessionStorage.setItem(
+                                    "userData",
+                                    JSON.stringify(result[0])
+                                );
                                 localStorage.setItem(
                                     "lastLogin",
-                                    JSON.stringify({ data: data, data1: data1 })
+                                    JSON.stringify({
+                                        data: data,
+                                        data1: data1,
+                                    })
                                 );
                                 sessionStorage.setItem("userImg", imgData);
-                                //    sessionStorage.setItem("userInfor", JSON.stringify(result));
-                                //console.log(result[0]);
-
                                 navigate("/");
-
-                                // if ("caches" in window) {
-                                //     caches.keys().then((names) => {
-                                //         // delete all the cache files
-                                //         names.foreach((name) => {
-                                //             caches.delete(name);
-                                //         });
-                                //     });
-                                //     // makes sure the page reloads. changes are only visible after you refresh.
-                                //     window.location.reload(true);
-                                // }
                             }
                         }
                     } else {
@@ -347,8 +335,8 @@ const SignIn = () => {
                 },
                 body: JSON.stringify({
                     ARG_TYPE: "Q_EXIST",
-                    ARG_EMPID: data, //user name
-                    ARG_PASSWORD: "", //password
+                    ARG_EMPID: data,
+                    ARG_PASSWORD: "",
                     OUT_CURSOR: "",
                 }),
                 signal: Timeout(5).signal,
@@ -368,7 +356,10 @@ const SignIn = () => {
                                     handleShowReset();
                                 });
                             } else {
-                                if (result[0].EMAIL !== null && result[0].EMAIL !== "") {
+                                if (
+                                    result[0].EMAIL !== null &&
+                                    result[0].EMAIL !== ""
+                                ) {
                                     let _emailData = result[0].EMAIL;
 
                                     fetch(UserRegisterURL, {
@@ -380,76 +371,121 @@ const SignIn = () => {
                                         },
                                         body: JSON.stringify({
                                             ARG_TYPE: "Q_OTP",
-                                            ARG_EMPID: data, //user name
-                                            ARG_PASSWORD: "", //password
+                                            ARG_EMPID: data,
+                                            ARG_PASSWORD: "",
                                         }),
                                         signal: Timeout(5).signal,
                                     }).then((response) => {
                                         response.json().then(async (rs) => {
                                             if (rs.Result === "OK") {
-
                                                 fetch(LoginURL, {
                                                     method: "POST",
                                                     mode: "cors",
                                                     dataType: "json",
                                                     headers: {
-                                                        "Content-Type": "application/json",
+                                                        "Content-Type":
+                                                            "application/json",
                                                     },
                                                     body: JSON.stringify({
                                                         ARG_TYPE: "Q_OTP",
-                                                        ARG_EMPID: data, //user name
-                                                        ARG_PASSWORD: "", //password
+                                                        ARG_EMPID: data,
+                                                        ARG_PASSWORD: "",
                                                         OUT_CURSOR: "",
                                                     }),
                                                     signal: Timeout(5).signal,
-                                                })
-                                                    .then((response) => {
-                                                        response.json().then(async (result) => {
-                                                            let _sendEmailPrams = {
-                                                                "to": [_emailData],
-                                                                "subject": "General Affairs System - Reset Password",
-                                                                "html":
-                                                                    "<html>" +
-                                                                    "<head><style>.text{ font-family: 'Consolas', Times, serif; font-size: '14'; }</style></head>" +
-                                                                    "<body class='text'>" +
-                                                                    t('mail_hello') + ",<br />- " + t('mail_system') + ".<br />" +
-                                                                    "- " + t('mail_warn') + ".<br/>" +
-                                                                    "- <b>" + result[0].OTP_CD + "</b>" + t('mail_define') + ".<br />" +
-                                                                    t('mail_end') + "." +
-                                                                    "</body>" +
-                                                                    "</html>"
-                                                            }
+                                                }).then((response) => {
+                                                    response
+                                                        .json()
+                                                        .then(async (result) => {
+                                                            let _sendEmailPrams =
+                                                                {
+                                                                    to: [
+                                                                        _emailData,
+                                                                    ],
+                                                                    subject:
+                                                                        "General Affairs System - Reset Password",
+                                                                    html:
+                                                                        "<html>" +
+                                                                        "<head><style>.text{ font-family: 'Consolas', Times, serif; font-size: '14'; }</style></head>" +
+                                                                        "<body class='text'>" +
+                                                                        t(
+                                                                            "mail_hello"
+                                                                        ) +
+                                                                        ",<br />- " +
+                                                                        t(
+                                                                            "mail_system"
+                                                                        ) +
+                                                                        ".<br />" +
+                                                                        "- " +
+                                                                        t(
+                                                                            "mail_warn"
+                                                                        ) +
+                                                                        ".<br/>" +
+                                                                        "- <b>" +
+                                                                        result[0]
+                                                                            .OTP_CD +
+                                                                        "</b>" +
+                                                                        t(
+                                                                            "mail_define"
+                                                                        ) +
+                                                                        ".<br />" +
+                                                                        t(
+                                                                            "mail_end"
+                                                                        ) +
+                                                                        "." +
+                                                                        "</body>" +
+                                                                        "</html>",
+                                                                };
 
-                                                            const response = await fetch(SendEmailURL, {
-                                                                method: "POST",
-                                                                mode: "cors",
-                                                                dataType: "json",
-                                                                headers: {
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                                body: JSON.stringify(_sendEmailPrams),
-                                                            });
+                                                            const response =
+                                                                await fetch(
+                                                                    SendEmailURL,
+                                                                    {
+                                                                        method: "POST",
+                                                                        mode: "cors",
+                                                                        dataType:
+                                                                            "json",
+                                                                        headers: {
+                                                                            "Content-Type":
+                                                                                "application/json",
+                                                                        },
+                                                                        body: JSON.stringify(
+                                                                            _sendEmailPrams
+                                                                        ),
+                                                                    }
+                                                                );
 
-                                                            if (response.status === 200) {
-                                                                setTimeout(() => {
-                                                                    setEmail(email => _emailData);
-                                                                    Swal.close();
-                                                                }, 1000);
+                                                            if (
+                                                                response.status ===
+                                                                200
+                                                            ) {
+                                                                setTimeout(
+                                                                    () => {
+                                                                        setEmail(
+                                                                            (
+                                                                                email
+                                                                            ) =>
+                                                                                _emailData
+                                                                        );
+                                                                        Swal.close();
+                                                                    },
+                                                                    1000
+                                                                );
                                                             } else {
                                                                 Swal.close();
-                                                                alert("Network Error!");
+                                                                alert(
+                                                                    "Network Error!"
+                                                                );
                                                             }
-                                                        }
-                                                        )
-                                                    });
+                                                        });
+                                                });
                                             } else {
                                                 Swal.close();
                                                 alert("Network Error!");
                                             }
                                         });
                                     });
-                                }
-                                else {
+                                } else {
                                     Swal.close();
                                     Swal.fire({
                                         position: "center",
@@ -458,7 +494,7 @@ const SignIn = () => {
                                         text: t("frm_id_required"),
                                         showConfirmButton: false,
                                         timer: 1500,
-                                    })
+                                    });
                                 }
                             }
                         } else {
@@ -488,8 +524,8 @@ const SignIn = () => {
                 },
                 body: JSON.stringify({
                     ARG_TYPE: "Q_CHECK_OTP",
-                    ARG_EMPID: data, //user name
-                    ARG_PASSWORD: dataOTP, //password
+                    ARG_EMPID: data,
+                    ARG_PASSWORD: dataOTP,
                     OUT_CURSOR: "",
                 }),
                 signal: Timeout(5).signal,
@@ -507,8 +543,8 @@ const SignIn = () => {
                                     },
                                     body: JSON.stringify({
                                         ARG_TYPE: "Q_DELETE",
-                                        ARG_EMPID: data, //user name
-                                        ARG_PASSWORD: base64_encode(data), //password
+                                        ARG_EMPID: data,
+                                        ARG_PASSWORD: base64_encode(data),
                                     }),
                                     signal: Timeout(5).signal,
                                 }).then((response) => {
@@ -518,8 +554,10 @@ const SignIn = () => {
                                             Swal.fire({
                                                 position: "center",
                                                 icon: "success",
-                                                title: t('title_success'),
-                                                text: t('swal_new_reset_pass'),
+                                                title: t("title_success"),
+                                                text: t(
+                                                    "swal_new_reset_pass"
+                                                ),
                                                 showConfirmButton: false,
                                                 timer: 3500,
                                             }).then(() => {
@@ -529,8 +567,7 @@ const SignIn = () => {
                                             Swal.close();
                                             alert("Network Error!");
                                         }
-                                    }
-                                    )
+                                    });
                                 });
                             } else {
                                 Swal.close();
@@ -547,167 +584,332 @@ const SignIn = () => {
                             Swal.close();
                             alert("Network Error!");
                         }
-                    }
-                    )
+                    });
                 });
         }
-    }
+    };
+
+    // ============================================
+    // RENDER: RESET PASSWORD VIEW
+    // ============================================
+    const renderResetPassword = () => (
+        <Box className="b-box">
+            <Box className="s-form">
+                <Typography variant="h1" className="p-title">
+                    Reset Password
+                </Typography>
+                <Box className="b-thumb">
+                    <img src={otpImage} alt="OTP Verification" />
+                </Box>
+                <form>
+                    <Stack marginBottom={1} spacing={2}>
+                        {email === "" ? (
+                            <TextField
+                                label={t("frm_user_id")}
+                                id="userID"
+                                inputProps={{
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                }}
+                                className="b-input"
+                                placeholder={t("frm_user_id_placeholder")}
+                                value={data}
+                                onChange={handleChange}
+                                name="USER_ID"
+                                color="info"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonOutlineOutlinedIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                fullWidth
+                            />
+                        ) : (
+                            <>
+                                <Box textAlign="center">
+                                    <Typography
+                                        variant="h5"
+                                        className="p-desc"
+                                    >
+                                        {t("plholder_email")} -{" "}
+                                        <span>{email}</span>
+                                    </Typography>
+                                </Box>
+                                <Box className="otp-container">
+                                    {Array.from({ length: 6 }, (_, idx) => {
+                                        const digit = dataOTP[idx] || "";
+                                        return (
+                                            <input
+                                                key={idx}
+                                                className="otp-input-slot"
+                                                type="number"
+                                                inputMode="numeric"
+                                                maxLength={1}
+                                                value={digit}
+                                                onChange={(e) => {
+                                                    const val =
+                                                        e.target.value.replace(
+                                                            /[^0-9]/g,
+                                                            ""
+                                                        );
+                                                    const otpArr =
+                                                        dataOTP.split("");
+                                                    otpArr[idx] =
+                                                        val.slice(-1) || "";
+                                                    setDataOTP(
+                                                        otpArr.join("")
+                                                    );
+                                                    // Auto-focus next input
+                                                    if (
+                                                        val &&
+                                                        idx < 5
+                                                    ) {
+                                                        const nextSibling =
+                                                            e.target
+                                                                .parentElement
+                                                                .children[
+                                                                idx + 1
+                                                            ];
+                                                        if (
+                                                            nextSibling
+                                                        )
+                                                            nextSibling.focus();
+                                                    }
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (
+                                                        e.key ===
+                                                            "Backspace" &&
+                                                        !dataOTP[
+                                                            idx
+                                                        ] &&
+                                                        idx > 0
+                                                    ) {
+                                                        const prevSibling =
+                                                            e.target
+                                                                .parentElement
+                                                                .children[
+                                                                idx - 1
+                                                            ];
+                                                        if (
+                                                            prevSibling
+                                                        )
+                                                            prevSibling.focus();
+                                                    }
+                                                }}
+                                                onPaste={(e) => {
+                                                    e.preventDefault();
+                                                    const pasted =
+                                                        e.clipboardData
+                                                            .getData("text")
+                                                            .replace(
+                                                                /[^0-9]/g,
+                                                                ""
+                                                            )
+                                                            .slice(0, 6);
+                                                    setDataOTP(
+                                                        pasted.padEnd(
+                                                            6,
+                                                            ""
+                                                        )
+                                                    );
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                </Box>
+                            </>
+                        )}
+                    </Stack>
+                    <Grid justifyContent="flex-end" className="s-mid">
+                        <ButtonPrimary
+                            title={
+                                email === ""
+                                    ? t("title_continue")
+                                    : t("btn_confirm")
+                            }
+                            handleClick={handleReset}
+                        />
+                        {email === "" ? (
+                            <Typography
+                                variant="h5"
+                                className="p-desc align-center"
+                            >
+                                {t("title_have_account")}{" "}
+                                <span onClick={handleShowReset}>
+                                    {t("btn_login")}
+                                </span>
+                            </Typography>
+                        ) : (
+                            <Typography
+                                variant="h5"
+                                className="p-desc align-center"
+                            >
+                                <span
+                                    onClick={() => setEmail((email) => "")}
+                                >
+                                    {t("btn_cancel")}
+                                </span>
+                            </Typography>
+                        )}
+                    </Grid>
+                </form>
+            </Box>
+        </Box>
+    );
+
+    // ============================================
+    // RENDER: MAIN LOGIN VIEW
+    // ============================================
+    const renderLogin = () => (
+        <Box className="b-box">
+            <Box className="s-form-container">
+                {/* ---- Left Panel: Login Form ---- */}
+                <Box className="s-form left-form">
+                    <Typography variant="h1" className="p-title">
+                        General Affairs System
+                    </Typography>
+                    <Box className="b-thumb">
+                        <img src={loginImage} alt="Login Illustration" />
+                    </Box>
+                    <form>
+                        <Stack marginBottom={1} spacing={2}>
+                            <TextField
+                                label={t("frm_user_id")}
+                                id="userID"
+                                inputProps={{
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                }}
+                                className="b-input"
+                                placeholder={t("frm_user_id_placeholder")}
+                                value={data}
+                                onChange={handleChange}
+                                name="USER_ID"
+                                color="info"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PersonOutlineOutlinedIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                fullWidth
+                            />
+                            <TextField
+                                type={
+                                    showPassword ? "text" : "password"
+                                }
+                                label={t("frm_password")}
+                                id="passWord"
+                                className="b-input"
+                                placeholder={t(
+                                    "frm_password_placeholder"
+                                )}
+                                value={data1}
+                                onChange={handleChange}
+                                name="PASSWORD"
+                                color="info"
+                                helperText={t(
+                                    "text_if_first_time_password"
+                                )}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <LockIcon />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={
+                                                    handleClickShowPassword
+                                                }
+                                                onMouseDown={
+                                                    handleMouseDownPassword
+                                                }
+                                                edge="end"
+                                            >
+                                                {showPassword ? (
+                                                    <VisibilityOff />
+                                                ) : (
+                                                    <Visibility />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                fullWidth
+                            />
+                        </Stack>
+                        <Grid
+                            justifyContent="flex-end"
+                            className="s-mid"
+                        >
+                            <ButtonPrimary
+                                title={t("btn_login")}
+                                handleClick={handleSignIn}
+                            />
+                            <Typography
+                                variant="h5"
+                                className="p-desc align-center"
+                            >
+                                {t("title_forgot_pass")}{" "}
+                                <span onClick={handleShowReset}>
+                                    {t("title_reset")}
+                                </span>
+                            </Typography>
+                        </Grid>
+                    </form>
+
+                    {/* Mobile divider between left and right */}
+                    <Box className="mobile-divider">
+                        <span>{t("or_more_services") || "MORE"}</span>
+                    </Box>
+                </Box>
+
+                {/* ---- Right Panel: Business Trip Card ---- */}
+                <Box className="s-form right-form">
+                    <Typography
+                        variant="h1"
+                        className="p-title p-title-card"
+                    >
+                        Business Trip
+                    </Typography>
+                    <Box className="b-thumb">
+                        <img
+                            src={loginImage}
+                            alt="Business Trip Illustration"
+                        />
+                    </Box>
+                    <Box className="s-mid">
+                        <ButtonPrimary
+                            title="Registration"
+                            handleClick={() =>
+                                navigate("/registration/business-trip")
+                            }
+                        />
+                    </Box>
+                </Box>
+            </Box>
+        </Box>
+    );
 
     return (
         <>
-            <Box
-                className="s-layout"
-                sx={{
-                    width: "100%",
-                    minHeight: height,
-                }}
-            >
-                <Typography variant="h5" component="div" className="s-logo">CSG</Typography>
-                {reset && (
-                    <Box className="b-box">
-                        <Box className="s-form">
-                            <Typography variant="h1" className="p-title">
-                                Reset Password
-                            </Typography>
-                            <Box className="b-thumb" sx={{ margin: '0 auto !important' }}>
-                                <img src={otpImage} alt="OTP" />
-                            </Box>
-                            <form>
-                                <Stack marginBottom={1} spacing={2}>
-                                    {email === "" ? (
-                                        <TextField
-                                            label={t("frm_user_id")}
-                                            id="userID"
-                                            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                                            className="b-input"
-                                            placeholder={t("frm_user_id_placeholder")}
-                                            value={data}
-                                            onChange={handleChange}
-                                            name="USER_ID"
-                                            color="info"
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <PersonOutlineOutlinedIcon />
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            fullWidth
-                                        />
-                                    ) : (
-                                        <>
-                                            <Box>
-                                                <Typography variant="h5" className="p-desc">
-                                                    {t('plholder_email')} - <span>{email}</span>
-                                                </Typography>
-                                            </Box>
-                                            <OtpInput
-                                                value={dataOTP}
-                                                onChange={setDataOTP}
-                                                numInputs={6}
-                                                inputType="number"
-                                                renderSeparator={<span>-</span>}
-                                                renderInput={(props) => <input {...props} />}
-                                                inputStyle={{ width: (size / 6) + 'px', height: '65px', fontWeight: '600' }}
-                                            />
-                                        </>
-                                    )}
-                                </Stack>
-                                <Grid justifyContent="flex-end" className="s-mid">
-                                    <ButtonPrimary
-                                        title={email === "" ? t("title_continue") : t("btn_confirm")}
-                                        handleClick={handleReset}
-                                    />
-                                    {email === "" ? (
-                                        <Typography variant="h5" className="p-desc align-center">
-                                            {t('title_have_account')} <span onClick={handleShowReset}>{t('btn_login')}</span>
-                                        </Typography>
-                                    ) : (
-                                        <Typography variant="h5" className="p-desc align-center">
-                                            <span onClick={() => setEmail(email => "")}>{t('btn_cancel')}</span>
-                                        </Typography>
-                                    )}
-                                </Grid>
-                            </form>
-                        </Box>
-                    </Box>
-                )}
-                {!reset && (
-                    <Box className="b-box">
-                        <Box className="s-form">
-                            <Typography variant="h1" className="p-title">
-                                General Affairs System
-                            </Typography>
-                            <Box className="b-thumb">
-                                <img src={loginImage} alt="Login" />
-                            </Box>
-                            <form>
-                                <Stack marginBottom={1} spacing={2}>
-                                    <TextField
-                                        label={t("frm_user_id")}
-                                        id="userID"
-                                        inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                                        className="b-input"
-                                        placeholder={t("frm_user_id_placeholder")}
-                                        value={data}
-                                        onChange={handleChange}
-                                        name="USER_ID"
-                                        color="info"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <PersonOutlineOutlinedIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        fullWidth
-                                    />
-                                    <TextField
-                                        type={showPassword ? "text" : "password"}
-                                        label={t("frm_password")}
-                                        id="passWord"
-                                        className="b-input"
-                                        placeholder={t("frm_password_placeholder")}
-                                        value={data1}
-                                        onChange={handleChange}
-                                        name="PASSWORD"
-                                        color="info"
-                                        helperText={t("text_if_first_time_password")}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <LockIcon />
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        aria-label="toggle password visibility"
-                                                        onClick={handleClickShowPassword}
-                                                        onMouseDown={handleMouseDownPassword}
-                                                    >
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        fullWidth
-                                    />
-                                </Stack>
-                                <Grid justifyContent="flex-end" className="s-mid">
-                                    <ButtonPrimary
-                                        title={t("btn_login")}
-                                        handleClick={handleSignIn}
-                                    />
-                                    <Typography variant="h5" className="p-desc align-center">
-                                        {t('title_forgot_pass')} <span onClick={handleShowReset}>{t('title_reset')}</span>
-                                    </Typography>
-                                </Grid>
-                            </form>
-                        </Box>
-                    </Box>
-                )}
+            <Box className="s-layout">
+                {/* Logo */}
+                <Typography variant="h5" component="div" className="s-logo">
+                    CSG
+                </Typography>
+
+                {/* Conditional rendering: Reset Password vs Login */}
+                {reset ? renderResetPassword() : renderLogin()}
             </Box>
+
             <ModalWarning
                 open={openWarn}
                 handleOpen={handleOpenWarn}

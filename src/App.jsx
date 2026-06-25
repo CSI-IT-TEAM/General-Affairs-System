@@ -119,9 +119,9 @@ const router = createBrowserRouter([
         path: "/registration/business-trip",
         errorElement: <ErrorPage />,
         element: (
-            <Layout>
+            // <Layout>
                 <BusinessTripForm />
-            </Layout>
+            // </Layout>
         ),
     },
     {
