@@ -227,7 +227,14 @@ const FormHospital = () => {
       .then((response) => {
         response.json().then(async (result) => {
           if (result.length > 0) {
-            setClinicListData(result);
+            // Sort alphabetically by label, with "Add New Hospital" fixed at top
+            const addNewItems = result.filter(
+              (item) => item.IS_CLINIC_NEW_CODE === "Y"
+            );
+            const normalItems = result
+              .filter((item) => item.IS_CLINIC_NEW_CODE !== "Y")
+              .sort((a, b) => (a.label || "").localeCompare(b.label || ""));
+            setClinicListData([...addNewItems, ...normalItems]);
           }
         });
       })
@@ -1216,6 +1223,22 @@ const FormHospital = () => {
                           value={ClinicListData.filter(
                             (item) => item.value === data.MEDICAL_CD
                           )}
+                          isSearchable={true}
+                          placeholder={t("plholder_search_hospital") || "🔍 Search hospital..."}
+                          noOptionsMessage={() => t("frm_no_hospital_found") || "No hospital found"}
+                          filterOption={(candidate, input) => {
+                            if (!input) return true;
+                            const keyword = input.toLowerCase().trim();
+                            const label = (candidate.label || "").toLowerCase();
+                            // Highlight "Add New Hospital" when typing "add" or "new"
+                            if (
+                              candidate.data.IS_CLINIC_NEW_CODE === "Y" &&
+                              ("add new hospital").includes(keyword)
+                            ) {
+                              return true;
+                            }
+                            return label.includes(keyword);
+                          }}
                           classNames={{
                             control: (state) =>
                               state.isFocused
@@ -1235,7 +1258,7 @@ const FormHospital = () => {
                             ) => ({
                               ...base,
                               backgroundColor:
-                                data.label === "Add New Hospital"
+                                data.IS_CLINIC_NEW_CODE === "Y"
                                   ? isSelected
                                     ? "navy"
                                     : "#e65522"
@@ -1245,7 +1268,7 @@ const FormHospital = () => {
                                       ? "#00B2E2"
                                       : "#ffffff",
                               color:
-                                data.label === "Add New Hospital"
+                                data.IS_CLINIC_NEW_CODE === "Y"
                                   ? "white"
                                   : isSelected
                                     ? "white"

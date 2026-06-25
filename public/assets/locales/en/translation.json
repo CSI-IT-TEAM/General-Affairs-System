@@ -200,6 +200,8 @@
     "frm_txt_total_passenger": "Total Passengers",
     "frm_memo_address_detail":"Detailed description & Destination address & Passenger List",
     "frm_select_clinic_helper": "If your hopsital dose not listed, please choose 'Add New Hospital' option.",
+    "plholder_search_hospital": "🔍 Search hospital...",
+    "frm_no_hospital_found": "No hospital found",
     
     "frm_account_name": "Account Name",
     "frm_account_no": "Account No",
@@ -350,6 +352,7 @@
     "mail_warn": "Please do not provide this OTP code to anyone for information security",
     "mail_define": " is the OTP code that activates password reset, valid for 5 minutes",
     "mail_end": "Thank you",
+    "business_trip": "Business Trip",
     "business_trip_title": "Business Trip Registration",
     "business_trip_desc": "Register for business trips to ChangShin Vietnam",
     "business_trip_registration_tab": "Business Trip Registration",
