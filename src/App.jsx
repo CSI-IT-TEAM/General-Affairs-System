@@ -17,7 +17,7 @@ import PickleballBooking from "./pages/PickleballBooking";
 import MeetingRoomBooking from "./pages/MeetingRoomBooking";
 import TemporaryResidence from "./pages/TemporaryResidence";
 import CanteenAttendanceRegistration from "./pages/CanteenAttendanceRegistration";
-import BusinessTripForm_NewLayout from "./pages/FormPage/BusinessTripForm_NewLayout";
+import BusinessTripForm from "./pages/FormPage/BusinessTripForm";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -120,7 +120,7 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         element: (
             <Layout>
-                <BusinessTripForm_NewLayout />
+                <BusinessTripForm />
             </Layout>
         ),
     },

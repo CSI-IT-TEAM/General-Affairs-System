@@ -351,8 +351,12 @@
     "pending": "대기 중",
     "requestDate": "요청 일자",
     "from": "부터",
-     "email": "이메일",
-     "reset": "재설정"
+    "email": "이메일",
+    "reset": "재설정",
+    "hotel": "호텔",
+    "google_maps": "구글 지도",
+    "e_visa_apec_card": "E-Visa / APEC Card",
+    "flight_ticket": "항공권"
 
 
 }

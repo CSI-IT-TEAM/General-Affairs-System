@@ -80,7 +80,7 @@ const POSITION_OPTIONS = [
   { value: "VICE GENERAL MANAGER", label: "VICE GENERAL MANAGER / 부총경리" },
   { value: "GENERAL MANAGER", label: "GENERAL MANAGER / 총경리" },
   { value: "CEO", label: "CEO / 대표이사" },
-  { value: "OTHER", label: "OTHER / 기타" },
+  { value: "OTHERS", label: "OTHERS / 기타" },
 ];
 
 
@@ -96,7 +96,7 @@ const DOCUMENT_FILE_FIELD = "IMAGE_FILE";
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
 const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com; DO.IT@changshininc.com; PHUOC.IT@changshininc.com";
 
 const EMPTY_FILE_DATA = {
   eVisaFiles: [],
@@ -175,7 +175,7 @@ const escapeHtml = (value) => {
     .replace(/'/g, "&#039;");
 };
 
-const renderEmailFileLinks = (value) => {
+const renderEmailFileLinks = (value, linkText) => {
   if (!value) return "-";
 
   const parts = String(value)
@@ -185,15 +185,20 @@ const renderEmailFileLinks = (value) => {
 
   if (!parts.length) return "-";
 
+  const safeLinkText = escapeHtml(linkText || "OPEN FILE");
+
   return parts
-    .map((item) => {
+    .map((item, index) => {
       const safeItem = escapeHtml(item);
+      const displayText = parts.length > 1
+        ? `${safeLinkText} ${index + 1}`
+        : safeLinkText;
 
       if (/^https?:\/\//i.test(item)) {
-        return `- <a href="${safeItem}" target="_blank" rel="noopener noreferrer" style="color: #1976d2; text-decoration: underline;">${safeItem}</a>`;
+        return `- <a href="${safeItem}" target="_blank" rel="noopener noreferrer" style="color: #1976d2; text-decoration: underline;">${displayText}</a>`;
       }
 
-      return `- ${safeItem}`;
+      return `- ${displayText}: ${safeItem}`;
     })
     .join("<br>");
 };
@@ -502,9 +507,83 @@ export default function BusinessTripFormNewLayout() {
     );
   });
 
+  const formatEmailDateOnly = (value) => {
+    if (!value) return "-";
+
+    const rawValue = String(value).trim();
+
+    if (/^\d{12}$/.test(rawValue)) {
+      return `${rawValue.substring(0, 4)}-${rawValue.substring(4, 6)}-${rawValue.substring(6, 8)}`;
+    }
+
+    if (/^\d{8}$/.test(rawValue)) {
+      return `${rawValue.substring(0, 4)}-${rawValue.substring(4, 6)}-${rawValue.substring(6, 8)}`;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(rawValue)) {
+      return rawValue.substring(0, 10);
+    }
+
+    return escapeHtml(rawValue);
+  };
+
+  const formatEmailDateTime = (value) => {
+    if (!value) return "-";
+
+    const rawValue = String(value).trim();
+
+    if (/^\d{12}$/.test(rawValue)) {
+      return (
+        `${rawValue.substring(0, 4)}-${rawValue.substring(4, 6)}-${rawValue.substring(6, 8)} ` +
+        `${rawValue.substring(8, 10)}:${rawValue.substring(10, 12)}`
+      );
+    }
+
+    if (/^\d{8}$/.test(rawValue)) {
+      return `${rawValue.substring(0, 4)}-${rawValue.substring(4, 6)}-${rawValue.substring(6, 8)}`;
+    }
+
+    return escapeHtml(rawValue.replace("T", " "));
+  };
+
+  const renderEmailTableFileLink = (value, linkText) => {
+    if (!value) return "-";
+
+    const parts = String(value)
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    if (!parts.length) return "-";
+
+    const safeLinkText = escapeHtml(linkText);
+
+    return parts
+      .map((item, index) => {
+        const safeItem = escapeHtml(item);
+        const displayText = parts.length > 1
+          ? `${safeLinkText} ${index + 1}`
+          : safeLinkText;
+
+        if (/^https?:\/\//i.test(item)) {
+          return `<a href="${safeItem}" target="_blank" rel="noopener noreferrer" style="color:#0000ee;text-decoration:underline;">${displayText}</a>`;
+        }
+
+        return `${displayText}: ${safeItem}`;
+      })
+      .join("<br>");
+  };
+
+  const buildEmailTableRow = (label, value) => {
+    return (
+      `<tr>` +
+        `<th style="border:1px solid #d9d9d9;background:#f7f7f7;padding:7px 8px;text-align:left;width:190px;font-weight:700;vertical-align:top;">${escapeHtml(label)}</th>` +
+        `<td style="border:1px solid #d9d9d9;padding:7px 8px;vertical-align:top;">${value || "-"}</td>` +
+      `</tr>`
+    );
+  };
+
   const buildBusinessTripEmailHtml = ({
-    regId,
-    empNo,
     eVisaForSave,
     flightTicketForSave,
     entryDateTimeForSave,
@@ -512,37 +591,41 @@ export default function BusinessTripFormNewLayout() {
     hotelReserveDateForSave,
     airportDropoffTimeForSave,
   }) => {
-    return [
-      `<b>Business Trip Registration Saved</b>`,
-      `<br><br>`,
-      `1. Registration ID:<br>${escapeHtml(regId || "")}`,
-      `<br><br>`,
-      `2. Employee No:<br>${escapeHtml(empNo || "")}`,
-      `<br><br>`,
-      `3. Visitor Information:<br>` +
-        `- Factory: ${escapeHtml(formData.affiliDiv)}<br>` +
-        `- English Name: ${escapeHtml(formData.visitorNameEn)}<br>` +
-        `- Korean Name: ${escapeHtml(formData.visitorNameKr)}<br>` +
-        `- Department: ${escapeHtml(formData.visitorDept)}<br>` +
-        `- Position: ${escapeHtml(formData.visitorPosition)}<br>` +
-        `- Email: ${escapeHtml(formData.email)}`,
-      `<br><br>`,
-      `4. Business Trip Information:<br>` +
-        `- Purpose: ${escapeHtml(formData.purpose)}<br>` +
-        `- Related Department: ${escapeHtml(formData.relateDept)}<br>` +
-        `- Description: ${escapeHtml(formData.description)}`,
-      `<br><br>`,
-      `5. Schedule:<br>` +
-        `- Entry Date and Time: ${escapeHtml(formatDateDisplay(entryDateTimeForSave))}<br>` +
-        `- Exit Date and Time: ${escapeHtml(formatDateDisplay(exitDateTimeForSave))}<br>` +
-        `- Hotel Reservation Date: ${escapeHtml(formatDateDisplay(hotelReserveDateForSave))}<br>` +
-        `- Airport Pick-up: ${formData.airportPickupYn === "Y" ? "Required" : "Not Needed"}<br>` +
-        `- Airport Drop-off Time: ${escapeHtml(formatDateDisplay(airportDropoffTimeForSave))}`,
-      `<br><br>`,
-      `6. E-Visa / APEC Card:<br>${renderEmailFileLinks(eVisaForSave)}`,
-      `<br><br>`,
-      `7. Flight Ticket:<br>${renderEmailFileLinks(flightTicketForSave)}`,
+    const businessTripPeriod =
+      `${formatEmailDateOnly(entryDateTimeForSave)} ~ ${formatEmailDateOnly(exitDateTimeForSave)}`;
+
+    const arrivalDepartureInVietnam =
+      `${formatEmailDateTime(entryDateTimeForSave)} ~ ${formatEmailDateTime(exitDateTimeForSave)}`;
+
+    const airportDropoffText = formData.airportPickupYn === "Y"
+      ? formatEmailDateTime(airportDropoffTimeForSave)
+      : "Not Needed";
+
+    const rows = [
+      buildEmailTableRow("Visitor Name (English)", escapeHtml(formData.visitorNameEn)),
+      buildEmailTableRow("Visitor Name (Korean)", escapeHtml(formData.visitorNameKr)),
+      buildEmailTableRow("Position", escapeHtml(formData.visitorPosition)),
+      buildEmailTableRow("Purpose", escapeHtml(formData.purpose)),
+      buildEmailTableRow("Business trip period", escapeHtml(businessTripPeriod)),
+      buildEmailTableRow("Arrival / Departure in Vietnam", escapeHtml(arrivalDepartureInVietnam)),
+      buildEmailTableRow("Airline tickets", renderEmailTableFileLink(flightTicketForSave, "Click to view flight tickets")),
+      buildEmailTableRow("E-Visa / APEC Card", renderEmailTableFileLink(eVisaForSave, "Click to view E-VISA / APEC CARD")),
+      buildEmailTableRow("Hotel booking date", escapeHtml(formatEmailDateOnly(hotelReserveDateForSave))),
+      buildEmailTableRow("Relevant departments", escapeHtml(formData.relateDept)),
+      buildEmailTableRow("Airport Pick-up", formData.airportPickupYn === "Y" ? "Required" : "Not Needed"),
+      buildEmailTableRow("Airport Drop-off Time", escapeHtml(airportDropoffText)),
+      
     ].join("");
+
+    return (
+      `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#000;line-height:1.35;">` +
+        `<p style="margin:0 0 12px 0;"><b>Dear GA Team, <br> Please check the business trip information below: </b></p>` +
+        `<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:620px;max-width:100%;border:1px solid #d9d9d9;">` +
+          `<tbody>${rows}</tbody>` +
+        `</table> <br>` +
+        `<p style="margin:0 0 12px 0;"><b>Best regards, </b></p>` +
+      `</div>`
+    );
   };
 
   const sendBusinessTripEmail = async ({
@@ -596,12 +679,14 @@ export default function BusinessTripFormNewLayout() {
 
   const handleSave = async () => {
     if (isSubmitting) return;
+    
 
     const validationMessage = validateForm();
     if (validationMessage) {
       alert(validationMessage);
       return;
     }
+    
 
     setIsSubmitting(true);
 
@@ -706,12 +791,12 @@ export default function BusinessTripFormNewLayout() {
         argCreatedBy: userId,
         argDetailJson: detailJson,
       };
-
-      const result = await saveBusinessRegistration(registrationData);
+      
+      const result = await saveBusinessRegistration(registrationData);   
 
       if (result.success) {
         let emailSent = false;
-
+        
         try {
           await sendBusinessTripEmail({
             regId: result.data?.regId,
@@ -1095,32 +1180,96 @@ export default function BusinessTripFormNewLayout() {
               <CircularProgress />
             </Box>
           ) : (
-            <TableContainer component={Paper} sx={{ maxHeight: 520 }}>
-              <Table stickyHeader size="small">
+            <TableContainer
+              component={Paper}
+              sx={{
+                maxHeight: 520,
+                overflow: "auto",
+                "& .MuiTableCell-root": {
+                  verticalAlign: "middle",
+                  px: 1.25,
+                  py: 1,
+                  fontSize: "0.875rem",
+                },
+                "& .MuiTableCell-head": {
+                  fontWeight: 700,
+                  whiteSpace: "normal",
+                  lineHeight: 1.25,
+                  minWidth: 110,
+                  maxWidth: 150,
+                  wordBreak: "normal",
+                  overflowWrap: "break-word",
+                },
+                "& .MuiTableCell-body": {
+                  whiteSpace: "normal",
+                  lineHeight: 1.35,
+                  minWidth: 110,
+                  maxWidth: 180,
+                  wordBreak: "break-word",
+                  overflowWrap: "anywhere",
+                },
+                "& .tracking-col-xs": {
+                  width: 75,
+                  minWidth: 75,
+                  maxWidth: 75,
+                },
+                "& .tracking-col-sm": {
+                  width: 105,
+                  minWidth: 105,
+                  maxWidth: 105,
+                },
+                "& .tracking-col-md": {
+                  width: 135,
+                  minWidth: 135,
+                  maxWidth: 135,
+                },
+                "& .tracking-col-lg": {
+                  width: 170,
+                  minWidth: 170,
+                  maxWidth: 170,
+                },
+                "& .tracking-col-xl": {
+                  width: 210,
+                  minWidth: 210,
+                  maxWidth: 210,
+                },
+              }}
+            >
+              <Table
+                stickyHeader
+                size="small"
+                sx={{
+                  width: "100%",
+                  minWidth: 2300,
+                  tableLayout: "fixed",
+                }}
+              >
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t("requestDate") || "Request Date"}</TableCell>
-                    <TableCell>{t("from") || "From"}</TableCell>
-                    <TableCell>{t("business_trip_name_en") || "English Name"}</TableCell>
-                    <TableCell>{t("business_trip_name_kr") || "Korean Name"}</TableCell>
-                    <TableCell>{t("business_trip_dept_from") || "From Department"}</TableCell>
-                    <TableCell>{t("business_trip_position") || "Position"}</TableCell>
-                    <TableCell>{t("email") || "Email"}</TableCell>
-                    <TableCell>{t("business_trip_dept_related") || "Related Dept"}</TableCell>
-                    <TableCell>{t("business_trip_purpose") || "Purpose"}</TableCell>
-                    <TableCell>{t("business_trip_entry_time") || "Entry"}</TableCell>
-                    <TableCell>{t("business_trip_exit_time") || "Exit"}</TableCell>
-                    <TableCell>{t("business_trip_hotel_reservation_date") || "Hotel Date"}</TableCell>
-                    <TableCell>{t("business_trip_airport_pickup_required") || "Airport"}</TableCell>
-                    <TableCell>{t("business_trip_upload_e_visa") || "E-Visa / APEC"}</TableCell>
-                    <TableCell>{t("business_trip_upload_flight_ticket") || "Flight Ticket"}</TableCell>
-                    <TableCell>{t("status") || "Status"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("requestDate") || "Request Date"}</TableCell>
+                    <TableCell className="tracking-col-xs">{t("from") || "From"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_name_en") || "English Name"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_name_kr") || "Korean Name"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_dept_from") || "From Department"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_position") || "Position"}</TableCell>
+                    <TableCell className="tracking-col-xl">{t("email") || "Email"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_dept_related") || "Related Dept"}</TableCell>
+                    <TableCell className="tracking-col-lg">{t("business_trip_purpose") || "Purpose"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_entry_time") || "Entry"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_exit_time") || "Exit"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date") || "Hotel Date"}</TableCell>
+                    <TableCell className="tracking-col-md">{t("business_trip_airport_pickup_required") || "Airport"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("e_visa_apec_card") || "E-Visa / APEC"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("flight_ticket") || "Flight Ticket"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("status") || "Status"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("hotel") || "Hotel"}</TableCell>
+                    <TableCell className="tracking-col-sm">{t("google_maps") || "Google Maps"}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredTrackingRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={16} align="center">
+                      <TableCell colSpan={18} align="center">
                         No data
                       </TableCell>
                     </TableRow>
@@ -1154,7 +1303,27 @@ export default function BusinessTripFormNewLayout() {
                               {statusValue}
                             </TableCell>
                           );
-                        })()}
+                        })()
+                        }
+                        <TableCell>{getRowValue(row, ["HOTEL_NAME", "hotel"])}</TableCell>
+                        <TableCell>
+                          {(() => {
+                            const googleMapsUrl = getRowValue(row, ["GOOGLE_MAP_LINK", "googleMaps"]);
+                            if (googleMapsUrl) {
+                              return (
+                                <a
+                                  href={googleMapsUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ color: "#0000ee", textDecoration: "underline" }}
+                                >
+                                  {t("view") || "View"}
+                                </a>
+                              );
+                            }
+                            return "-";
+                          })()}
+                        </TableCell>
                       </TableRow>
                     ))
                   )}

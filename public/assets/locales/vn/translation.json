@@ -373,7 +373,11 @@
      "confirmed": "Đã xác nhận",
      "requestDate": "Ngày đề nghị",
      "from": "Từ",
-      "email": "Email",
-      "reset": "Đặt lại"
+     "email": "Email",
+     "reset": "Đặt lại",
+     "hotel": "Khách sạn",
+     "google_maps": "Bản đồ",
+     "e_visa_apec_card": "E-Visa / APEC Card",
+     "flight_ticket": "Vé máy bay"
 
      }
