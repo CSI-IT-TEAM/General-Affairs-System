@@ -1548,6 +1548,6 @@ export default function BusinessTripFormNewLayout() {
         </Box>
       )}
     </Box>
-    </>
+   
   );
 }
