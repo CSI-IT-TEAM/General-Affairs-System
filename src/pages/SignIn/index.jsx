@@ -30,7 +30,6 @@ import loginImage from "../../assets/images/sign-in.png";
 import otpImage from "../../assets/images/logos/otp.png";
 import AvatarImage from "../../assets/images/avatar.png";
 
-import businessTripBanner from "../../assets/images/banners/business_trip.png"
 
 const SignIn = () => {
     /////// Translate Lang
@@ -766,12 +765,79 @@ const SignIn = () => {
     // RENDER: MAIN LOGIN VIEW
     // ============================================
     const renderLogin = () => (
-        <Box className="b-box">
-            <Box className="s-form-container">
-                {/* ---- Left Panel: Login Form ---- */}
-                <Box className="s-form left-form">
+        <Box
+            className="login-only-wrapper"
+            sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                bgcolor: "transparent !important",
+                background: "transparent !important",
+                boxShadow: "none !important",
+                borderRadius: "0 !important",
+                p: "0 !important",
+                m: "0 auto !important",
+            }}
+            style={{
+                background: "transparent",
+                boxShadow: "none",
+                borderRadius: 0,
+                padding: 0,
+            }}
+        >
+            <Box
+                className="login-only-container"
+                sx={{
+                    width: "auto !important",
+                    maxWidth: "none !important",
+                    minWidth: "0 !important",
+                    display: "flex",
+                    justifyContent: "center",
+                    gridTemplateColumns: "1fr !important",
+                    bgcolor: "transparent !important",
+                    background: "transparent !important",
+                    borderRadius: "0 !important",
+                    overflow: "visible !important",
+                    boxShadow: "none !important",
+                    p: "0 !important",
+                    m: "0 auto !important",
+                }}
+                style={{
+                    width: "auto",
+                    maxWidth: "none",
+                    minWidth: 0,
+                    background: "transparent",
+                    boxShadow: "none",
+                    borderRadius: 0,
+                    padding: 0,
+                }}
+            >
+                <Box
+                    className="s-form left-form login-only-form"
+                    sx={{
+                        width: "min(92vw, 440px) !important",
+                        maxWidth: "440px !important",
+                        minWidth: "0 !important",
+                        borderRight: "0 !important",
+                        bgcolor: "#fff !important",
+                        borderRadius: "24px !important",
+                        overflow: "hidden",
+                        boxShadow: "0 22px 70px rgba(0,0,0,0.18)",
+                        m: "0 auto !important",
+                        px: { xs: 3, sm: 4 },
+                        py: { xs: 3, sm: 4 },
+                    }}
+                    style={{
+                        width: "min(92vw, 440px)",
+                        maxWidth: "440px",
+                        minWidth: 0,
+                        borderRight: 0,
+                        background: "#fff",
+                        borderRadius: 24,
+                    }}
+                >
                     <Typography variant="h1" className="p-title">
-                        {t("main_title")||"General Affairs System"}
+                        {t("main_title") || "General Affairs System"}
                     </Typography>
                     <Box className="b-thumb">
                         <img src={loginImage} alt="Login Illustration" />
@@ -801,22 +867,16 @@ const SignIn = () => {
                                 fullWidth
                             />
                             <TextField
-                                type={
-                                    showPassword ? "text" : "password"
-                                }
+                                type={showPassword ? "text" : "password"}
                                 label={t("frm_password")}
                                 id="passWord"
                                 className="b-input"
-                                placeholder={t(
-                                    "frm_password_placeholder"
-                                )}
+                                placeholder={t("frm_password_placeholder")}
                                 value={data1}
                                 onChange={handleChange}
                                 name="PASSWORD"
                                 color="info"
-                                helperText={t(
-                                    "text_if_first_time_password"
-                                )}
+                                helperText={t("text_if_first_time_password")}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -827,12 +887,8 @@ const SignIn = () => {
                                         <InputAdornment position="end">
                                             <IconButton
                                                 aria-label="toggle password visibility"
-                                                onClick={
-                                                    handleClickShowPassword
-                                                }
-                                                onMouseDown={
-                                                    handleMouseDownPassword
-                                                }
+                                                onClick={handleClickShowPassword}
+                                                onMouseDown={handleMouseDownPassword}
                                                 edge="end"
                                             >
                                                 {showPassword ? (
@@ -847,17 +903,59 @@ const SignIn = () => {
                                 fullWidth
                             />
                         </Stack>
-                        <Grid
-                            justifyContent="flex-end"
-                            className="s-mid"
-                        >
+                        <Grid justifyContent="flex-end" className="s-mid">
                             <ButtonPrimary
                                 title={t("btn_login")}
                                 handleClick={handleSignIn}
                             />
+
+                            <Box
+                                sx={{
+                                    width: "100%",
+                                    my: 1.25,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1.5,
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        flex: 1,
+                                        height: "1px",
+                                        bgcolor: "rgba(0,0,0,0.14)",
+                                    }}
+                                />
+                                <Typography
+                                    component="span"
+                                    sx={{
+                                        color: "#777",
+                                        fontWeight: 700,
+                                        fontSize: "0.85rem",
+                                        letterSpacing: 1,
+                                    }}
+                                >
+                                    OR
+                                </Typography>
+                                <Box
+                                    sx={{
+                                        flex: 1,
+                                        height: "1px",
+                                        bgcolor: "rgba(0,0,0,0.14)",
+                                    }}
+                                />
+                            </Box>
+
+                            <ButtonPrimary
+                                title={t("business_trip") || "Business Trip"}
+                                handleClick={() =>
+                                    navigate("/registration/business-trip")
+                                }
+                            />
+
                             <Typography
                                 variant="h5"
                                 className="p-desc align-center"
+                                sx={{ mt: 1 }}
                             >
                                 {t("title_forgot_pass")}{" "}
                                 <span onClick={handleShowReset}>
@@ -866,56 +964,6 @@ const SignIn = () => {
                             </Typography>
                         </Grid>
                     </form>
-
-                    {/* Mobile divider between left and right */}
-                    <Box className="mobile-divider">
-                        <span>{t("or_more_services") || "MORE"}</span>
-                    </Box>
-                </Box>
-
-                {/* ---- Right Panel: Business Trip Card ---- */}
-                <Box className="s-form right-form">
-                    <Typography
-                        variant="h1"
-                        className="p-title"
-                    >
-                        {t("business_trip_to_changshin")||"Business Trip to Changshin Vietnam"}
-                    </Typography>
-                    <Box
-                        className="b-thumb business-trip-banner-thumb"
-                        sx={{
-                            width: "100%",
-                            maxWidth: "360px !important",
-                            mx: "auto",
-                            my: 1.5,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            overflow: "hidden",
-                            borderRadius: "12px",
-                            "& img": {
-                                width: "100% !important",
-                                maxWidth: "100% !important",
-                                height: "auto !important",
-                                objectFit: "cover",
-                                borderRadius: "12px",
-                                display: "block",
-                            },
-                        }}
-                    >
-                        <img
-                            src={businessTripBanner}
-                            alt="Business Trip Illustration"
-                        />
-                    </Box>
-                    <Box className="s-small-text">
-                        <ButtonPrimary
-                            title={t("register_now")||"Register Now"}
-                            handleClick={() =>
-                                navigate("/registration/business-trip")
-                            }
-                        />
-                    </Box>
                 </Box>
             </Box>
         </Box>

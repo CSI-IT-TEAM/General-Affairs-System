@@ -102,6 +102,7 @@ const STATUS_FILTER_OPTIONS = [
   { value: "DENIED", label: "DENIED" },
 ];
 
+const TRACKING_PAGE_SIZE = 15;
 
 const svgToDataUri = (svg) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 
@@ -214,7 +215,7 @@ const DOCUMENT_FILE_FIELD = "IMAGE_FILE";
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
 const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com; DO.IT@changshininc.com; PHUOC.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com; DO.IT@changshininc.com";
 
 const EMPTY_FILE_DATA = {
   eVisaFiles: [],
@@ -262,7 +263,7 @@ const getStatusCellSx = (statusValue) => {
     return {
       bgcolor: "#FFEB3B",
       color: "#000",
-      fontWeight: 700,
+      fontWeight: 400,
       textAlign: "center",
     };
   }
@@ -271,7 +272,7 @@ const getStatusCellSx = (statusValue) => {
     return {
       bgcolor: "#32CD32",
       color: "#000",
-      fontWeight: 700,
+      fontWeight: 400,
       textAlign: "center",
     };
   }
@@ -280,7 +281,7 @@ const getStatusCellSx = (statusValue) => {
     return {
       bgcolor: "#F44336",
       color: "#fff",
-      fontWeight: 700,
+      fontWeight: 400,
       textAlign: "center",
     };
   }
@@ -292,6 +293,14 @@ const getStatusCellSx = (statusValue) => {
   };
 };
 
+
+const formatStatusDisplay = (statusValue) => {
+  const status = String(statusValue || "").trim().toLowerCase();
+
+  if (!status) return "";
+
+  return status.charAt(0).toUpperCase() + status.slice(1);
+};
 
 const escapeHtml = (value) => {
   return String(value || "")
@@ -386,6 +395,7 @@ export default function BusinessTripFormNewLayout() {
   const [isLoadingTracking, setIsLoadingTracking] = useState(false);
   const [trackingError, setTrackingError] = useState("");
   const [hasLoadedTracking, setHasLoadedTracking] = useState(false);
+  const [trackingPage, setTrackingPage] = useState(1);
 
   useEffect(() => {
     setLanguage(normalizeLanguage(i18n.language));
@@ -453,6 +463,7 @@ export default function BusinessTripFormNewLayout() {
       ...prev,
       [field]: event.target.value,
     }));
+    setTrackingPage(1);
   };
 
   const getDateFromDateTime = (dateTimeValue) => {
@@ -513,6 +524,25 @@ export default function BusinessTripFormNewLayout() {
     if (!year || !month || !day) return "";
 
     return `${year}${month}${day}`;
+  };
+
+  const isExitDateTimeAfterEntryDateTime = (entryDateTime, exitDateTime) => {
+    if (!entryDateTime || !exitDateTime) return true;
+
+    const entryTime = new Date(entryDateTime).getTime();
+    const exitTime = new Date(exitDateTime).getTime();
+
+    if (Number.isNaN(entryTime) || Number.isNaN(exitTime)) return true;
+
+    return exitTime > entryTime;
+  };
+
+  const isValidEmail = (email) => {
+    const emailValue = String(email || "").trim();
+
+    if (!emailValue) return false;
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailValue);
   };
 
   const handleFileChange = (field, fileField) => (event) => {
@@ -601,9 +631,13 @@ export default function BusinessTripFormNewLayout() {
     if (!formData.visitorDept?.trim()) return t("business_trip_dept_from") + " is required";
     if (!formData.visitorNameEn?.trim()) return t("business_trip_name_en") + " is required";
     if (!formData.email?.trim()) return "Email is required";
+    if (!isValidEmail(formData.email)) return "Email không đúng định dạng.";
     if (!formData.purpose?.trim()) return t("business_trip_purpose") + " is required";
     if (!formData.entryDateTime) return t("business_trip_entry_time") + " is required";
     if (!formData.exitDateTime) return t("business_trip_exit_time") + " is required";
+    if (!isExitDateTimeAfterEntryDateTime(formData.entryDateTime, formData.exitDateTime)) {
+      return "Ngày xuất cảnh phải sau ngày nhập cảnh.";
+    }
     return "";
   };
 
@@ -624,6 +658,7 @@ export default function BusinessTripFormNewLayout() {
 
       if (result.success) {
         setTrackingRows(Array.isArray(result.data) ? result.data : []);
+        setTrackingPage(1);
         setHasLoadedTracking(true);
       } else {
         setTrackingRows([]);
@@ -651,12 +686,8 @@ export default function BusinessTripFormNewLayout() {
   }, [tab, hasLoadedTracking, fetchTrackingData]);
 
   const handleSearchTracking = () => {
+    setTrackingPage(1);
     fetchTrackingData();
-  };
-
-  const handleResetTracking = () => {
-    setTrackingFilters(getDefaultTrackingFilters());
-    setHasLoadedTracking(false);
   };
 
   const filteredTrackingRows = trackingRows.filter((row) => {
@@ -690,6 +721,30 @@ export default function BusinessTripFormNewLayout() {
       isMatchedStatus
     );
   });
+
+  const totalTrackingPages = Math.max(
+    1,
+    Math.ceil(filteredTrackingRows.length / TRACKING_PAGE_SIZE)
+  );
+  const currentTrackingPage = Math.min(trackingPage, totalTrackingPages);
+  const paginatedTrackingRows = filteredTrackingRows.slice(
+    (currentTrackingPage - 1) * TRACKING_PAGE_SIZE,
+    currentTrackingPage * TRACKING_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    if (trackingPage > totalTrackingPages) {
+      setTrackingPage(totalTrackingPages);
+    }
+  }, [trackingPage, totalTrackingPages]);
+
+  const handleTrackingPreviousPage = () => {
+    setTrackingPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleTrackingNextPage = () => {
+    setTrackingPage((prev) => Math.min(totalTrackingPages, prev + 1));
+  };
 
   const formatEmailDateOnly = (value) => {
     if (!value) return "-";
@@ -1030,7 +1085,59 @@ export default function BusinessTripFormNewLayout() {
   };
 
   return (
-    <Box className="business-trip-form" sx={{ bgcolor: "#fff" }}>
+    <Box
+      className="business-trip-form"
+      sx={{
+        bgcolor: "#fff",
+        height: "100vh",
+        maxHeight: "100vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        "& .business-trip-card": {
+          p: "14px !important",
+        },
+        "& .business-trip-card .MuiTextField-root": {
+          margin: 0,
+        },
+        "& .business-trip-card .MuiInputBase-root": {
+          minHeight: 38,
+          fontSize: "0.84rem",
+        },
+        "& .business-trip-card .MuiInputBase-input": {
+          py: "7px",
+          fontSize: "0.84rem",
+        },
+        "& .business-trip-card .MuiInputLabel-root": {
+          fontSize: "0.84rem",
+        },
+        "& .business-trip-card .MuiFormControlLabel-root": {
+          mr: 1,
+          my: 0,
+        },
+        "& .business-trip-card .MuiFormControlLabel-label": {
+          fontSize: "0.84rem",
+        },
+        "& .business-trip-card .MuiRadio-root": {
+          p: "4px",
+        },
+        "& .business-trip-card .MuiButton-root": {
+          minHeight: 32,
+          py: 0.45,
+          px: 1.25,
+          fontSize: "0.82rem",
+          textTransform: "none",
+        },
+        "& .business-trip-card .MuiTypography-h6": {
+          fontSize: "1rem",
+        },
+        "& .business-trip-card .MuiTypography-subtitle1": {
+          fontSize: "0.9rem",
+          mt: -0.25,
+          mb: -0.25,
+        },
+      }}
+    >
       <Box
         className="business-trip-header"
         sx={{
@@ -1042,6 +1149,7 @@ export default function BusinessTripFormNewLayout() {
           alignItems: "center",
           justifyContent: "space-between",
           boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+          flexShrink: 0,
         }}
       >
         <Box
@@ -1190,14 +1298,15 @@ export default function BusinessTripFormNewLayout() {
         value={tab}
         onChange={(e, value) => setTab(value)}
         sx={{
-          mt: "8px !important",
-          mb: "8px !important",
-          minHeight: "44px",
+          mt: "4px !important",
+          mb: "6px !important",
+          flexShrink: 0,
+          minHeight: "36px",
           borderBottom: "1px solid #ddd",
           px: 1.5,
           "& .MuiTab-root": {
-            minHeight: "44px",
-            py: 1,
+            minHeight: "36px",
+            py: 0.5,
             textTransform: "none",
             fontWeight: 700,
           },
@@ -1208,10 +1317,19 @@ export default function BusinessTripFormNewLayout() {
       </Tabs>
 
       {tab === 0 && (
-        <Box className="business-trip-card business-trip-register-card" sx={{ border: "1px solid #ccc", p: 3 }}>
+        <Box
+          className="business-trip-card business-trip-register-card"
+          sx={{
+            border: "1px solid #ccc",
+            p: 1.5,
+            flex: "1 1 auto",
+            minHeight: 0,
+            overflow: "auto",
+          }}
+        >
           <Box
             sx={{
-              mb: 2,
+              mb: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -1232,7 +1350,7 @@ export default function BusinessTripFormNewLayout() {
             </Button>
           </Box>
 
-          <Grid container spacing={2} className="business-trip-grid">
+          <Grid container spacing={1.1} className="business-trip-grid">
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -1254,6 +1372,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                type="email"
                 label="Email"
                 value={formData.email}
                 onChange={handleInputChange("email")}
@@ -1269,7 +1388,7 @@ export default function BusinessTripFormNewLayout() {
                 row
                 value={formData.affiliDiv}
                 onChange={handleInputChange("affiliDiv")}
-                sx={{ minHeight: 56, alignItems: "center" }}
+                sx={{ minHeight: 38, alignItems: "center" }}
               >
                 <FormControlLabel value="CDC" control={<Radio />} label="CDC" />
                 <FormControlLabel value="JJ" control={<Radio />} label="JJ" />
@@ -1329,7 +1448,7 @@ export default function BusinessTripFormNewLayout() {
               <TextField
                 fullWidth
                 multiline
-                rows={4}
+                rows={3}
                 label={t("business_trip_note")}
                 value={formData.description}
                 onChange={handleInputChange("description")}
@@ -1419,7 +1538,7 @@ export default function BusinessTripFormNewLayout() {
                 row
                 value={formData.airportPickupYn}
                 onChange={handleInputChange("airportPickupYn")}
-                sx={{ height: "100%", alignItems: "center" }}
+                sx={{ minHeight: 38, alignItems: "center" }}
               >
                 <FormControlLabel
                   value="Y"
@@ -1454,17 +1573,22 @@ export default function BusinessTripFormNewLayout() {
           className="business-trip-card business-trip-tracking-card"
           sx={{
             border: "1px solid #ccc",
-            minHeight: 600,
-            p: 3,
+            height: "calc(100vh - 132px)",
+            minHeight: 0,
+            p: 1.5,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <Box
             sx={{
-              mb: 2,
+              mb: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               gap: 2,
+              flexShrink: 0,
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -1472,13 +1596,6 @@ export default function BusinessTripFormNewLayout() {
             </Typography>
 
             <Stack direction="row" spacing={1}>
-              <Button
-                variant="outlined"
-                onClick={handleResetTracking}
-                disabled={isLoadingTracking}
-              >
-                {t("reset") || "Reset"}
-              </Button>
               <Button
                 variant="contained"
                 onClick={handleSearchTracking}
@@ -1489,7 +1606,12 @@ export default function BusinessTripFormNewLayout() {
             </Stack>
           </Box>
 
-          <Grid container spacing={2} className="business-trip-filter-grid" sx={{ mb: 2 }}>
+          <Grid
+            container
+            spacing={1.1}
+            className="business-trip-filter-grid"
+            sx={{ mb: 1, flexShrink: 0 }}
+          >
             <Grid item xs={12} md={2}>
               <TextField
                 fullWidth
@@ -1577,23 +1699,28 @@ export default function BusinessTripFormNewLayout() {
               className="business-trip-tracking-table"
               component={Paper}
               sx={{
-                maxHeight: 520,
+                flex: "1 1 auto",
+                minHeight: 0,
+                maxHeight: "none",
                 overflow: "auto",
+                "& .MuiTableRow-root": {
+                  height: 34,
+                },
                 "& .MuiTableCell-root": {
                   verticalAlign: "middle",
-                  px: 1.25,
-                  py: 1,
-                  fontSize: "0.875rem",
+                  px: 0.55,
+                  py: 0.45,
+                  fontSize: "0.75rem",
                 },
                 "& .MuiTableCell-head": {
                   bgcolor: "#E3F2FD",
                   color: "#000",
-                  fontWeight: 700,
+                  fontWeight: "400 !important",
                   textAlign: "center",
+                  textTransform: "capitalize",
                   whiteSpace: "normal",
-                  lineHeight: 1.25,
+                  lineHeight: 1.15,
                   minWidth: 110,
-                  maxWidth: 150,
                   wordBreak: "normal",
                   overflowWrap: "break-word",
                   borderRight: "1px solid #D0D7DE",
@@ -1602,37 +1729,36 @@ export default function BusinessTripFormNewLayout() {
                   zIndex: 3,
                 },
                 "& .MuiTableCell-body": {
-                  whiteSpace: "normal",
-                  lineHeight: 1.35,
+                  whiteSpace: "nowrap",
+                  lineHeight: 1.2,
                   minWidth: 110,
-                  maxWidth: 180,
-                  wordBreak: "break-word",
-                  overflowWrap: "anywhere",
+                  wordBreak: "normal",
+                  overflowWrap: "normal",
+                  fontWeight: "400 !important",
                 },
                 "& .tracking-col-xs": {
-                  width: 75,
-                  minWidth: 75,
-                  maxWidth: 75,
+                  width: 72,
+                  minWidth: 72,
                 },
                 "& .tracking-col-sm": {
-                  width: 105,
-                  minWidth: 105,
-                  maxWidth: 105,
+                  width: 120,
+                  minWidth: 120,
                 },
                 "& .tracking-col-md": {
-                  width: 135,
-                  minWidth: 135,
-                  maxWidth: 135,
+                  width: 155,
+                  minWidth: 155,
                 },
                 "& .tracking-col-lg": {
-                  width: 170,
-                  minWidth: 170,
-                  maxWidth: 170,
-                },
-                "& .tracking-col-xl": {
                   width: 210,
                   minWidth: 210,
-                  maxWidth: 210,
+                },
+                "& .tracking-col-xl": {
+                  width: 260,
+                  minWidth: 260,
+                },
+                "& .tracking-col-email": {
+                  width: 290,
+                  minWidth: 290,
                 },
               }}
             >
@@ -1640,9 +1766,9 @@ export default function BusinessTripFormNewLayout() {
                 stickyHeader
                 size="small"
                 sx={{
-                  width: "100%",
-                  minWidth: 2450,
-                  tableLayout: "fixed",
+                  width: "max-content",
+                  minWidth: 2600,
+                  tableLayout: "auto",
                 }}
               >
                 <TableHead>
@@ -1654,7 +1780,7 @@ export default function BusinessTripFormNewLayout() {
                     <TableCell className="tracking-col-md">{t("business_trip_name_kr") || "Korean Name"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_dept_from") || "From Department"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_position") || "Position"}</TableCell>
-                    <TableCell className="tracking-col-xl">{t("email") || "Email"}</TableCell>
+                    <TableCell className="tracking-col-email">{t("email") || "Email"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_dept_related") || "Related Dept"}</TableCell>
                     <TableCell className="tracking-col-lg">{t("business_trip_purpose") || "Purpose"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_entry_time") || "Entry"}</TableCell>
@@ -1676,14 +1802,14 @@ export default function BusinessTripFormNewLayout() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredTrackingRows.map((row, index) => (
+                    paginatedTrackingRows.map((row, index) => (
                       <TableRow key={getRowValue(row, ["REG_ID", "regId"], index)} hover>     
                       {(() => {
                           const statusValue = getRowValue(row, ["STATUS", "status"]);
 
                           return (
                             <TableCell sx={getStatusCellSx(statusValue)}>
-                              {statusValue}
+                              {formatStatusDisplay(statusValue)}
                             </TableCell>
                           );
                         })()
@@ -1734,6 +1860,36 @@ export default function BusinessTripFormNewLayout() {
                 </TableBody>
               </Table>
             </TableContainer>
+          )}
+
+          {!isLoadingTracking && filteredTrackingRows.length > TRACKING_PAGE_SIZE && (
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              justifyContent="flex-end"
+              sx={{ pt: 0.75, flexShrink: 0 }}
+            >
+              <Typography sx={{ fontSize: "0.78rem", color: "text.secondary" }}>
+                Page {currentTrackingPage} / {totalTrackingPages} · {filteredTrackingRows.length} rows
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleTrackingPreviousPage}
+                disabled={currentTrackingPage <= 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleTrackingNextPage}
+                disabled={currentTrackingPage >= totalTrackingPages}
+              >
+                Next
+              </Button>
+            </Stack>
           )}
         </Box>
       )}
