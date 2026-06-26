@@ -146,6 +146,8 @@
         /* ---- Left Panel: Login Form ---- */
         .left-form {
             position: relative;
+            background-color: #fff;
+            border-radius: inherit;
 
             @media screen and (min-width: 768px) {
                 border-right: 1px solid $color-border;
@@ -300,6 +302,27 @@
 
         .b-input {
             background-color: $color-bg-white;
+        }
+
+        .login-lang-select {
+            .login-lang-select__control {
+                min-width: 110px;
+
+                .MuiSelect-select {
+                    padding: 4px 28px 4px 8px !important;
+                    font-size: 12px;
+                }
+            }
+        }
+
+        .login-header {
+            display: flex;
+            width: 100%;
+            margin-bottom: 8px;
+
+            .login-lang-select {
+                margin-left: auto;
+            }
         }
 
         /* ---- Title ---- */

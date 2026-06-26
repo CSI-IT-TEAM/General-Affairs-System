@@ -7,10 +7,14 @@ import {
     Stack,
     Grid,
     IconButton,
+    FormControl,
+    Select,
+    MenuItem,
 } from "@mui/material";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import InputAdornment from "@mui/material/InputAdornment";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LockIcon from "@mui/icons-material/Lock";
@@ -25,6 +29,7 @@ import {
     imageURL,
     SendEmailURL,
 } from "../../api";
+import { langData } from "../../data";
 import "./SignIn.scss";
 import loginImage from "../../assets/images/sign-in.png";
 import otpImage from "../../assets/images/logos/otp.png";
@@ -50,6 +55,20 @@ const SignIn = () => {
     const [reset, setReset] = useState(false);
     const [dataOTP, setDataOTP] = useState("");
     const [email, setEmail] = useState("");
+
+    /////// Language Selector
+    const i18_Value =
+        i18next.language !== null &&
+        i18next.language !== undefined &&
+        i18next.language !== ""
+            ? i18next.language
+            : "en";
+    const [lang, setLang] = useState(i18_Value);
+
+    const handleLanguageChange = (event) => {
+        i18next.changeLanguage(event.target.value);
+        setLang(event.target.value);
+    };
 
     /////// Handle Warning Modal
     const [openWarn, setOpenWarn] = useState(false);
@@ -888,6 +907,26 @@ const SignIn = () => {
                         borderRadius: 24,
                     }}
                 >
+                    <Box className="login-header">
+                        <Box className="login-lang-select">
+                            <FormControl size="small" variant="standard" className="login-lang-select__control">
+                                <Select value={lang} onChange={handleLanguageChange}>
+                                    {langData.map((item) => (
+                                        <MenuItem key={item.value} value={item.value} className="s-lang__item">
+                                            <Stack spacing={1} direction="row" alignItems="center">
+                                                <img
+                                                    alt="Language"
+                                                    style={{ width: "52px", height: "32px" }}
+                                                    src={item.thumb}
+                                                />
+                                                <Typography sx={{ fontSize: "12px" }}>{item.title}</Typography>
+                                            </Stack>
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    </Box>
                     <Typography variant="h1" className="p-title">
                         {t("main_title") || "General Affairs System"}
                     </Typography>
