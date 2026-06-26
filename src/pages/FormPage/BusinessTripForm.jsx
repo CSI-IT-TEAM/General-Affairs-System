@@ -375,6 +375,16 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
       kr: "영문 성명을 입력해 주세요.",
       vn: "Vui lòng nhập tên tiếng Anh.",
     },
+    visitorNameKrRequired: {
+      en: "Korean Name is required.",
+      kr: "한글 성명을 입력해 주세요.",
+      vn: "Vui lòng nhập tên tiếng Hàn.",
+    },
+    visitorPositionRequired: {
+      en: "Position is required.",
+      kr: "직급을 선택해 주세요.",
+      vn: "Vui lòng chọn chức vụ.",
+    },
     emailRequired: {
       en: "Email is required.",
       kr: "이메일을 입력해 주세요.",
@@ -389,6 +399,21 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
       en: "Business Trip Purpose is required.",
       kr: "출장 목적을 입력해 주세요.",
       vn: "Vui lòng nhập mục đích chuyến công tác.",
+    },
+    relateDeptRequired: {
+      en: "Related Department is required.",
+      kr: "관련 부서를 입력해 주세요.",
+      vn: "Vui lòng nhập bộ phận liên quan.",
+    },
+    eVisaRequired: {
+      en: "Please upload E-Visa / APEC Card before saving.",
+      kr: "저장하기 전에 E-Visa / APEC 카드를 업로드해 주세요.",
+      vn: "Vui lòng upload E-Visa / APEC Card trước khi lưu.",
+    },
+    flightTicketRequired: {
+      en: "Please upload flight ticket before saving.",
+      kr: "저장하기 전에 항공권을 업로드해 주세요.",
+      vn: "Vui lòng upload vé máy bay trước khi lưu.",
     },
     entryDateTimeRequired: {
       en: "Entry date and time is required.",
@@ -1105,9 +1130,18 @@ export default function BusinessTripFormNewLayout() {
     if (!formData.affiliDiv) return getSaveAlertMessage(language, "factoryRequired");
     if (!formData.visitorDept?.trim()) return getSaveAlertMessage(language, "visitorDeptRequired");
     if (!formData.visitorNameEn?.trim()) return getSaveAlertMessage(language, "visitorNameEnRequired");
+    if (!formData.visitorNameKr?.trim()) return getSaveAlertMessage(language, "visitorNameKrRequired");
     if (!formData.email?.trim()) return getSaveAlertMessage(language, "emailRequired");
     if (!isValidEmail(formData.email)) return getSaveAlertMessage(language, "emailInvalid");
+    if (!formData.visitorPosition?.trim()) return getSaveAlertMessage(language, "visitorPositionRequired");
     if (!formData.purpose?.trim()) return getSaveAlertMessage(language, "purposeRequired");
+    if (!formData.relateDept?.trim()) return getSaveAlertMessage(language, "relateDeptRequired");
+    if (!fileData.eVisaFiles || fileData.eVisaFiles.length === 0) {
+      return getSaveAlertMessage(language, "eVisaRequired");
+    }
+    if (!fileData.flightTicketFiles || fileData.flightTicketFiles.length === 0) {
+      return getSaveAlertMessage(language, "flightTicketRequired");
+    }
     if (!formData.entryDateTime) return getSaveAlertMessage(language, "entryDateTimeRequired");
     if (!formData.exitDateTime) return getSaveAlertMessage(language, "exitDateTimeRequired");
     if (!isExitDateTimeAfterEntryDateTime(formData.entryDateTime, formData.exitDateTime)) {
@@ -1581,13 +1615,37 @@ export default function BusinessTripFormNewLayout() {
         "& .business-trip-card .MuiInputBase-root": {
           minHeight: 38,
           fontSize: "0.84rem",
+          display: "flex",
+          alignItems: "center",
         },
         "& .business-trip-card .MuiInputBase-input": {
           py: "7px",
           fontSize: "0.84rem",
+          lineHeight: "22px",
         },
         "& .business-trip-card .MuiInputLabel-root": {
           fontSize: "0.84rem",
+          lineHeight: "18px",
+        },
+        "& .business-trip-card .MuiInputLabel-root:not(.MuiInputLabel-shrink)": {
+          transform: "translate(14px, 10px) scale(1)",
+        },
+        "& .business-trip-card .MuiInputLabel-root.MuiInputLabel-shrink": {
+          transform: "translate(14px, -7px) scale(0.75)",
+        },
+        "& .business-trip-card .MuiFormLabel-asterisk": {
+          color: "#d32f2f",
+          fontWeight: 700,
+        },
+        "& .business-trip-card .required-upload-asterisk": {
+          color: "#d32f2f",
+          fontWeight: 700,
+          marginLeft: "4px",
+        },
+        "& .business-trip-card .MuiSelect-select": {
+          display: "flex",
+          alignItems: "center",
+          minHeight: "22px !important",
         },
         "& .business-trip-card .MuiFormControlLabel-root": {
           mr: 1,
@@ -1924,6 +1982,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                required
                 label={t("business_trip_name_en")}
                 value={formData.visitorNameEn}
                 onChange={handleInputChange("visitorNameEn")}
@@ -1933,6 +1992,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                required
                 label={t("business_trip_name_kr")}
                 value={formData.visitorNameKr}
                 onChange={handleInputChange("visitorNameKr")}
@@ -1942,6 +2002,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                required
                 type="email"
                 label="Email"
                 value={formData.email}
@@ -1969,6 +2030,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                required
                 label={t("business_trip_dept_from")}
                 value={formData.visitorDept}
                 onChange={handleInputChange("visitorDept")}
@@ -1979,6 +2041,7 @@ export default function BusinessTripFormNewLayout() {
               <TextField
                 select
                 fullWidth
+                required
                 label={t("business_trip_position")}
                 value={formData.visitorPosition}
                 onChange={handleInputChange("visitorPosition")}
@@ -1999,6 +2062,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
+                required
                 label={t("business_trip_purpose")}
                 value={formData.purpose}
                 onChange={handleInputChange("purpose")}
@@ -2008,6 +2072,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
+                required
                 label={t("business_trip_dept_related")}
                 value={formData.relateDept}
                 onChange={handleInputChange("relateDept")}
@@ -2025,64 +2090,130 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Button variant="outlined" component="label">
-                {t("business_trip_upload_e_visa")}
-                <input
-                  hidden
-                  multiple
-                  type="file"
-                  accept={FILE_INPUT_ACCEPT}
-                  onChange={handleFileChange("eVisa", "eVisaFiles")}
-                />
-              </Button>
-              {formData.eVisa && (
-                <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                  {getSelectedFilesDisplay(fileData.eVisaFiles, formData.eVisa)}
-                </Typography>
-              )}
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  component="label"
+                  sx={{
+                    width: 220,
+                    minWidth: 220,
+                    justifyContent: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {t("business_trip_upload_e_visa")}
+                  <Box component="span" className="required-upload-asterisk">*</Box>
+                  <input
+                    hidden
+                    multiple
+                    type="file"
+                    accept={FILE_INPUT_ACCEPT}
+                    onChange={handleFileChange("eVisa", "eVisaFiles")}
+                  />
+                </Button>
+                {formData.eVisa && (
+                  <Typography
+                    variant="caption"
+                    component="div"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {getSelectedFilesDisplay(fileData.eVisaFiles, formData.eVisa)}
+                  </Typography>
+                )}
+              </Box>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Button variant="outlined" component="label">
-                {t("business_trip_upload_flight_ticket")}
-                <input
-                  hidden
-                  multiple
-                  type="file"
-                  accept={FILE_INPUT_ACCEPT}
-                  onChange={handleFileChange("businessTripFlightTicket", "flightTicketFiles")}
-                />
-              </Button>
-              {formData.businessTripFlightTicket && (
-                <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                  {getSelectedFilesDisplay(
-                    fileData.flightTicketFiles,
-                    formData.businessTripFlightTicket
-                  )}
-                </Typography>
-              )}
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  component="label"
+                  sx={{
+                    width: 220,
+                    minWidth: 220,
+                    justifyContent: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {t("business_trip_upload_flight_ticket")}
+                  <Box component="span" className="required-upload-asterisk">*</Box>
+                  <input
+                    hidden
+                    multiple
+                    type="file"
+                    accept={FILE_INPUT_ACCEPT}
+                    onChange={handleFileChange("businessTripFlightTicket", "flightTicketFiles")}
+                  />
+                </Button>
+                {formData.businessTripFlightTicket && (
+                  <Typography
+                    variant="caption"
+                    component="div"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {getSelectedFilesDisplay(
+                      fileData.flightTicketFiles,
+                      formData.businessTripFlightTicket
+                    )}
+                  </Typography>
+                )}
+              </Box>
             </Grid>
 
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
+                required
                 type="datetime-local"
                 label={t("business_trip_entry_time")}
                 value={formData.entryDateTime}
                 onChange={handleEntryDateTimeChange}
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  step: 60,
+                  lang: "en-GB",
+                }}
               />
             </Grid>
 
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
+                required
                 type="datetime-local"
                 label={t("business_trip_exit_time")}
                 value={formData.exitDateTime}
                 onChange={handleExitDateTimeChange}
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  step: 60,
+                  lang: "en-GB",
+                }}
               />
             </Grid>
 
@@ -2128,7 +2259,7 @@ export default function BusinessTripFormNewLayout() {
               </RadioGroup>
             </Grid>
 
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 type="datetime-local"
@@ -2136,6 +2267,10 @@ export default function BusinessTripFormNewLayout() {
                 value={formData.airportDropoffTime}
                 onChange={handleInputChange("airportDropoffTime")}
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  step: 60,
+                  lang: "en-GB",
+                }}
               />
             </Grid>
 
