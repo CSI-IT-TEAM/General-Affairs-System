@@ -90,6 +90,15 @@ const SignIn = () => {
         userLoginHandle();
     };
 
+    const handleBusinessTripClick = () => {
+        sessionStorage.removeItem("userData");
+        sessionStorage.removeItem("userImg");
+        localStorage.removeItem("userData");
+        localStorage.removeItem("userImg");
+        localStorage.removeItem("lastLogin");
+        navigate("/registration/business-trip");
+    };
+
     ////// Download User Info Data
     const fetchDownload = async (dataConfig) => {
         fetch(downloadURL, {
@@ -825,7 +834,50 @@ const SignIn = () => {
                         boxShadow: "0 22px 70px rgba(0,0,0,0.18)",
                         m: "0 auto !important",
                         px: { xs: 3, sm: 4 },
-                        py: { xs: 3, sm: 4 },
+                        py: { xs: 2, sm: 2.5 },
+                        maxHeight: "calc(100vh - 118px) !important",
+                        overflow: "hidden",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        "& .p-title": {
+                            mb: "8px !important",
+                            fontSize: { xs: "1.9rem !important", sm: "2.15rem !important" },
+                            lineHeight: "1.15 !important",
+                        },
+                        "& .b-thumb": {
+                            mb: "10px !important",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        },
+                        "& .b-thumb img": {
+                            width: "82% !important",
+                            maxWidth: "320px !important",
+                            maxHeight: "170px !important",
+                            objectFit: "contain",
+                        },
+                        "& form": {
+                            width: "100%",
+                        },
+                        "& .MuiTextField-root": {
+                            mb: "0 !important",
+                        },
+                        "& .MuiInputBase-root": {
+                            minHeight: "46px",
+                        },
+                        "& .MuiInputBase-input": {
+                            py: "9px",
+                        },
+                        "& .MuiFormHelperText-root": {
+                            mt: "3px",
+                            fontSize: "0.76rem",
+                            lineHeight: 1.1,
+                        },
+                        "& .s-mid": {
+                            marginTop: "4px !important",
+                        },
                     }}
                     style={{
                         width: "min(92vw, 440px)",
@@ -912,7 +964,7 @@ const SignIn = () => {
                             <Box
                                 sx={{
                                     width: "100%",
-                                    my: 1.25,
+                                    my: 0.8,
                                     display: "flex",
                                     alignItems: "center",
                                     gap: 1.5,
@@ -947,15 +999,13 @@ const SignIn = () => {
 
                             <ButtonPrimary
                                 title={t("business_trip") || "Business Trip"}
-                                handleClick={() =>
-                                    navigate("/registration/business-trip")
-                                }
+                                handleClick={handleBusinessTripClick}
                             />
 
                             <Typography
                                 variant="h5"
                                 className="p-desc align-center"
-                                sx={{ mt: 1 }}
+                                sx={{ mt: 0.6 }}
                             >
                                 {t("title_forgot_pass")}{" "}
                                 <span onClick={handleShowReset}>
@@ -971,9 +1021,34 @@ const SignIn = () => {
 
     return (
         <>
-            <Box className="s-layout">
+            <Box
+                className="s-layout"
+                sx={{
+                    height: "100vh !important",
+                    minHeight: "100vh !important",
+                    maxHeight: "100vh !important",
+                    overflow: "hidden !important",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    py: "8px !important",
+                }}
+            >
                 {/* Logo */}
-                <Typography variant="h5" component="div" className="s-logo">
+                <Typography
+                    variant="h5"
+                    component="div"
+                    className="s-logo"
+                    sx={{
+                        flex: "0 0 auto",
+                        mt: "0 !important",
+                        mb: "8px !important",
+                        fontSize: { xs: "3.3rem !important", sm: "3.7rem !important" },
+                        lineHeight: "0.95 !important",
+                    }}
+                >
                     CSG
                 </Typography>
 

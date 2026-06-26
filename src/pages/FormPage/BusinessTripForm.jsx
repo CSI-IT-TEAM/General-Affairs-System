@@ -24,8 +24,12 @@ import {
   Select,
   FormControl,
   Stack,
+  Avatar,
+  Menu,
 } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import i18next from "i18next";
 import { useNavigate } from "react-router-dom";
 import { langData } from "../../data";
@@ -212,6 +216,214 @@ const normalizeLanguage = (language) => {
 const POCKETBASE_BASE_URL = "http://vjweb.dskorea.com:8090";
 const POCKETBASE_COLLECTION = "GA_BUSINESS_TRIP_FILES";
 const DOCUMENT_FILE_FIELD = "IMAGE_FILE";
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_FILE_EXTENSIONS = [".pdf", ".jpeg", ".jpg", ".png", ".bmp"];
+const FILE_INPUT_ACCEPT = ALLOWED_FILE_EXTENSIONS.join(",");
+
+
+const safeJsonParse = (value) => {
+  try {
+    return value ? JSON.parse(value) : null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const getLoggedInUserDisplayName = () => {
+  const userData =
+    safeJsonParse(sessionStorage.getItem("userData")) ||
+    safeJsonParse(localStorage.getItem("userData"));
+
+  const userName =
+    userData?.DISPLAY_NAME ||
+    userData?.displayName ||
+    userData?.EMP_NAME ||
+    userData?.empName ||
+    userData?.EMP_NAME_ENG ||
+    userData?.empNameEng ||
+    userData?.NAME ||
+    userData?.name ||
+    userData?.USER_NAME ||
+    userData?.userName ||
+    userData?.USERNAME ||
+    userData?.username ||
+    userData?.EMPID ||
+    userData?.EMP_NO ||
+    userData?.USER_ID ||
+    userData?.USERID ||
+    "";
+
+  if (userName) return String(userName).trim();
+
+  const lastLogin = safeJsonParse(localStorage.getItem("lastLogin"));
+  return String(lastLogin?.data || "").trim();
+};
+
+const normalizeUserImageSrc = (value) => {
+  const imageValue = String(value || "").trim();
+
+  if (!imageValue) return "";
+
+  if (/^(https?:|data:image\/|blob:|\/)/i.test(imageValue)) {
+    return imageValue;
+  }
+
+  if (/^[A-Za-z0-9+/=\r\n]+$/.test(imageValue) && imageValue.length > 80) {
+    return `data:image/png;base64,${imageValue.replace(/\s/g, "")}`;
+  }
+
+  return imageValue;
+};
+
+const getLoggedInUserImageSrc = () => {
+  const rawUserImg =
+    sessionStorage.getItem("userImg") || localStorage.getItem("userImg") || "";
+
+  const parsedUserImg = safeJsonParse(rawUserImg);
+  const userImg =
+    parsedUserImg?.url ||
+    parsedUserImg?.URL ||
+    parsedUserImg?.src ||
+    parsedUserImg?.SRC ||
+    parsedUserImg?.image ||
+    parsedUserImg?.IMAGE ||
+    parsedUserImg?.photo ||
+    parsedUserImg?.PHOTO ||
+    (typeof parsedUserImg === "string" ? parsedUserImg : rawUserImg);
+
+  if (userImg) return normalizeUserImageSrc(userImg);
+
+  const userData =
+    safeJsonParse(sessionStorage.getItem("userData")) ||
+    safeJsonParse(localStorage.getItem("userData"));
+
+  return normalizeUserImageSrc(
+    userData?.PHOTO ||
+      userData?.photo ||
+      userData?.PHOTO_URL ||
+      userData?.photoUrl ||
+      userData?.IMAGE_URL ||
+      userData?.imageUrl ||
+      userData?.AVATAR ||
+      userData?.avatar ||
+      ""
+  );
+};
+
+const getLogoutButtonLabel = (selectedLanguage) => {
+  const labels = {
+    en: "Logout",
+    kr: "로그아웃",
+    vn: "Đăng xuất",
+  };
+
+  return labels[selectedLanguage] || labels.en;
+};
+
+
+const getFileSizeLimitMessage = (selectedLanguage, fileNames) => {
+  const messages = {
+    en: `Files must not exceed 5 MB. Please select again: ${fileNames}`,
+    kr: `파일 크기는 5MB를 초과할 수 없습니다. 다시 선택해 주세요: ${fileNames}`,
+    vn: `File không được lớn hơn 5 MB. Vui lòng chọn lại: ${fileNames}`,
+  };
+
+  return messages[selectedLanguage] || messages.en;
+};
+
+const getInvalidFileTypeMessage = (selectedLanguage, fileNames) => {
+  const messages = {
+    en: `Only PDF, JPEG, JPG, PNG, and BMP files are allowed. Please select again: ${fileNames}`,
+    kr: `PDF, JPEG, JPG, PNG, BMP 형식의 파일만 업로드할 수 있습니다. 다시 선택해 주세요: ${fileNames}`,
+    vn: `Chỉ được upload file định dạng PDF, JPEG, JPG, PNG và BMP. Vui lòng chọn lại: ${fileNames}`,
+  };
+
+  return messages[selectedLanguage] || messages.en;
+};
+
+const getDateValidationMessage = (selectedLanguage, type) => {
+  const messages = {
+    exitAfterEntry: {
+      en: "Exit date and time must be after entry date and time. Please select again.",
+      kr: "출국 일시는 입국 일시보다 이후여야 합니다. 다시 선택해 주세요.",
+      vn: "Ngày xuất cảnh phải sau ngày nhập cảnh. Vui lòng chọn lại.",
+    },
+    hotelToAfterFrom: {
+      en: "Hotel reservation date to must be after hotel reservation date from. Please select again.",
+      kr: "호텔 예약 종료일은 호텔 예약 시작일보다 이후여야 합니다. 다시 선택해 주세요.",
+      vn: "Ngày đặt phòng khách sạn đến phải sau ngày đặt phòng khách sạn từ. Vui lòng chọn lại.",
+    },
+  };
+
+  return messages[type]?.[selectedLanguage] || messages[type]?.en || "";
+};
+
+const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
+  const messages = {
+    factoryRequired: {
+      en: "Please select factory.",
+      kr: "공장을 선택해 주세요.",
+      vn: "Vui lòng chọn nhà máy.",
+    },
+    visitorDeptRequired: {
+      en: "From Department is required.",
+      kr: "소속 부서를 입력해 주세요.",
+      vn: "Vui lòng nhập bộ phận.",
+    },
+    visitorNameEnRequired: {
+      en: "English Name is required.",
+      kr: "영문 성명을 입력해 주세요.",
+      vn: "Vui lòng nhập tên tiếng Anh.",
+    },
+    emailRequired: {
+      en: "Email is required.",
+      kr: "이메일을 입력해 주세요.",
+      vn: "Vui lòng nhập email.",
+    },
+    emailInvalid: {
+      en: "Email address is invalid.",
+      kr: "이메일 형식이 올바르지 않습니다.",
+      vn: "Địa chỉ email không đúng định dạng.",
+    },
+    purposeRequired: {
+      en: "Business Trip Purpose is required.",
+      kr: "출장 목적을 입력해 주세요.",
+      vn: "Vui lòng nhập mục đích chuyến công tác.",
+    },
+    entryDateTimeRequired: {
+      en: "Entry date and time is required.",
+      kr: "입국 일시를 선택해 주세요.",
+      vn: "Vui lòng chọn ngày giờ nhập cảnh.",
+    },
+    exitDateTimeRequired: {
+      en: "Exit date and time is required.",
+      kr: "출국 일시를 선택해 주세요.",
+      vn: "Vui lòng chọn ngày giờ xuất cảnh.",
+    },
+    saveSuccessEmailSent: {
+      en: "Save successful and email sent.",
+      kr: "저장되었으며 이메일이 발송되었습니다.",
+      vn: "Lưu thành công và đã gửi email.",
+    },
+    saveSuccessEmailFailed: {
+      en: "Save successful but email sending failed. Please check the email server or send the email manually.",
+      kr: "저장은 성공했지만 이메일 발송에 실패했습니다. 이메일 서버를 확인하거나 수동으로 발송해 주세요.",
+      vn: "Lưu thành công nhưng gửi email thất bại. Vui lòng kiểm tra email server hoặc gửi email thủ công.",
+    },
+    saveFailed: {
+      en: `Save failed${detail ? `: ${detail}` : "."}`,
+      kr: `저장에 실패했습니다${detail ? `: ${detail}` : "."}`,
+      vn: `Lưu thất bại${detail ? `: ${detail}` : "."}`,
+    },
+    saveUnexpectedError: {
+      en: "An error occurred while saving. Please try again.",
+      kr: "저장 중 오류가 발생했습니다. 다시 시도해 주세요.",
+      vn: "Đã xảy ra lỗi khi lưu. Vui lòng thử lại.",
+    },
+  };
+
+  return messages[type]?.[selectedLanguage] || messages[type]?.en || "";
+};
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
 const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
@@ -230,6 +442,61 @@ const getRowValue = (row, keys, defaultValue = "") => {
   }
 
   return defaultValue;
+};
+
+const formatFileSize = (bytes) => {
+  const size = Number(bytes);
+
+  if (!Number.isFinite(size) || size < 0) return "";
+  if (size === 0) return "0 B";
+
+  const units = ["B", "KB", "MB", "GB"];
+  const unitIndex = Math.min(
+    Math.floor(Math.log(size) / Math.log(1024)),
+    units.length - 1
+  );
+  const value = size / 1024 ** unitIndex;
+  const decimals = unitIndex === 0 || value >= 100 ? 0 : value >= 10 ? 1 : 2;
+
+  return `${value.toFixed(decimals)} ${units[unitIndex]}`;
+};
+
+const getFileExtension = (fileName) => {
+  const normalizedFileName = String(fileName || "").trim().toLowerCase();
+  const dotIndex = normalizedFileName.lastIndexOf(".");
+
+  return dotIndex >= 0 ? normalizedFileName.slice(dotIndex) : "";
+};
+
+const isAllowedFileType = (file) =>
+  ALLOWED_FILE_EXTENSIONS.includes(getFileExtension(file?.name));
+
+const getSelectedFilesDisplay = (files, fallbackValue = "") => {
+  if (!Array.isArray(files) || files.length === 0) return fallbackValue;
+
+  return files.map((file, index) => {
+    const isPdf = getFileExtension(file.name) === ".pdf";
+    const FileIcon = isPdf ? PictureAsPdfOutlinedIcon : ImageOutlinedIcon;
+
+    return (
+      <Box
+        component="span"
+        key={`${file.name}-${file.size}-${index}`}
+        sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.25 }}
+      >
+        <FileIcon
+          sx={{
+            fontSize: 18,
+            color: isPdf ? "#D32F2F" : "#1976D2",
+            flexShrink: 0,
+          }}
+        />
+        <Box component="span">
+          {file.name} ({formatFileSize(file.size)})
+        </Box>
+      </Box>
+    );
+  });
 };
 
 const formatDateDisplay = (value) => {
@@ -385,6 +652,13 @@ export default function BusinessTripFormNewLayout() {
 
   const { t, i18n } = useTranslation();
   const [language, setLanguage] = useState(() => normalizeLanguage(i18n.language));
+  const [loggedInUserName, setLoggedInUserName] = useState(() =>
+    getLoggedInUserDisplayName()
+  );
+  const [loggedInUserImageSrc, setLoggedInUserImageSrc] = useState(() =>
+    getLoggedInUserImageSrc()
+  );
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
 
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [fileData, setFileData] = useState({ ...EMPTY_FILE_DATA });
@@ -401,12 +675,51 @@ export default function BusinessTripFormNewLayout() {
     setLanguage(normalizeLanguage(i18n.language));
   }, [i18n.language]);
 
+  useEffect(() => {
+    const refreshLoggedInUserName = () => {
+      setLoggedInUserName(getLoggedInUserDisplayName());
+      setLoggedInUserImageSrc(getLoggedInUserImageSrc());
+    };
+
+    refreshLoggedInUserName();
+    window.addEventListener("storage", refreshLoggedInUserName);
+    window.addEventListener("focus", refreshLoggedInUserName);
+
+    return () => {
+      window.removeEventListener("storage", refreshLoggedInUserName);
+      window.removeEventListener("focus", refreshLoggedInUserName);
+    };
+  }, []);
+
   const handleLanguageChange = (event) => {
     const nextLanguage = event.target.value;
 
     setLanguage(nextLanguage);
     i18n.changeLanguage(nextLanguage);
     localStorage.setItem("i18nextLng", nextLanguage);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("userData");
+    sessionStorage.removeItem("userImg");
+    sessionStorage.removeItem("lastLogin");
+
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userImg");
+    localStorage.removeItem("lastLogin");
+
+    setLoggedInUserName("");
+    setLoggedInUserImageSrc("");
+    setUserMenuAnchorEl(null);
+    navigate("/signin");
+  };
+
+  const handleUserAvatarClick = (event) => {
+    setUserMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchorEl(null);
   };
 
   const renderSelectedLanguage = (selectedLanguage) => {
@@ -427,8 +740,8 @@ export default function BusinessTripFormNewLayout() {
           src={option.flagSrc}
           alt={option.label}
           sx={{
-            width: 38,
-            height: 25,
+            width: 50,
+            height: 32,
             objectFit: "cover",
             borderRadius: "2px",
             display: "inline-flex",
@@ -475,12 +788,41 @@ export default function BusinessTripFormNewLayout() {
 
   const handleEntryDateTimeChange = (event) => {
     const entryDateTime = event.target.value;
+    const hotelReserveDate = getDateFromDateTime(entryDateTime);
 
-    setFormData((prev) => ({
-      ...prev,
-      entryDateTime,
-      hotelReserveDate: getDateFromDateTime(entryDateTime),
-    }));
+    setFormData((prev) => {
+      const shouldClearExitDateTime =
+        prev.exitDateTime &&
+        !isExitDateTimeAfterEntryDateTime(entryDateTime, prev.exitDateTime);
+
+      const shouldClearHotelReserveDateTo =
+        prev.hotelReserveDateTo &&
+        !isDateAfter(hotelReserveDate, prev.hotelReserveDateTo);
+
+      if (shouldClearExitDateTime) {
+        alert(getDateValidationMessage(language, "exitAfterEntry"));
+      } else if (shouldClearHotelReserveDateTo) {
+        alert(getDateValidationMessage(language, "hotelToAfterFrom"));
+      }
+
+      return {
+        ...prev,
+        entryDateTime,
+        hotelReserveDate,
+        ...(shouldClearExitDateTime
+          ? {
+              exitDateTime: "",
+              hotelReserveDateTo: "",
+              airportDropoffTime: "",
+            }
+          : {}),
+        ...(shouldClearHotelReserveDateTo && !shouldClearExitDateTime
+          ? {
+              hotelReserveDateTo: "",
+            }
+          : {}),
+      };
+    });
   };
 
   const getDefaultAirportDropoffTime = (exitDateTime) => {
@@ -495,12 +837,94 @@ export default function BusinessTripFormNewLayout() {
   const handleExitDateTimeChange = (event) => {
     const exitDateTime = event.target.value;
 
-    setFormData((prev) => ({
-      ...prev,
-      exitDateTime,
-      hotelReserveDateTo: getDateFromDateTime(exitDateTime),
-      airportDropoffTime: getDefaultAirportDropoffTime(exitDateTime),
-    }));
+    setFormData((prev) => {
+      if (
+        prev.entryDateTime &&
+        !isExitDateTimeAfterEntryDateTime(prev.entryDateTime, exitDateTime)
+      ) {
+        alert(getDateValidationMessage(language, "exitAfterEntry"));
+
+        return {
+          ...prev,
+          exitDateTime: "",
+          hotelReserveDateTo: "",
+          airportDropoffTime: "",
+        };
+      }
+
+      const hotelReserveDateTo = getDateFromDateTime(exitDateTime);
+
+      if (
+        prev.hotelReserveDate &&
+        hotelReserveDateTo &&
+        !isDateAfter(prev.hotelReserveDate, hotelReserveDateTo)
+      ) {
+        alert(getDateValidationMessage(language, "hotelToAfterFrom"));
+
+        return {
+          ...prev,
+          exitDateTime,
+          hotelReserveDateTo: "",
+          airportDropoffTime: getDefaultAirportDropoffTime(exitDateTime),
+        };
+      }
+
+      return {
+        ...prev,
+        exitDateTime,
+        hotelReserveDateTo,
+        airportDropoffTime: getDefaultAirportDropoffTime(exitDateTime),
+      };
+    });
+  };
+
+  const handleHotelReserveDateFromChange = (event) => {
+    const hotelReserveDate = event.target.value;
+
+    setFormData((prev) => {
+      if (
+        hotelReserveDate &&
+        prev.hotelReserveDateTo &&
+        !isDateAfter(hotelReserveDate, prev.hotelReserveDateTo)
+      ) {
+        alert(getDateValidationMessage(language, "hotelToAfterFrom"));
+
+        return {
+          ...prev,
+          hotelReserveDate,
+          hotelReserveDateTo: "",
+        };
+      }
+
+      return {
+        ...prev,
+        hotelReserveDate,
+      };
+    });
+  };
+
+  const handleHotelReserveDateToChange = (event) => {
+    const hotelReserveDateTo = event.target.value;
+
+    setFormData((prev) => {
+      if (
+        prev.hotelReserveDate &&
+        hotelReserveDateTo &&
+        !isDateAfter(prev.hotelReserveDate, hotelReserveDateTo)
+      ) {
+        alert(getDateValidationMessage(language, "hotelToAfterFrom"));
+
+        return {
+          ...prev,
+          hotelReserveDateTo: "",
+        };
+      }
+
+      return {
+        ...prev,
+        hotelReserveDateTo,
+      };
+    });
   };
 
   const formatDateTimeForSave = (dateTimeValue) => {
@@ -537,6 +961,12 @@ export default function BusinessTripFormNewLayout() {
     return exitTime > entryTime;
   };
 
+  const isDateAfter = (fromDate, toDate) => {
+    if (!fromDate || !toDate) return true;
+
+    return String(toDate) > String(fromDate);
+  };
+
   const isValidEmail = (email) => {
     const emailValue = String(email || "").trim();
 
@@ -547,6 +977,32 @@ export default function BusinessTripFormNewLayout() {
 
   const handleFileChange = (field, fileField) => (event) => {
     const files = Array.from(event.target.files || []);
+    const invalidFiles = files.filter((file) => !isAllowedFileType(file));
+
+    if (invalidFiles.length > 0) {
+      const invalidFileNames = invalidFiles.map((file) => file.name).join(", ");
+
+      alert(getInvalidFileTypeMessage(language, invalidFileNames));
+
+      event.target.value = "";
+      return;
+    }
+
+    const oversizedFiles = files.filter(
+      (file) => file.size > MAX_FILE_SIZE_BYTES
+    );
+
+    if (oversizedFiles.length > 0) {
+      const oversizedFileNames = oversizedFiles
+        .map((file) => `${file.name} (${formatFileSize(file.size)})`)
+        .join(", ");
+
+      alert(getFileSizeLimitMessage(language, oversizedFileNames));
+
+      event.target.value = "";
+      return;
+    }
+
     const fileNameText = files.map((file) => file.name).join(", ");
 
     setFileData((prev) => ({
@@ -574,6 +1030,25 @@ export default function BusinessTripFormNewLayout() {
         fileNames: "",
         fileUrls: "",
       };
+    }
+
+    const invalidFile = files.find((file) => !isAllowedFileType(file));
+
+    if (invalidFile) {
+      throw new Error(getInvalidFileTypeMessage(language, invalidFile.name));
+    }
+
+    const oversizedFile = files.find(
+      (file) => file.size > MAX_FILE_SIZE_BYTES
+    );
+
+    if (oversizedFile) {
+      throw new Error(
+        getFileSizeLimitMessage(
+          language,
+          `${oversizedFile.name} (${formatFileSize(oversizedFile.size)})`
+        )
+      );
     }
 
     const uploadFormData = new FormData();
@@ -627,16 +1102,19 @@ export default function BusinessTripFormNewLayout() {
   };
 
   const validateForm = () => {
-    if (!formData.affiliDiv) return t("business_trip_factory") + " is required";
-    if (!formData.visitorDept?.trim()) return t("business_trip_dept_from") + " is required";
-    if (!formData.visitorNameEn?.trim()) return t("business_trip_name_en") + " is required";
-    if (!formData.email?.trim()) return "Email is required";
-    if (!isValidEmail(formData.email)) return "Email không đúng định dạng.";
-    if (!formData.purpose?.trim()) return t("business_trip_purpose") + " is required";
-    if (!formData.entryDateTime) return t("business_trip_entry_time") + " is required";
-    if (!formData.exitDateTime) return t("business_trip_exit_time") + " is required";
+    if (!formData.affiliDiv) return getSaveAlertMessage(language, "factoryRequired");
+    if (!formData.visitorDept?.trim()) return getSaveAlertMessage(language, "visitorDeptRequired");
+    if (!formData.visitorNameEn?.trim()) return getSaveAlertMessage(language, "visitorNameEnRequired");
+    if (!formData.email?.trim()) return getSaveAlertMessage(language, "emailRequired");
+    if (!isValidEmail(formData.email)) return getSaveAlertMessage(language, "emailInvalid");
+    if (!formData.purpose?.trim()) return getSaveAlertMessage(language, "purposeRequired");
+    if (!formData.entryDateTime) return getSaveAlertMessage(language, "entryDateTimeRequired");
+    if (!formData.exitDateTime) return getSaveAlertMessage(language, "exitDateTimeRequired");
     if (!isExitDateTimeAfterEntryDateTime(formData.entryDateTime, formData.exitDateTime)) {
-      return "Ngày xuất cảnh phải sau ngày nhập cảnh.";
+      return getDateValidationMessage(language, "exitAfterEntry");
+    }
+    if (!isDateAfter(formData.hotelReserveDate, formData.hotelReserveDateTo)) {
+      return getDateValidationMessage(language, "hotelToAfterFrom");
     }
     return "";
   };
@@ -863,11 +1341,11 @@ export default function BusinessTripFormNewLayout() {
 
     return (
       `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#000;line-height:1.35;">` +
-        `<p style="margin:0 0 12px 0;"><b>Dear GA Team, <br> Please check the business trip information below: </b></p>` +
+        `<p style="margin:0 0 12px 0;font-weight:400;">Dear GA Team,<br>Please check the business trip information below:</p>` +
         `<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:620px;max-width:100%;border:1px solid #d9d9d9;">` +
           `<tbody>${rows}</tbody>` +
         `</table> <br>` +
-        `<p style="margin:0 0 12px 0;"><b>Best regards, </b></p>` +
+        `<p style="margin:0 0 12px 0;font-weight:400;">Best regards,</p>` +
       `</div>`
     );
   };
@@ -943,7 +1421,7 @@ export default function BusinessTripFormNewLayout() {
       const userId = parsedUserData?.EMPID || parsedUserData?.USER_ID || parsedUserData?.USERID || "SYSTEM";
 
       if (!formData.affiliDiv) {
-        alert("Please select factory.");
+        alert(getSaveAlertMessage(language, "factoryRequired"));
         setIsSubmitting(false);
         return;
       }
@@ -1066,19 +1544,19 @@ export default function BusinessTripFormNewLayout() {
 
         alert(
           emailSent
-            ? `Save successful and email sent.`
-            : `Save successful but email sending failed. Please check the email server or send the email manually.`
+            ? getSaveAlertMessage(language, "saveSuccessEmailSent")
+            : getSaveAlertMessage(language, "saveSuccessEmailFailed")
         );
 
         setFormData({ ...EMPTY_FORM });
         setFileData({ ...EMPTY_FILE_DATA });
         setHasLoadedTracking(false);
       } else {
-        alert(`Save failed: ${result.error?.message || result.data?.message || "Unknown error"}`);
+        alert(getSaveAlertMessage(language, "saveFailed", result.error?.message || result.data?.message || ""));
       }
     } catch (error) {
       console.error("Error saving business trip registration:", error);
-      alert("An error occurred while saving. Please try again.");
+      alert(getSaveAlertMessage(language, "saveUnexpectedError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -1206,12 +1684,13 @@ export default function BusinessTripFormNewLayout() {
             display: "flex",
             justifyContent: "flex-end",
             alignItems: "center",
+            gap: 1.5,
           }}
         >
           <FormControl
             variant="standard"
             sx={{
-              minWidth: 128,
+              minWidth: 152,
               bgcolor: "transparent",
             }}
           >
@@ -1234,8 +1713,8 @@ export default function BusinessTripFormNewLayout() {
                 },
               }}
               sx={{
-                height: 42,
-                minWidth: 128,
+                height: 44,
+                minWidth: 152,
                 color: "#fff",
                 bgcolor: "transparent",
                 border: "0 !important",
@@ -1254,7 +1733,7 @@ export default function BusinessTripFormNewLayout() {
                   alignItems: "center",
                   py: "0 !important",
                   pl: "0 !important",
-                  pr: "28px !important",
+                  pr: "26px !important",
                   color: "#fff !important",
                   bgcolor: "transparent !important",
                 },
@@ -1290,6 +1769,97 @@ export default function BusinessTripFormNewLayout() {
               ))}
             </Select>
           </FormControl>
+
+          {loggedInUserName ? (
+            <>
+              <IconButton
+                size="small"
+                onClick={handleUserAvatarClick}
+                title={loggedInUserName}
+                sx={{
+                  p: 0,
+                  width: 44,
+                  height: 44,
+                  flexShrink: 0,
+                  "&:hover": {
+                    bgcolor: "rgba(255,255,255,0.12)",
+                  },
+                }}
+              >
+                <Avatar
+                  src={loggedInUserImageSrc || undefined}
+                  alt={loggedInUserName}
+                  sx={{
+                    width: 42,
+                    height: 42,
+                    bgcolor: "#1976d2",
+                    color: "#fff",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    border: "2px solid #fff",
+                    boxShadow: "0 0 0 1px rgba(255,255,255,0.35)",
+                  }}
+                >
+                  {loggedInUserName.charAt(0).toUpperCase()}
+                </Avatar>
+              </IconButton>
+
+              <Menu
+                anchorEl={userMenuAnchorEl}
+                open={Boolean(userMenuAnchorEl)}
+                onClose={handleUserMenuClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                PaperProps={{
+                  sx: {
+                    mt: 1,
+                    minWidth: 180,
+                    borderRadius: 1.5,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+                  },
+                }}
+              >
+                <MenuItem disabled sx={{ opacity: "1 !important" }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      maxWidth: 220,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {loggedInUserName}
+                  </Typography>
+                </MenuItem>
+                <MenuItem onClick={handleLogout} sx={{ fontWeight: 700 }}>
+                  {getLogoutButtonLabel(language)}
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => navigate("/signin")}
+              sx={{
+                minWidth: 78,
+                height: 34,
+                color: "#fff",
+                borderColor: "rgba(255,255,255,0.75)",
+                fontWeight: 700,
+                textTransform: "none",
+                borderRadius: 1,
+                px: 2,
+                "&:hover": {
+                  borderColor: "#fff",
+                  bgcolor: "rgba(255,255,255,0.12)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -1462,12 +2032,13 @@ export default function BusinessTripFormNewLayout() {
                   hidden
                   multiple
                   type="file"
+                  accept={FILE_INPUT_ACCEPT}
                   onChange={handleFileChange("eVisa", "eVisaFiles")}
                 />
               </Button>
               {formData.eVisa && (
                 <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                  {formData.eVisa}
+                  {getSelectedFilesDisplay(fileData.eVisaFiles, formData.eVisa)}
                 </Typography>
               )}
             </Grid>
@@ -1479,12 +2050,16 @@ export default function BusinessTripFormNewLayout() {
                   hidden
                   multiple
                   type="file"
+                  accept={FILE_INPUT_ACCEPT}
                   onChange={handleFileChange("businessTripFlightTicket", "flightTicketFiles")}
                 />
               </Button>
               {formData.businessTripFlightTicket && (
                 <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                  {formData.businessTripFlightTicket}
+                  {getSelectedFilesDisplay(
+                    fileData.flightTicketFiles,
+                    formData.businessTripFlightTicket
+                  )}
                 </Typography>
               )}
             </Grid>
@@ -1517,7 +2092,7 @@ export default function BusinessTripFormNewLayout() {
                 type="date"
                 label={t("business_trip_hotel_reservation_date_from", "Hotel Reservation Date From")}
                 value={formData.hotelReserveDate}
-                onChange={handleInputChange("hotelReserveDate")}
+                onChange={handleHotelReserveDateFromChange}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -1528,7 +2103,7 @@ export default function BusinessTripFormNewLayout() {
                 type="date"
                 label={t("business_trip_hotel_reservation_date_to", "Hotel Reservation Date To")}
                 value={formData.hotelReserveDateTo}
-                onChange={handleInputChange("hotelReserveDateTo")}
+                onChange={handleHotelReserveDateToChange}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
