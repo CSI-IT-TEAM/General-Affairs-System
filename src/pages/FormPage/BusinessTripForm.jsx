@@ -2239,7 +2239,7 @@ export default function BusinessTripFormNewLayout() {
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={12}>
               <RadioGroup
                 row
                 value={formData.airportPickupYn}
