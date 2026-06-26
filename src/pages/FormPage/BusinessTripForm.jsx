@@ -351,7 +351,7 @@ const getDateValidationMessage = (selectedLanguage, type) => {
     hotelToAfterFrom: {
       en: "Hotel reservation date to must be after hotel reservation date from. Please select again.",
       kr: "호텔 예약 종료일은 호텔 예약 시작일보다 이후여야 합니다. 다시 선택해 주세요.",
-      vn: "Ngày đặt phòng khách sạn đến phải sau ngày đặt phòng khách sạn từ. Vui lòng chọn lại.",
+      vn: "Ngày trả phòng khách sạn phải sau ngày đặt phòng. Vui lòng chọn lại.",
     },
   };
 
