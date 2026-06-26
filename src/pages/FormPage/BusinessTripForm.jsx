@@ -451,8 +451,9 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
 };
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
-const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com; DO.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@changshininc.com; LOAN.GENERAL@changshininc.com; NHI.GENERAL@changshininc.com";
+const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com";
+const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com";
 
 const EMPTY_FILE_DATA = {
   eVisaFiles: [],
@@ -1398,7 +1399,7 @@ export default function BusinessTripFormNewLayout() {
     const payload = {
       to: BUSINESS_TRIP_EMAIL_TO,
       carbon_copy: BUSINESS_TRIP_EMAIL_CC,
-      blind_carbon_copy: "",
+      blind_carbon_copy: BUSINESS_TRIP_EMAIL_BCC,
       subject: `[Business Trip] ${formData.visitorNameEn || "New Registration"} - ${formData.affiliDiv}`,
       html: buildBusinessTripEmailHtml({
         regId,
