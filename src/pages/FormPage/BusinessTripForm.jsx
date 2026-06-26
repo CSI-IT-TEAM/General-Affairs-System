@@ -1363,6 +1363,12 @@ export default function BusinessTripFormNewLayout() {
       buildEmailTableRow("Visitor Name (Korean)", escapeHtml(formData.visitorNameKr)),
       buildEmailTableRow("Position", escapeHtml(formData.visitorPosition)),
       buildEmailTableRow("Purpose", escapeHtml(formData.purpose)),
+      buildEmailTableRow(
+        "Description",
+        formData.description
+          ? `<div style="white-space:pre-wrap;">${escapeHtml(formData.description)}</div>`
+          : "-"
+      ),
       buildEmailTableRow("Business trip period", escapeHtml(businessTripPeriod)),
       buildEmailTableRow("Arrival / Departure in Vietnam", escapeHtml(arrivalDepartureInVietnam)),
       buildEmailTableRow("Airline tickets", renderEmailTableFileLink(flightTicketForSave, "Click to view flight tickets")),
