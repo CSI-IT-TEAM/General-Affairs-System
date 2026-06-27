@@ -843,8 +843,8 @@ const SignIn = () => {
                 <Box
                     className="s-form left-form login-only-form"
                     sx={{
-                        width: "min(92vw, 440px) !important",
-                        maxWidth: "440px !important",
+                        width: "min(96vw, 560px) !important",
+                        maxWidth: "560px !important",
                         minWidth: "0 !important",
                         borderRight: "0 !important",
                         bgcolor: "#fff !important",
@@ -897,10 +897,32 @@ const SignIn = () => {
                         "& .s-mid": {
                             marginTop: "4px !important",
                         },
+                        "& .s-mid button, & .s-mid .MuiButton-root": {
+                            whiteSpace: "nowrap !important",
+                            fontSize: "1.05rem !important",
+                            letterSpacing: "0.6px",
+                            minHeight: "50px",
+                            px: "18px",
+                        },
+                        "& .login-header": {
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            mb: "6px",
+                            mt: "-2px",
+                        },
+                        "& .login-lang-select": {
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            mr: "-10px",
+                        },
+                        "& .login-lang-select__control": {
+                            minWidth: "170px",
+                        },
                     }}
                     style={{
-                        width: "min(92vw, 440px)",
-                        maxWidth: "440px",
+                        width: "min(96vw, 560px)",
+                        maxWidth: "560px",
                         minWidth: 0,
                         borderRight: 0,
                         background: "#fff",

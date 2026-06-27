@@ -352,7 +352,7 @@
     "mail_warn": "Please do not provide this OTP code to anyone for information security",
     "mail_define": " is the OTP code that activates password reset, valid for 5 minutes",
     "mail_end": "Thank you",
-    "business_trip": "Business Trip",
+    "business_trip": "Business Trip ( From CDC, JJ, QD )",
     "business_trip_title": "Business Trip Registration",
     "business_trip_desc": "Register for business trips to ChangShin Vietnam",
     "business_trip_registration_tab": "Business Trip Registration",
@@ -366,7 +366,7 @@
      "business_trip_dept_from": "From Department",
      "business_trip_factory": "Affiliated Division",
      "business_trip_position": "Position",
-     "business_trip_tracking":  "Business Trip Tracking",
+     "business_trip_tracking":  "Business Trip Registration Tracking",
      "business_trip_info": "Business Trip Information",
      "business_trip_purpose": "Business Trip Purpose",
      "business_trip_dept_related": "Related Department",
@@ -397,6 +397,7 @@
       "business_trip_hotel_reservation_date_to": "Hotel Reservation Date To",
       "main_title": "General Affairs System",
       "business_trip_to_changshin": "Business Trip to ChangShin Vietnam"
+
      
 
 }
