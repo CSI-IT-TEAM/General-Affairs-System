@@ -1947,7 +1947,7 @@ export default function BusinessTripFormNewLayout() {
                 },
               }}
             >
-              Login
+              {t("login") || "Login"}
             </Button>
           )}
         </Box>

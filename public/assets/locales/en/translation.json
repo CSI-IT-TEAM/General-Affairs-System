@@ -397,7 +397,8 @@
       "business_trip_hotel_reservation_date_to": "Hotel Reservation Date To",
       "main_title": "General Affairs System",
       "business_trip_to_changshin": "Business Trip to ChangShin Vietnam",
-      "required_note":"(*) Required fields"
+      "required_note":"(*) Required fields",
+      "login": "Login"
 
      
 
