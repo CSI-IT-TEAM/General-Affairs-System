@@ -381,9 +381,9 @@ const getDateValidationMessage = (selectedLanguage, type) => {
 const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
   const messages = {
     factoryRequired: {
-      en: "Please select factory.",
-      kr: "공장을 선택해 주세요.",
-      vn: "Vui lòng chọn nhà máy.",
+      en: "Please select Affiliated Division.",
+      kr: "소속 구분을 선택해 주세요.",
+      vn: "Vui lòng chọn Đơn trực thuộc.",
     },
     visitorDeptRequired: {
       en: "From Department is required.",
