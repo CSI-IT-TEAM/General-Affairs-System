@@ -227,6 +227,12 @@ const normalizeLanguage = (language) => {
     : "en";
 };
 
+const renderRequiredLabel = (label) => (
+  <>
+    {label} <Box component="span" sx={{ color: "#d32f2f", fontWeight: 600 }}>(*)</Box>
+  </>
+);
+
 const POCKETBASE_BASE_URL = "http://vjweb.dskorea.com:8090";
 const POCKETBASE_COLLECTION = "GA_BUSINESS_TRIP_FILES";
 const DOCUMENT_FILE_FIELD = "IMAGE_FILE";
@@ -1990,9 +1996,29 @@ export default function BusinessTripFormNewLayout() {
               gap: 2,
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {t("business_trip_title")}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                {t("business_trip_title")}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#d32f2f",
+                  fontWeight: 600,
+                  fontStyle: "italic",
+                }}
+              >
+                {t("required_note")}
+              </Typography>
+            </Box>
 
             <Button
               variant="contained"
@@ -2008,8 +2034,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                required
-                label={t("business_trip_name_en")}
+                label={renderRequiredLabel(t("business_trip_name_en"))}
                 value={formData.visitorNameEn}
                 onChange={handleInputChange("visitorNameEn")}
               />
@@ -2018,8 +2043,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                required
-                label={t("business_trip_name_kr")}
+                label={renderRequiredLabel(t("business_trip_name_kr"))}
                 value={formData.visitorNameKr}
                 onChange={handleInputChange("visitorNameKr")}
               />
@@ -2028,9 +2052,8 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                required
                 type="email"
-                label="Email"
+                label={renderRequiredLabel("Email")}
                 value={formData.email}
                 onChange={handleInputChange("email")}
               />
@@ -2056,8 +2079,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                required
-                label={t("business_trip_dept_from")}
+                label={renderRequiredLabel(t("business_trip_dept_from"))}
                 value={formData.visitorDept}
                 onChange={handleInputChange("visitorDept")}
               />
@@ -2067,8 +2089,7 @@ export default function BusinessTripFormNewLayout() {
               <TextField
                 select
                 fullWidth
-                required
-                label={t("business_trip_position")}
+                label={renderRequiredLabel(t("business_trip_position"))}
                 value={formData.visitorPosition}
                 onChange={handleInputChange("visitorPosition")}
               >
@@ -2088,8 +2109,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                required
-                label={t("business_trip_purpose")}
+                label={renderRequiredLabel(t("business_trip_purpose"))}
                 value={formData.purpose}
                 onChange={handleInputChange("purpose")}
               />
@@ -2098,8 +2118,7 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                required
-                label={t("business_trip_dept_related")}
+                label={renderRequiredLabel(t("business_trip_dept_related"))}
                 value={formData.relateDept}
                 onChange={handleInputChange("relateDept")}
               />
@@ -2136,7 +2155,7 @@ export default function BusinessTripFormNewLayout() {
                   }}
                 >
                   {t("business_trip_upload_e_visa")}
-                  <Box component="span" className="required-upload-asterisk">*</Box>
+                  <Box component="span" className="required-upload-asterisk" sx={{ color: "#d32f2f", fontWeight: 600 }}>&nbsp;(*)</Box>
                   <input
                     hidden
                     multiple
@@ -2182,7 +2201,7 @@ export default function BusinessTripFormNewLayout() {
                   }}
                 >
                   {t("business_trip_upload_flight_ticket")}
-                  <Box component="span" className="required-upload-asterisk">*</Box>
+                  <Box component="span" className="required-upload-asterisk" sx={{ color: "#d32f2f", fontWeight: 600 }}>&nbsp;(*)</Box>
                   <input
                     hidden
                     multiple
@@ -2214,9 +2233,8 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
-                required
                 type="datetime-local"
-                label={t("business_trip_entry_time")}
+                label={renderRequiredLabel(t("business_trip_entry_time"))}
                 value={formData.entryDateTime}
                 onChange={handleEntryDateTimeChange}
                 InputLabelProps={{ shrink: true }}
@@ -2230,9 +2248,8 @@ export default function BusinessTripFormNewLayout() {
             <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
-                required
                 type="datetime-local"
-                label={t("business_trip_exit_time")}
+                label={renderRequiredLabel(t("business_trip_exit_time"))}
                 value={formData.exitDateTime}
                 onChange={handleExitDateTimeChange}
                 InputLabelProps={{ shrink: true }}

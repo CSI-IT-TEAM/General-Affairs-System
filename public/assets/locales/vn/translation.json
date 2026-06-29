@@ -385,6 +385,7 @@
     "business_trip_hotel_reservation_date_from": "Ngày nhận phòng khách sạn",
     "business_trip_hotel_reservation_date_to": "Ngày trả phòng khách sạn",
     "main_title": "General Affairs System",
-    "business_trip_to_changshin": "Công tác đến ChangShin Vietnam"
+    "business_trip_to_changshin": "Công tác đến ChangShin Vietnam",
+    "required_note":"(*) Các trường bắt buộc"
 
      }
