@@ -365,8 +365,8 @@
     "main_title": "General Affairs System",
     "business_trip_to_changshin": "창신 베트남 출장",
     "required_note":"(*) 필수 입력 사항",
-    "login": "로그인"
-    
+    "login": "로그인",
+    "hotel_file_upload": "호텔 정보"   
 
 
 }

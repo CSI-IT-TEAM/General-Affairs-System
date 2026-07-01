@@ -697,6 +697,170 @@ const renderFileLinks = (value) => {
   });
 };
 
+const getFileExtensionFromValue = (value) => {
+  const cleanValue = String(value || "")
+    .trim()
+    .split("?")[0]
+    .split("#")[0]
+    .toLowerCase();
+  const dotIndex = cleanValue.lastIndexOf(".");
+
+  return dotIndex >= 0 ? cleanValue.slice(dotIndex) : "";
+};
+
+const isOpenableFileUrl = (value) => /^(https?:\/\/|data:|blob:|\/)/i.test(String(value || "").trim());
+
+const renderHotelFileUpload = (value) => {
+  if (!value) return "-";
+
+  const parts = String(value)
+    .split(/[,;\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!parts.length) return "-";
+
+  const hotelFiles = parts
+    .map((item, index) => {
+      const extension = getFileExtensionFromValue(item);
+      const isPdf = extension === ".pdf";
+      const isImage = [".jpg", ".jpeg", ".png", ".bmp"].includes(extension);
+
+      return {
+        item,
+        originalIndex: index,
+        extension,
+        isPdf,
+        isImage,
+        canOpen: isOpenableFileUrl(item),
+      };
+    })
+    .sort((a, b) => {
+      const getRank = (file) => {
+        if (file.isPdf) return 0;
+        if (file.isImage) return 1;
+        return 2;
+      };
+
+      const rankDiff = getRank(a) - getRank(b);
+      return rankDiff !== 0 ? rankDiff : a.originalIndex - b.originalIndex;
+    });
+
+  return (
+    <Stack
+      direction="column"
+      spacing={0.45}
+      alignItems="center"
+      justifyContent="center"
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "visible",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {hotelFiles.map((file, index) => {
+        const { item, isPdf, isImage, canOpen } = file;
+        const fileLabel = hotelFiles.length > 1 ? `File ${index + 1}` : "File";
+
+        if (isPdf && canOpen) {
+          return (
+            <Box
+              component="a"
+              key={`${item}-${file.originalIndex}`}
+              href={item}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Open ${fileLabel}`}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                gap: 0.2,
+                color: "#D32F2F",
+                textDecoration: "none",
+                fontWeight: 700,
+              }}
+            >
+              <PictureAsPdfOutlinedIcon sx={{ fontSize: 24 }} />
+              PDF{hotelFiles.length > 1 ? ` ${index + 1}` : ""}
+            </Box>
+          );
+        }
+
+        if (isImage && canOpen) {
+          return (
+            <Box
+              component="a"
+              key={`${item}-${file.originalIndex}`}
+              href={item}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Open ${fileLabel}`}
+              sx={{
+                display: "inline-flex",
+                justifyContent: "center",
+                flexShrink: 0,
+                textDecoration: "none",
+              }}
+            >
+              <Box
+                component="img"
+                src={item}
+                alt={`Hotel upload ${index + 1}`}
+                sx={{
+                  width: 64,
+                  height: 46,
+                  objectFit: "cover",
+                  borderRadius: 1,
+                  border: "1px solid #C8D1DA",
+                  bgcolor: "#fff",
+                }}
+              />
+            </Box>
+          );
+        }
+
+        if (canOpen) {
+          return (
+            <Box
+              component="a"
+              key={`${item}-${file.originalIndex}`}
+              href={item}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Open ${fileLabel}`}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                flexShrink: 0,
+                gap: 0.5,
+                color: "primary.main",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
+            >
+              <ImageOutlinedIcon sx={{ fontSize: 20 }} />
+              {fileLabel}
+            </Box>
+          );
+        }
+
+        return (
+          <Box
+            component="span"
+            key={`${item}-${file.originalIndex}`}
+            sx={{ display: "inline-block", flexShrink: 0 }}
+          >
+            {item}
+          </Box>
+        );
+      })}
+    </Stack>
+  );
+};
+
 export default function BusinessTripFormNewLayout() {
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
@@ -2497,6 +2661,10 @@ export default function BusinessTripFormNewLayout() {
                   width: 120,
                   minWidth: 120,
                 },
+                "& .tracking-col-file": {
+                  width: 210,
+                  minWidth: 210,
+                },
                 "& .tracking-col-md": {
                   width: 155,
                   minWidth: 155,
@@ -2520,7 +2688,7 @@ export default function BusinessTripFormNewLayout() {
                 size="small"
                 sx={{
                   width: "max-content",
-                  minWidth: 2600,
+                  minWidth: 2810,
                   tableLayout: "auto",
                 }}
               >
@@ -2545,12 +2713,13 @@ export default function BusinessTripFormNewLayout() {
                     <TableCell className="tracking-col-sm">{t("flight_ticket") || "Flight Ticket"}</TableCell>                    
                     <TableCell className="tracking-col-sm">{t("hotel") || "Hotel"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("google_maps") || "Google Maps"}</TableCell>
+                    <TableCell className="tracking-col-file">{t("hotel_file_upload", "Hotel Information")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredTrackingRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={19} align="center">
+                      <TableCell colSpan={20} align="center">
                         No data
                       </TableCell>
                     </TableRow>
@@ -2606,6 +2775,16 @@ export default function BusinessTripFormNewLayout() {
                             }
                             return "-";
                           })()}
+                        </TableCell>
+                        <TableCell className="tracking-col-file">
+                          {renderHotelFileUpload(
+                            getRowValue(row, [
+                              "HOTEL_FILE_UPLOAD",
+                              "hotelFileUpload",
+                              "HOTEL_FILE",
+                              "hotelFile",
+                            ])
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
