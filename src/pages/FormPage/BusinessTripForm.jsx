@@ -472,7 +472,7 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
 const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@changshininc.com; LOAN.GENERAL@changshininc.com; NHI.GENERAL@changshininc.com";
-const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com";
+const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com; changho.kwon@changshininc.com";
 const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; 
 
 /*const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com; DO.IT@changshininc.com";
@@ -885,6 +885,13 @@ export default function BusinessTripFormNewLayout() {
   const [trackingError, setTrackingError] = useState("");
   const [hasLoadedTracking, setHasLoadedTracking] = useState(false);
   const [trackingPage, setTrackingPage] = useState(1);
+  const trackingTableRef = React.useRef(null);
+  const [trackingScrollState, setTrackingScrollState] = useState({
+    left: 0,
+    top: 0,
+    maxLeft: 0,
+    maxTop: 0,
+  });
 
   useEffect(() => {
     setLanguage(normalizeLanguage(i18n.language));
@@ -1448,6 +1455,83 @@ export default function BusinessTripFormNewLayout() {
     setTrackingPage((prev) => Math.min(totalTrackingPages, prev + 1));
   };
 
+  const updateTrackingScrollState = useCallback(() => {
+    const scrollElement = trackingTableRef.current;
+
+    if (!scrollElement) return;
+
+    const nextState = {
+      left: Math.round(scrollElement.scrollLeft || 0),
+      top: Math.round(scrollElement.scrollTop || 0),
+      maxLeft: Math.max(
+        0,
+        Math.round(scrollElement.scrollWidth - scrollElement.clientWidth)
+      ),
+      maxTop: Math.max(
+        0,
+        Math.round(scrollElement.scrollHeight - scrollElement.clientHeight)
+      ),
+    };
+
+    setTrackingScrollState((prev) =>
+      prev.left === nextState.left &&
+      prev.top === nextState.top &&
+      prev.maxLeft === nextState.maxLeft &&
+      prev.maxTop === nextState.maxTop
+        ? prev
+        : nextState
+    );
+  }, []);
+
+  useEffect(() => {
+    if (tab !== 1) return undefined;
+
+    updateTrackingScrollState();
+
+    const resizeHandler = () => updateTrackingScrollState();
+    const timeoutId = window.setTimeout(updateTrackingScrollState, 120);
+
+    window.addEventListener("resize", resizeHandler);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("resize", resizeHandler);
+    };
+  }, [
+    tab,
+    isLoadingTracking,
+    filteredTrackingRows.length,
+    paginatedTrackingRows.length,
+    updateTrackingScrollState,
+  ]);
+
+  const handleTrackingTableScroll = () => {
+    updateTrackingScrollState();
+  };
+
+  const handleTrackingHorizontalScrollChange = (event) => {
+    const scrollElement = trackingTableRef.current;
+    if (!scrollElement) return;
+
+    scrollElement.scrollLeft = Number(event.target.value || 0);
+    updateTrackingScrollState();
+  };
+
+  const handleTrackingVerticalScrollChange = (event) => {
+    const scrollElement = trackingTableRef.current;
+    if (!scrollElement) return;
+
+    // input[type=range] in vertical mode puts min value at the bottom.
+    // Invert the value so the thumb is at the top when the table is scrolled to top,
+    // just like the native Chrome/Windows scrollbar.
+    const sliderValue = Number(event.target.value || 0);
+    scrollElement.scrollTop = Math.max(
+      0,
+      trackingScrollState.maxTop - sliderValue
+    );
+    updateTrackingScrollState();
+  };
+
   const formatEmailDateOnly = (value) => {
     if (!value) return "-";
 
@@ -1870,6 +1954,124 @@ export default function BusinessTripFormNewLayout() {
         },
       }}
     >
+      <style>
+        {`
+          .business-trip-form .business-trip-tracking-table {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+          }
+
+          .business-trip-form .business-trip-tracking-table::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            display: none !important;
+          }
+
+          .business-trip-form .business-trip-tracking-table::-webkit-scrollbar-track {
+            display: none !important;
+            background: transparent !important;
+          }
+
+          .business-trip-form .business-trip-tracking-table::-webkit-scrollbar-thumb {
+            display: none !important;
+            background: transparent !important;
+          }
+
+          .business-trip-form .business-trip-tracking-table::-webkit-scrollbar-corner {
+            display: none !important;
+            background: transparent !important;
+          }
+
+          .business-trip-form .tracking-scroll-panel {
+            background: #EFEFEF;
+            border: 1px solid #C8C8C8;
+            border-radius: 10px;
+            padding: 3px;
+            box-sizing: border-box;
+          }
+
+          .business-trip-form .tracking-big-scroll-range {
+            width: 100%;
+            height: 26px;
+            cursor: pointer;
+            accent-color: #555;
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+          }
+
+          .business-trip-form .tracking-big-scroll-range::-webkit-slider-runnable-track {
+            height: 10px;
+            background: #D0D0D0;
+            border-radius: 999px;
+          }
+
+          .business-trip-form .tracking-big-scroll-range::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 58px;
+            height: 18px;
+            margin-top: -4px;
+            background: #555;
+            border: 2px solid #F5F5F5;
+            border-radius: 999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+          }
+
+          .business-trip-form .tracking-big-scroll-range::-moz-range-track {
+            height: 10px;
+            background: #D0D0D0;
+            border-radius: 999px;
+          }
+
+          .business-trip-form .tracking-big-scroll-range::-moz-range-thumb {
+            width: 58px;
+            height: 18px;
+            background: #555;
+            border: 2px solid #F5F5F5;
+            border-radius: 999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+          }
+
+          .business-trip-form .tracking-big-scroll-range-vertical {
+            width: 28px;
+            height: 100%;
+            margin: 0 auto;
+            display: block;
+            min-height: 360px;
+            writing-mode: vertical-rl;
+            direction: rtl;
+            align-self: center;
+          }
+
+          .business-trip-form .tracking-big-scroll-range-vertical::-webkit-slider-runnable-track {
+            width: 10px;
+            height: 100%;
+          }
+
+          .business-trip-form .tracking-big-scroll-range-vertical::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 58px;
+            margin-left: -4px;
+            margin-top: 0;
+            background: #555;
+            border: 2px solid #F5F5F5;
+            border-radius: 999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+          }
+
+          .business-trip-form .tracking-big-scroll-range-vertical::-moz-range-thumb {
+            width: 18px;
+            height: 58px;
+            background: #555;
+            border: 2px solid #F5F5F5;
+            border-radius: 999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+          }
+        `}
+      </style>
       <Box
         className="business-trip-header"
         sx={{
@@ -2612,14 +2814,49 @@ export default function BusinessTripFormNewLayout() {
               <CircularProgress />
             </Box>
           ) : (
-            <TableContainer
-              className="business-trip-tracking-table"
-              component={Paper}
+            <Box
               sx={{
+                gridColumn: "1 / 2",
+                gridRow: "1 / 2",
+                flex: "1 1 auto",
+                minHeight: 0,
+                display: "grid",
+                gridTemplateColumns:
+                  trackingScrollState.maxTop > 0 ? "minmax(0, 1fr) 38px" : "minmax(0, 1fr)",
+                gridTemplateRows:
+                  trackingScrollState.maxLeft > 0 ? "minmax(0, 1fr) 38px" : "minmax(0, 1fr)",
+                gap: 0.25,
+              }}
+            >
+              <TableContainer
+                ref={trackingTableRef}
+                onScroll={handleTrackingTableScroll}
+                className="business-trip-tracking-table"
+                component={Paper}
+                sx={{
                 flex: "1 1 auto",
                 minHeight: 0,
                 maxHeight: "none",
                 overflow: "auto",
+                msOverflowStyle: "none",
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": {
+                  width: 0,
+                  height: 0,
+                  display: "none",
+                },
+                "&::-webkit-scrollbar-track": {
+                  display: "none",
+                  bgcolor: "transparent",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  display: "none",
+                  bgcolor: "transparent",
+                },
+                "&::-webkit-scrollbar-corner": {
+                  display: "none",
+                  bgcolor: "transparent",
+                },
                 "& .MuiTableRow-root": {
                   height: 34,
                 },
@@ -2628,6 +2865,8 @@ export default function BusinessTripFormNewLayout() {
                   px: 0.55,
                   py: 0.45,
                   fontSize: "0.75rem",
+                  borderRight: "1px solid #D0D7DE",
+                  borderBottom: "1px solid #E0E0E0",
                 },
                 "& .MuiTableCell-head": {
                   bgcolor: "#E3F2FD",
@@ -2640,7 +2879,7 @@ export default function BusinessTripFormNewLayout() {
                   minWidth: 110,
                   wordBreak: "normal",
                   overflowWrap: "break-word",
-                  borderRight: "1px solid #D0D7DE",
+                  borderRight: "1px solid #B8C7D3",
                   borderBottom: "2px solid #90CAF9",
                   verticalAlign: "middle",
                   zIndex: 3,
@@ -2653,6 +2892,28 @@ export default function BusinessTripFormNewLayout() {
                   overflowWrap: "normal",
                   fontWeight: "400 !important",
                 },
+                "& .tracking-sticky": {
+                  position: "sticky",
+                  left: "var(--tracking-sticky-left)",
+                  zIndex: 2,
+                  boxShadow: "2px 0 0 #B8C7D3",
+                },
+                "& .tracking-sticky:not(.tracking-sticky-status)": {
+                  bgcolor: "#fff",
+                },
+                "& .MuiTableCell-head.tracking-sticky": {
+                  zIndex: 5,
+                  bgcolor: "#E3F2FD",
+                },
+                "& .MuiTableRow-hover:hover .tracking-sticky:not(.tracking-sticky-status)": {
+                  bgcolor: "#F5F9FF",
+                },
+                "& .tracking-sticky-1": { "--tracking-sticky-left": "0px" },
+                "& .tracking-sticky-2": { "--tracking-sticky-left": "120px" },
+                "& .tracking-sticky-3": { "--tracking-sticky-left": "240px" },
+                "& .tracking-sticky-4": { "--tracking-sticky-left": "312px" },
+                "& .tracking-sticky-5": { "--tracking-sticky-left": "467px" },
+                "& .tracking-sticky-6": { "--tracking-sticky-left": "622px" },
                 "& .tracking-col-xs": {
                   width: 72,
                   minWidth: 72,
@@ -2694,12 +2955,12 @@ export default function BusinessTripFormNewLayout() {
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell className="tracking-col-sm">{t("status") || "Status"}</TableCell>
-                    <TableCell className="tracking-col-sm">{t("requestDate") || "Request Date"}</TableCell>
-                    <TableCell className="tracking-col-xs">{t("from") || "From"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_name_en") || "English Name"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_name_kr") || "Korean Name"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_dept_from") || "From Department"}</TableCell>
+                    <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-1">{t("status") || "Status"}</TableCell>
+                    <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-2">{t("requestDate") || "Request Date"}</TableCell>
+                    <TableCell className="tracking-col-xs tracking-sticky tracking-sticky-3">{t("from") || "From"}</TableCell>
+                    <TableCell className="tracking-col-md tracking-sticky tracking-sticky-4">{t("business_trip_name_en") || "English Name"}</TableCell>
+                    <TableCell className="tracking-col-md tracking-sticky tracking-sticky-5">{t("business_trip_name_kr") || "Korean Name"}</TableCell>
+                    <TableCell className="tracking-col-md tracking-sticky tracking-sticky-6">{t("business_trip_dept_from") || "From Department"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_position") || "Position"}</TableCell>
                     <TableCell className="tracking-col-email">{t("email") || "Email"}</TableCell>
                     <TableCell className="tracking-col-md">{t("business_trip_dept_related") || "Related Dept"}</TableCell>
@@ -2730,17 +2991,17 @@ export default function BusinessTripFormNewLayout() {
                           const statusValue = getRowValue(row, ["STATUS", "status"]);
 
                           return (
-                            <TableCell sx={getStatusCellSx(statusValue)}>
+                            <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-1 tracking-sticky-status" sx={getStatusCellSx(statusValue)}>
                               {formatStatusDisplay(statusValue)}
                             </TableCell>
                           );
                         })()
                         }                   
-                        <TableCell>{getRowValue(row, ["REQ_DATE", "reqDate"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["AFFILI_DIV", "affiliDiv"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["VISITOR_NAME_EN", "visitorNameEn"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["VISITOR_NAME_KR", "visitorNameKr"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["VISITOR_DEPT", "visitorDept"])}</TableCell>
+                        <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-2">{getRowValue(row, ["REQ_DATE", "reqDate"])}</TableCell>
+                        <TableCell className="tracking-col-xs tracking-sticky tracking-sticky-3">{getRowValue(row, ["AFFILI_DIV", "affiliDiv"])}</TableCell>
+                        <TableCell className="tracking-col-md tracking-sticky tracking-sticky-4">{getRowValue(row, ["VISITOR_NAME_EN", "visitorNameEn"])}</TableCell>
+                        <TableCell className="tracking-col-md tracking-sticky tracking-sticky-5">{getRowValue(row, ["VISITOR_NAME_KR", "visitorNameKr"])}</TableCell>
+                        <TableCell className="tracking-col-md tracking-sticky tracking-sticky-6">{getRowValue(row, ["VISITOR_DEPT", "visitorDept"])}</TableCell>
                         <TableCell>{getRowValue(row, ["VISITOR_POSITION", "visitorPosition"])}</TableCell>
                         <TableCell>{getRowValue(row, ["EMAIL", "email"])}</TableCell>
                         <TableCell>{getRowValue(row, ["RELATE_DEPT", "relateDept"])}</TableCell>
@@ -2792,6 +3053,80 @@ export default function BusinessTripFormNewLayout() {
                 </TableBody>
               </Table>
             </TableContainer>
+
+              {trackingScrollState.maxTop > 0 && (
+                <Box
+                  className="tracking-scroll-panel"
+                  sx={{
+                    gridColumn: "2 / 3",
+                    gridRow: "1 / 2",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    justifyItems: "center",
+                    minHeight: 0,
+                  }}
+                  title="Kéo để cuộn lên / xuống"
+                >
+                  <input
+                    className="tracking-big-scroll-range tracking-big-scroll-range-vertical"
+                    type="range"
+                    min="0"
+                    max={trackingScrollState.maxTop}
+                    value={Math.max(
+                      0,
+                      trackingScrollState.maxTop - Math.min(
+                        trackingScrollState.top,
+                        trackingScrollState.maxTop
+                      )
+                    )}
+                    onChange={handleTrackingVerticalScrollChange}
+                    aria-label="Vertical table scrollbar"
+                  />
+                </Box>
+              )}
+
+              {trackingScrollState.maxLeft > 0 && (
+                <Box
+                  className="tracking-scroll-panel"
+                  sx={{
+                    gridColumn: "1 / 2",
+                    gridRow: "2 / 3",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    minWidth: 0,
+                  }}
+                  title="Kéo để cuộn trái / phải"
+                >
+                  <input
+                    className="tracking-big-scroll-range"
+                    type="range"
+                    min="0"
+                    max={trackingScrollState.maxLeft}
+                    value={Math.min(trackingScrollState.left, trackingScrollState.maxLeft)}
+                    onChange={handleTrackingHorizontalScrollChange}
+                    aria-label="Horizontal table scrollbar"
+                  />
+                </Box>
+              )}
+
+              {trackingScrollState.maxTop > 0 && trackingScrollState.maxLeft > 0 && (
+                <Box
+                  className="tracking-scroll-panel"
+                  sx={{
+                    gridColumn: "2 / 3",
+                    gridRow: "2 / 3",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    color: "#555",
+                  }}
+                />
+              )}
+            </Box>
           )}
 
           {!isLoadingTracking && filteredTrackingRows.length > TRACKING_PAGE_SIZE && (
