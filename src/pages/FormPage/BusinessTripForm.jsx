@@ -69,9 +69,13 @@ const formatDateInputValue = (date) => {
 };
 
 const getDefaultTrackingFilters = () => {
-  const toDate = new Date();
-  const fromDate = new Date();
-  fromDate.setMonth(fromDate.getMonth() - 1);
+  const today = new Date();
+
+  const fromDate = new Date(today);
+  fromDate.setDate(today.getDate() - 14);
+
+  const toDate = new Date(today);
+  toDate.setDate(today.getDate() + 14);
 
   return {
     affiliDiv: "ALL",
