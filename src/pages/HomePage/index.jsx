@@ -153,7 +153,7 @@ const HomePage = () => {
             <Grid justifyContent={"flex-start"} alignItems="stretch" container spacing={colSpacing} className="s-home-grid">
             {(() => {
                 // Kiểm tra quyền xem menu
-                const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" ;
+                const isExpOrSpecialEmp = persType === "EXP" || emp_id === "15050432" || emp_id === "99115447" || emp_id === "10100384" ;
                 const isAdminGA = emp_id === "02026154"|| emp_id === "05110243"
                 const canViewJobPositionMenu = jobPosition !== null && (Number(jobPosition) <= 180 || Number(jobPosition) === 300);
                 

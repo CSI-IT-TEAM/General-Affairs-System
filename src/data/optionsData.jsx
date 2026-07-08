@@ -66,19 +66,19 @@ const optionData = [
         sort_order: 3,
         visible: true,
     },
-    {
-        id: '004',
-        title: 'Pickle Ball Booking',
-        thumb: pickleballBanner, // Ảnh icon - đang sử dụng
-        // thumb: pickleballBanner, // Ảnh banner - comment lại
-        desc: 'Đặt lịch chơi Pickleball tại các sân thể thao',
-        desc_color: "#000000",
-        bgColor: '#4ade80',
-        link: '',
-        btn_order_text: "Booking Now",
-        sort_order: 4,
-        visible: true,
-    },
+    // {
+    //     id: '004',
+    //     title: 'Pickle Ball Booking',
+    //     thumb: pickleballBanner, // Ảnh icon - đang sử dụng
+    //     // thumb: pickleballBanner, // Ảnh banner - comment lại
+    //     desc: 'Đặt lịch chơi Pickleball tại các sân thể thao',
+    //     desc_color: "#000000",
+    //     bgColor: '#4ade80',
+    //     link: '',
+    //     btn_order_text: "Booking Now",
+    //     sort_order: 4,
+    //     visible: true,
+    // },
     {
         id: '006',
         title: 'Temporary Residence Registration',
