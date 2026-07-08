@@ -399,7 +399,8 @@
       "business_trip_to_changshin": "Business Trip to ChangShin Vietnam",
       "required_note":"(*) Required fields",
       "login": "Login",
-      "hotel_file_upload": "Hotel Information"
+      "hotel_file_upload": "Hotel Information",
+        "remarks": "Remarks"
 
      
 

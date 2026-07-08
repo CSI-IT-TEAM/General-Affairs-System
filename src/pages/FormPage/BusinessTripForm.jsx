@@ -455,9 +455,9 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
       vn: "Lưu thành công và đã gửi email.",
     },
     saveSuccessEmailFailed: {
-      en: "Save successful but email sending failed. Please check the email server or send the email manually.",
-      kr: "저장은 성공했지만 이메일 발송에 실패했습니다. 이메일 서버를 확인하거나 수동으로 발송해 주세요.",
-      vn: "Lưu thành công nhưng gửi email thất bại. Vui lòng kiểm tra email server hoặc gửi email thủ công.",
+      en: `Save successful but email sending failed${detail ? `: ${detail}` : ". Please check the email server or send the email manually."}`,
+      kr: `저장은 성공했지만 이메일 발송에 실패했습니다${detail ? `: ${detail}` : ". 이메일 서버를 확인하거나 수동으로 발송해 주세요."}`,
+      vn: `Lưu thành công nhưng gửi email thất bại${detail ? `: ${detail}` : ". Vui lòng kiểm tra email server hoặc gửi email thủ công."}`,
     },
     saveFailed: {
       en: `Save failed${detail ? `: ${detail}` : "."}`,
@@ -479,9 +479,54 @@ const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@c
 const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com";
 const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; 
 
-/*const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com; DO.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com; DO.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com";*/
+/*const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com";*/
+
+const splitEmailRecipients = (value) =>
+  String(value || "")
+    .split(/[;,]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const buildBusinessTripEmailCarbonCopy = (visitorEmail) => {
+  const recipientMap = new Map();
+
+  [...splitEmailRecipients(BUSINESS_TRIP_EMAIL_CC), String(visitorEmail || "").trim()]
+    .filter(Boolean)
+    .forEach((email) => {
+      recipientMap.set(email.toLowerCase(), email);
+    });
+
+  return Array.from(recipientMap.values()).join("; ");
+};
+
+const getEmailResponseErrorMessage = (value) => {
+  const fallbackMessage = "Send email failed";
+
+  if (!value) return fallbackMessage;
+
+  if (typeof value === "string") {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) return fallbackMessage;
+
+    try {
+      return getEmailResponseErrorMessage(JSON.parse(trimmedValue));
+    } catch (error) {
+      return trimmedValue;
+    }
+  }
+
+  return (
+    value.message ||
+    value.errorMessage ||
+    value.error?.message ||
+    value.error ||
+    value.detail ||
+    fallbackMessage
+  );
+};
 
 
 const EMPTY_FILE_DATA = {
@@ -1681,7 +1726,7 @@ export default function BusinessTripFormNewLayout() {
   }) => {
     const payload = {
       to: BUSINESS_TRIP_EMAIL_TO,
-      carbon_copy: BUSINESS_TRIP_EMAIL_CC,
+      carbon_copy: buildBusinessTripEmailCarbonCopy(formData.email),
       blind_carbon_copy: BUSINESS_TRIP_EMAIL_BCC,
       subject: `[Business Trip] ${formData.visitorNameEn || "New Registration"} - ${formData.affiliDiv}`,
       html: buildBusinessTripEmailHtml({
@@ -1705,17 +1750,31 @@ export default function BusinessTripFormNewLayout() {
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Send email failed");
-    }
-
     const responseText = await response.text();
 
+    if (!response.ok) {
+      throw new Error(getEmailResponseErrorMessage(responseText));
+    }
+
     try {
-      return responseText ? JSON.parse(responseText) : { success: true };
+      const emailResult = responseText ? JSON.parse(responseText) : { success: true };
+
+      if (
+        emailResult?.success === false ||
+        emailResult?.ok === false ||
+        String(emailResult?.status || "").toLowerCase() === "error" ||
+        emailResult?.error
+      ) {
+        throw new Error(getEmailResponseErrorMessage(emailResult));
+      }
+
+      return emailResult;
     } catch (error) {
-      return { success: true, data: responseText };
+      if (error instanceof SyntaxError) {
+        return { success: true, data: responseText };
+      }
+
+      throw error;
     }
   };
 
@@ -1842,6 +1901,7 @@ export default function BusinessTripFormNewLayout() {
 
       if (result.success) {
         let emailSent = false;
+        let emailErrorMessage = "";
         
         try {
           await sendBusinessTripEmail({
@@ -1857,13 +1917,14 @@ export default function BusinessTripFormNewLayout() {
           });
           emailSent = true;
         } catch (emailError) {
+          emailErrorMessage = emailError?.message || "";
           console.error("Business trip saved but email sending failed:", emailError);
         }
 
         alert(
           emailSent
             ? getSaveAlertMessage(language, "saveSuccessEmailSent")
-            : getSaveAlertMessage(language, "saveSuccessEmailFailed")
+            : getSaveAlertMessage(language, "saveSuccessEmailFailed", emailErrorMessage)
         );
 
         setFormData({ ...EMPTY_FORM });
@@ -2979,6 +3040,7 @@ export default function BusinessTripFormNewLayout() {
                     <TableCell className="tracking-col-sm">{t("hotel") || "Hotel"}</TableCell>
                     <TableCell className="tracking-col-sm">{t("google_maps") || "Google Maps"}</TableCell>
                     <TableCell className="tracking-col-file">{t("hotel_file_upload", "Hotel Information")}</TableCell>
+                    <TableCell className="tracking-col-file">{t("remarks", "Remarks")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -3051,6 +3113,7 @@ export default function BusinessTripFormNewLayout() {
                             ])
                           )}
                         </TableCell>
+                        <TableCell>{getRowValue(row, ["MEMO", "memo"])}</TableCell>
                       </TableRow>
                     ))
                   )}
