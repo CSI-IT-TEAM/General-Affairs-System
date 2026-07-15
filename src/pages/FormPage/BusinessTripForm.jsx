@@ -41,7 +41,7 @@ import {
 import "./Form.scss";
 
 const EMPTY_FORM = {
-  affiliDiv: "CDC",
+  affiliDiv: "HQ",
   visitorDept: "",
   visitorNameEn: "",
   visitorNameKr: "",
@@ -2501,7 +2501,7 @@ export default function BusinessTripFormNewLayout() {
                 onChange={handleInputChange("affiliDiv")}
                 sx={{ minHeight: 38, alignItems: "center" }}
               >
-                <FormControlLabel value="CDC" control={<Radio />} label="CDC" />
+                <FormControlLabel value="HQ" control={<Radio />} label="HQ" />
                 <FormControlLabel value="JJ" control={<Radio />} label="JJ" />
                 <FormControlLabel value="QD" control={<Radio />} label="QD" />
               </RadioGroup>
@@ -2826,7 +2826,7 @@ export default function BusinessTripFormNewLayout() {
                 onChange={handleTrackingInputChange("affiliDiv")}
               >
                 <MenuItem value="ALL">ALL</MenuItem>
-                <MenuItem value="CDC">CDC</MenuItem>
+                <MenuItem value="HQ">HQ</MenuItem>
                 <MenuItem value="JJ">JJ</MenuItem>
                 <MenuItem value="QD">QD</MenuItem>
               </TextField>
@@ -2941,7 +2941,7 @@ export default function BusinessTripFormNewLayout() {
                   textTransform: "capitalize",
                   whiteSpace: "normal",
                   lineHeight: 1.15,
-                  minWidth: 110,
+                  minWidth: 80,
                   wordBreak: "normal",
                   overflowWrap: "break-word",
                   borderRight: "1px solid #B8C7D3",
@@ -2965,6 +2965,7 @@ export default function BusinessTripFormNewLayout() {
                 },
                 "& .tracking-sticky:not(.tracking-sticky-status)": {
                   bgcolor: "#fff",
+                  textAlign: "center",
                 },
                 "& .MuiTableCell-head.tracking-sticky": {
                   zIndex: 5,
@@ -2974,38 +2975,45 @@ export default function BusinessTripFormNewLayout() {
                   bgcolor: "#F5F9FF",
                 },
                 "& .tracking-sticky-1": { "--tracking-sticky-left": "0px" },
-                "& .tracking-sticky-2": { "--tracking-sticky-left": "120px" },
-                "& .tracking-sticky-3": { "--tracking-sticky-left": "240px" },
-                "& .tracking-sticky-4": { "--tracking-sticky-left": "312px" },
-                "& .tracking-sticky-5": { "--tracking-sticky-left": "467px" },
-                "& .tracking-sticky-6": { "--tracking-sticky-left": "622px" },
-                "& .tracking-col-xs": {
-                  width: 72,
-                  minWidth: 72,
+                "& .tracking-sticky-2": { "--tracking-sticky-left": "90px" },
+                "& .tracking-sticky-3": { "--tracking-sticky-left": "210px" },
+                "& .tracking-sticky-4": { "--tracking-sticky-left": "280px" },
+                "& .tracking-sticky-5": { "--tracking-sticky-left": "450px" },
+                "& .tracking-col-status": {
+                  width: 90,
+                  minWidth: 90,
                 },
-                "& .tracking-col-sm": {
+                "& .tracking-col-date": {
                   width: 120,
                   minWidth: 120,
                 },
+                "& .tracking-col-factory": {
+                  width: 70,
+                  minWidth: 70,
+                },
+                "& .tracking-col-name": {
+                  width: 170,
+                  minWidth: 170,
+                },
+                "& .tracking-col-korean": {
+                  width: 170,
+                  minWidth: 170,
+                },
+                "& .tracking-col-dept": {
+                  width: 180,
+                  minWidth: 180,
+                },
+                "& .tracking-col-purpose": {
+                  width: 320,
+                  minWidth: 320,
+                },
+                "& .tracking-col-datetime": {
+                  width: 145,
+                  minWidth: 145,
+                },
                 "& .tracking-col-file": {
-                  width: 210,
-                  minWidth: 210,
-                },
-                "& .tracking-col-md": {
-                  width: 155,
-                  minWidth: 155,
-                },
-                "& .tracking-col-lg": {
-                  width: 210,
-                  minWidth: 210,
-                },
-                "& .tracking-col-xl": {
-                  width: 260,
-                  minWidth: 260,
-                },
-                "& .tracking-col-email": {
-                  width: 290,
-                  minWidth: 290,
+                  width: 170,
+                  minWidth: 170,
                 },
               }}
             >
@@ -3014,33 +3022,28 @@ export default function BusinessTripFormNewLayout() {
                 size="small"
                 sx={{
                   width: "max-content",
-                  minWidth: 2810,
+                  minWidth: "100%",
                   tableLayout: "auto",
                 }}
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-1">{t("status") || "Status"}</TableCell>
-                    <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-2">{t("requestDate") || "Request Date"}</TableCell>
-                    <TableCell className="tracking-col-xs tracking-sticky tracking-sticky-3">{t("from") || "From"}</TableCell>
-                    <TableCell className="tracking-col-md tracking-sticky tracking-sticky-4">{t("business_trip_name_en") || "English Name"}</TableCell>
-                    <TableCell className="tracking-col-md tracking-sticky tracking-sticky-5">{t("business_trip_name_kr") || "Korean Name"}</TableCell>
-                    <TableCell className="tracking-col-md tracking-sticky tracking-sticky-6">{t("business_trip_dept_from") || "From Department"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_position") || "Position"}</TableCell>
-                    <TableCell className="tracking-col-email">{t("email") || "Email"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_dept_related") || "Related Dept"}</TableCell>
-                    <TableCell className="tracking-col-lg">{t("business_trip_purpose") || "Purpose"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_entry_time") || "Entry"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_exit_time") || "Exit"}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date_from", "Hotel Date From")}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_hotel_reservation_date_to", "Hotel Date To")}</TableCell>
-                    <TableCell className="tracking-col-md">{t("business_trip_airport_pickup_required") || "Airport"}</TableCell>
-                    <TableCell className="tracking-col-sm">{t("e_visa_apec_card") || "E-Visa / APEC"}</TableCell>
-                    <TableCell className="tracking-col-sm">{t("flight_ticket") || "Flight Ticket"}</TableCell>                    
-                    <TableCell className="tracking-col-sm">{t("hotel") || "Hotel"}</TableCell>
-                    <TableCell className="tracking-col-sm">{t("google_maps") || "Google Maps"}</TableCell>
-                    <TableCell className="tracking-col-file">{t("hotel_file_upload", "Hotel Information")}</TableCell>
-                    <TableCell className="tracking-col-file">{t("remarks", "Remarks")}</TableCell>
+                    <TableCell className="tracking-col-status tracking-sticky tracking-sticky-1">{t("status") || "Status"}</TableCell>
+                    <TableCell className="tracking-col-date tracking-sticky tracking-sticky-2">{t("requestDate") || "Request Date"}</TableCell>
+                    <TableCell className="tracking-col-factory tracking-sticky tracking-sticky-3">{t("from") || "From"}</TableCell>
+                    <TableCell className="tracking-col-name tracking-sticky tracking-sticky-4">{t("business_trip_name_en") || "English Name"}</TableCell>
+                    <TableCell className="tracking-col-korean tracking-sticky tracking-sticky-5">{t("business_trip_name_kr") || "Korean Name"}</TableCell>
+                                  
+                  
+                    <TableCell className="tracking-col-dept">{t("business_trip_dept_related") || "Related Dept"}</TableCell>
+                    <TableCell className="tracking-col-purpose">{t("business_trip_purpose") || "Purpose"}</TableCell>
+                    <TableCell className="tracking-col-datetime">{t("business_trip_entry_time") || "Entry"}</TableCell>
+                    <TableCell className="tracking-col-datetime">{t("business_trip_exit_time") || "Exit"}</TableCell>
+
+                    <TableCell className="tracking-col-file">{t("e_visa_apec_card") || "E-Visa / APEC"}</TableCell>
+                    <TableCell className="tracking-col-file">{t("flight_ticket") || "Flight Ticket"}</TableCell>                   
+
+                    
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -3057,63 +3060,27 @@ export default function BusinessTripFormNewLayout() {
                           const statusValue = getRowValue(row, ["STATUS", "status"]);
 
                           return (
-                            <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-1 tracking-sticky-status" sx={getStatusCellSx(statusValue)}>
+                            <TableCell className="tracking-col-status tracking-sticky tracking-sticky-1 tracking-sticky-status" sx={getStatusCellSx(statusValue)}>
                               {formatStatusDisplay(statusValue)}
                             </TableCell>
                           );
                         })()
                         }                   
-                        <TableCell className="tracking-col-sm tracking-sticky tracking-sticky-2">{getRowValue(row, ["REQ_DATE", "reqDate"])}</TableCell>
-                        <TableCell className="tracking-col-xs tracking-sticky tracking-sticky-3">{getRowValue(row, ["AFFILI_DIV", "affiliDiv"])}</TableCell>
-                        <TableCell className="tracking-col-md tracking-sticky tracking-sticky-4">{getRowValue(row, ["VISITOR_NAME_EN", "visitorNameEn"])}</TableCell>
-                        <TableCell className="tracking-col-md tracking-sticky tracking-sticky-5">{getRowValue(row, ["VISITOR_NAME_KR", "visitorNameKr"])}</TableCell>
-                        <TableCell className="tracking-col-md tracking-sticky tracking-sticky-6">{getRowValue(row, ["VISITOR_DEPT", "visitorDept"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["VISITOR_POSITION", "visitorPosition"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["EMAIL", "email"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["RELATE_DEPT", "relateDept"])}</TableCell>
-                        <TableCell>{getRowValue(row, ["PURPOSE", "purpose"])}</TableCell>
-                        <TableCell>{formatDateDisplay(getRowValue(row, ["ENTRY_DATE_TIME", "entryDateTime"]))}</TableCell>
-                        <TableCell>{formatDateDisplay(getRowValue(row, ["EXIT_DATE_TIME", "exitDateTime"]))}</TableCell>
-                        <TableCell>{formatDateDisplay(getRowValue(row, ["HOTEL_RESERVE_DATE", "hotelReserveDate"]))}</TableCell>
-                        <TableCell>{formatDateDisplay(getRowValue(row, ["HOTEL_RESERVE_DATE_TO", "hotelReserveDateTo"]))}</TableCell>
-                        <TableCell>
-                          {getRowValue(row, ["AIRPORT_PICKUP_YN", "airportPickupYn"]) === "Y" ? "Required" : "Not Needed"}
-                          <br />
-                          {formatDateDisplay(getRowValue(row, ["AIRPORT_DROPOFF_TIME", "airportDropoffTime"]))}
-                        </TableCell>
-                        <TableCell>{renderFileLinks(getRowValue(row, ["E_VISA", "eVisa"]))}</TableCell>
-                        <TableCell>{renderFileLinks(getRowValue(row, ["BUSINESS_TRIP_FLIGHT_TICKET", "businessTripFlightTicket"]))}</TableCell>
-                        
-                        <TableCell>{getRowValue(row, ["HOTEL_NAME", "hotel"])}</TableCell>
-                        <TableCell>
-                          {(() => {
-                            const googleMapsUrl = getRowValue(row, ["GOOGLE_MAP_LINK", "googleMaps"]);
-                            if (googleMapsUrl) {
-                              return (
-                                <a
-                                  href={googleMapsUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ color: "#0000ee", textDecoration: "underline" }}
-                                >
-                                  {t("view") || "View"}
-                                </a>
-                              );
-                            }
-                            return "-";
-                          })()}
-                        </TableCell>
-                        <TableCell className="tracking-col-file">
-                          {renderHotelFileUpload(
-                            getRowValue(row, [
-                              "HOTEL_FILE_UPLOAD",
-                              "hotelFileUpload",
-                              "HOTEL_FILE",
-                              "hotelFile",
-                            ])
-                          )}
-                        </TableCell>
-                        <TableCell>{getRowValue(row, ["MEMO", "memo"])}</TableCell>
+                        <TableCell className="tracking-col-date tracking-sticky tracking-sticky-2">{getRowValue(row, ["REQ_DATE", "reqDate"])}</TableCell>
+                        <TableCell className="tracking-col-factory tracking-sticky tracking-sticky-3">{getRowValue(row, ["AFFILI_DIV", "affiliDiv"])}</TableCell>
+                        <TableCell className="tracking-col-name tracking-sticky tracking-sticky-4">{getRowValue(row, ["VISITOR_NAME_EN", "visitorNameEn"])}</TableCell>
+                        <TableCell className="tracking-col-korean tracking-sticky tracking-sticky-5">{getRowValue(row, ["VISITOR_NAME_KR", "visitorNameKr"])}</TableCell>                       
+
+                        <TableCell className="tracking-col-dept">{getRowValue(row, ["RELATE_DEPT", "relateDept"])}</TableCell>
+                        <TableCell className="tracking-col-purpose">{getRowValue(row, ["PURPOSE", "purpose"])}</TableCell>
+                        <TableCell className="tracking-col-datetime">{formatDateDisplay(getRowValue(row, ["ENTRY_DATE_TIME", "entryDateTime"]))}</TableCell>
+                        <TableCell className="tracking-col-datetime">{formatDateDisplay(getRowValue(row, ["EXIT_DATE_TIME", "exitDateTime"]))}</TableCell>         
+                    
+                        <TableCell className="tracking-col-file">{renderFileLinks(getRowValue(row, ["E_VISA", "eVisa"]))}</TableCell>
+                        <TableCell className="tracking-col-file">{renderFileLinks(getRowValue(row, ["BUSINESS_TRIP_FLIGHT_TICKET", "businessTripFlightTicket"]))}</TableCell>
+                                           
+           
+                       
                       </TableRow>
                     ))
                   )}
