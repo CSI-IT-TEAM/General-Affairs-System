@@ -910,6 +910,8 @@ const renderHotelFileUpload = (value) => {
   );
 };
 
+const SHOW_TRACKING_TAB = false;
+
 export default function BusinessTripFormNewLayout() {
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
@@ -2404,7 +2406,9 @@ export default function BusinessTripFormNewLayout() {
         }}
       >
         <Tab label={t("business_trip_register")} />
-        <Tab label={t("business_trip_tracking")} />
+        {SHOW_TRACKING_TAB && (
+          <Tab label={t("business_trip_tracking")} />
+        )}
       </Tabs>
 
       {tab === 0 && (
@@ -2752,7 +2756,7 @@ export default function BusinessTripFormNewLayout() {
         </Box>
       )}
 
-      {tab === 1 && (
+      {SHOW_TRACKING_TAB && tab === 1 && (
         <Box
           className="business-trip-card business-trip-tracking-card"
           sx={{
