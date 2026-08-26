@@ -475,7 +475,7 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
 };
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
-const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@changshininc.com; LOAN.GENERAL@changshininc.com; NHI.GENERAL@changshininc.com";
+const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@changshininc.com; LOAN.GENERAL@changshininc.com; NHI.GENERAL@changshininc.com; TUYEN.GENERAL@changshininc.com; NAM.GENERAL@changshininc.com;";
 const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com";
 const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; 
 
