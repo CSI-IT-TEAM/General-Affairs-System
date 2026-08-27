@@ -1795,7 +1795,7 @@ export default function BusinessTripFormNewLayout() {
 
     try {
       const rawUserData = localStorage.getItem("userData") || sessionStorage.getItem("userData");
-      const parsedUserData = JSON.parse(rawUserData || "{}");
+      const parsedUserData = safeJsonParse(rawUserData) || {};
       const empNo = parsedUserData?.EMPID || parsedUserData?.EMP_NO || "";
       const userId = parsedUserData?.EMPID || parsedUserData?.USER_ID || parsedUserData?.USERID || "SYSTEM";
 
@@ -1835,58 +1835,29 @@ export default function BusinessTripFormNewLayout() {
       const hotelReserveDateToForSave = formatDateForSave(formData.hotelReserveDateTo);
       const airportDropoffTimeForSave = formatDateTimeForSave(formData.airportDropoffTime);
 
+      // Standard JSON payload for Oracle JSON_TABLE.
+      // Do not manually escape [, ], {, }, quotes, backslashes, or Unicode.
+      // JSON.stringify in businessTrip.jsx will serialize these values correctly.
       const detailJson = [
         {
           AFFILI_DIV: formData.affiliDiv,
-          affiliDiv: formData.affiliDiv,
-
           VISITOR_DEPT: formData.visitorDept,
-          visitorDept: formData.visitorDept,
-
           VISITOR_NAME_EN: formData.visitorNameEn,
-          visitorNameEn: formData.visitorNameEn,
-
           VISITOR_NAME_KR: formData.visitorNameKr,
-          visitorNameKr: formData.visitorNameKr,
-
           VISITOR_POSITION: formData.visitorPosition,
-          visitorPosition: formData.visitorPosition,
-
           EMAIL: formData.email,
-          email: formData.email,
-
           PURPOSE: formData.purpose,
-          purpose: formData.purpose,
-
           RELATE_DEPT: formData.relateDept,
-          relateDept: formData.relateDept,
-
           E_VISA: eVisaForSave,
-          eVisa: eVisaForSave,
-
           BUSINESS_TRIP_FLIGHT_TICKET: flightTicketForSave,
-          businessTripFlightTicket: flightTicketForSave,
-
           DESCRIPTION: formData.description,
-          description: formData.description,
-
           ENTRY_DATE_TIME: entryDateTimeForSave,
-          entryDateTime: entryDateTimeForSave,
-
           EXIT_DATE_TIME: exitDateTimeForSave,
-          exitDateTime: exitDateTimeForSave,
-
           HOTEL_RESERVE_DATE: hotelReserveDateForSave,
-          hotelReserveDate: hotelReserveDateForSave,
-
           HOTEL_RESERVE_DATE_TO: hotelReserveDateToForSave,
-          hotelReserveDateTo: hotelReserveDateToForSave,
-
           AIRPORT_PICKUP_YN: formData.airportPickupYn,
-          airportPickupYn: formData.airportPickupYn,
-
           AIRPORT_DROPOFF_TIME: airportDropoffTimeForSave,
-          airportDropoffTime: airportDropoffTimeForSave,
+          CREATED_BY: userId,
         },
       ];
 
@@ -1899,6 +1870,10 @@ export default function BusinessTripFormNewLayout() {
         argDetailJson: detailJson,
       };
       
+      if (process.env.NODE_ENV === "development") {
+        console.log("Business trip registrationData:", registrationData);
+      }
+
       const result = await saveBusinessRegistration(registrationData);   
 
       if (result.success) {
