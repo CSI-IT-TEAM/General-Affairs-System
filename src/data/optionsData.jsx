@@ -12,8 +12,10 @@ import flightBanner from "../assets/images/banners/flight_ticket.png";
 import pickleballBanner from "../assets/images/banners/pickleball.png";
 import meetingRoomBanner from "../assets/images/banners/meeting-room.png";
 import temporaryResidenceBanner from "../assets/images/banners/temporary_residence.png";
-import canteenRegistrationBanner from "../assets/images/banners/Canteen.png"
-import businessTripBanner from "../assets/images/banners/business_trip.png"
+import canteenRegistrationBanner from "../assets/images/banners/Canteen.png";
+import businessTripBanner from "../assets/images/banners/business_trip.png";
+import grievanceBanner from "../assets/images/banners/grievance_praise.png";
+
 const optionData = [
     {
         id: '001',
@@ -116,6 +118,19 @@ const optionData = [
         link: '/business-trip',
         btn_order_text: "register_now",
         sort_order: 8,
+        visible: true,
+    },
+    {
+        id: '009',
+        title: 'Grievance Praise',
+        thumb: grievanceBanner, // Ảnh icon - đang sử dụng
+        // thumb: businessTripBanner, // Ảnh banner - comment lại
+        desc: 'Register for grievance praise',
+        desc_color: "#000000",
+        bgColor: '#fc00d2',
+        link: '/grievance-praise',
+        btn_order_text: "View now",
+        sort_order: 9,
         visible: true,
     }
 ]

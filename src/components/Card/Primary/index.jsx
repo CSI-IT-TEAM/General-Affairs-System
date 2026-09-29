@@ -152,6 +152,10 @@ const CardPrimary = ({ data, handleClick }) => {
         title = t("business_trip_title");
         desc = t("business_trip_desc");
         break;
+              case "009":
+        title = t("grievance_title");
+        desc = t("grievance_desc");
+        break;
       default:
         break;
     }

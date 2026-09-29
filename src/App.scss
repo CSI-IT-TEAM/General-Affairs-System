@@ -145,7 +145,7 @@ input {
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    // font-family: 'Poppins', sans-serif;
     font-weight: 400;
     font-size: 15px;
 }
@@ -418,3 +418,25 @@ body {
 //     color: #ff0202 !important;
 //     cursor: pointer !important;
 //   }
+
+/* Request ID badge styles */
+.req-id-badge {
+  position: relative;
+  background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.req-id-badge:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.dark .req-id-badge {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(99, 102, 241, 0.1) 100%
+  );
+  border-color: rgba(99, 102, 241, 0.3);
+}

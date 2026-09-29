@@ -35,7 +35,6 @@ import loginImage from "../../assets/images/sign-in.png";
 import otpImage from "../../assets/images/logos/otp.png";
 import AvatarImage from "../../assets/images/avatar.png";
 
-
 const SignIn = () => {
     /////// Translate Lang
     const { t } = useTranslation();

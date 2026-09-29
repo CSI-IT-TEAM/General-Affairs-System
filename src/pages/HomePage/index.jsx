@@ -2,9 +2,7 @@ import { Box, Container, Grid } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
 import { CardPrimary, ModalWarning } from "../../components";
-
 import "./HomePage.scss";
 import { optionData } from "../../data";
 import { downloadURL } from "../../api";
@@ -132,7 +130,10 @@ const HomePage = () => {
         break;
       case "008":
         navigate("/registration/business-trip");
-        break;        
+        break;       
+      case "009":
+        navigate("/grievance-praise");
+        break;       
       default: {
         navigate("/");
         break;
@@ -162,7 +163,7 @@ const HomePage = () => {
                 
                 optionData.forEach((item) => {
                   // Luôn hiển thị menu 001 và 005
-                  if (item.id === "001" || item.id === "005" || item.id === "008") {
+                  if (item.id === "001" || item.id === "005" || item.id === "008" || item.id === "009") {
                     visibleCards.push(item);
                   }
                   // Menu 002 và 006: hiển thị nếu EXP/special emp
@@ -181,6 +182,8 @@ const HomePage = () => {
 
                 // Sắp xếp cards theo sort_order để đảm bảo thứ tự đúng
                 visibleCards.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+                console.log("Visible Cards:", visibleCards); // Debug: kiểm tra các cards hiển thị
 
                 // Render cards với width cố định và căn giữa
                 const result = [];

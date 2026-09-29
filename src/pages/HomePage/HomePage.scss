@@ -1,8 +1,8 @@
 @import "../../styles/color.scss";
 
 .s-home{
-    padding: 20px 0;
-    padding-top: 100px;
+    margin-top: 80px;
+    margin-bottom: 40px;
     min-height: calc(100vh - 100px);
     display: flex;
     flex-direction: column;
@@ -30,7 +30,6 @@
 
     &-grid-wrapper {
         flex: 1;
-        display: flex;
         align-items: center;
         justify-content: center;
         min-height: 0;
@@ -51,6 +50,7 @@
         justify-content: center !important;
         display: flex !important;
         flex-wrap: wrap !important;
+        padding-bottom: 30px !important;
     }
 
     .MuiGrid-item {
@@ -75,9 +75,6 @@
 
     // Tăng độ rộng Container và card trên màn hình lớn
     @media screen and (min-width: 1280px) {
-        padding: 30px 0;
-        padding-top: 110px;
-
         .MuiContainer-root {
             max-width: 1400px !important;
         }
@@ -89,9 +86,6 @@
     }
 
     @media screen and (min-width: 1920px) {
-        padding: 40px 0;
-        padding-top: 120px;
-
         .MuiContainer-root {
             max-width: 1600px !important;
         }
@@ -103,9 +97,6 @@
     }
 
     @media screen and (max-width: 1279px) {
-        padding: 30px 0;
-        padding-top: 95px;
-
         &-title {
             font-size: 32px;
             margin-bottom: 25px;
@@ -113,8 +104,8 @@
     }
 
     @media screen and (max-width: 767px) {
-        padding: 20px 16px;
-        padding-top: 90px;
+        margin-top: 70px;
+        margin-bottom: 20px;
 
         &-container {
             padding: 0 8px;
@@ -133,7 +124,7 @@
         }
 
         .MuiGrid-container {
-            padding: 0;
+            padding: 0 !important;
         }
 
         .MuiGrid-item {
@@ -143,9 +134,6 @@
     }
 
     @media screen and (max-width: 479px) {
-        padding: 15px 12px;
-        padding-top: 85px;
-
         &-container {
             padding: 0 4px;
         }
@@ -167,9 +155,6 @@
     }
 
     @media screen and (max-width: 375px) {
-        padding: 12px 8px;
-        padding-top: 80px;
-
         &-container {
             padding: 0 2px;
         }
