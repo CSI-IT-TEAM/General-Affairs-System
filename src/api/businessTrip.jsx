@@ -3,6 +3,84 @@ import {
 } from './index';
 
 /**
+ * Serialize JSON safely for Oracle / call-procedure transport.
+ *
+ * JSON.stringify already escapes quotes, backslashes and control characters.
+ * This helper additionally converts [, ], {, } that appear INSIDE JSON string
+ * values to Unicode escape sequences. Structural JSON brackets/braces remain
+ * unchanged.
+ *
+ * Example:
+ *   "abc [test] {x}"
+ * becomes:
+ *   "abc \u005Btest\u005D \u007Bx\u007D"
+ *
+ * A proper JSON parser (Oracle JSON_TABLE / JSON_VALUE / JSON_QUERY) restores
+ * the original text automatically.
+ */
+const stringifyJsonForOracle = (value) => {
+  const json = JSON.stringify(value);
+
+  if (typeof json !== 'string') {
+    return json;
+  }
+
+  let result = '';
+  let inString = false;
+  let escaped = false;
+
+  const unicodeMap = {
+    '[': '\\u005B',
+    ']': '\\u005D',
+    '{': '\\u007B',
+    '}': '\\u007D',
+  };
+
+  for (let i = 0; i < json.length; i += 1) {
+    const ch = json[i];
+
+    if (!inString) {
+      if (ch === '"') {
+        inString = true;
+      }
+
+      result += ch;
+      continue;
+    }
+
+    if (escaped) {
+      result += ch;
+      escaped = false;
+      continue;
+    }
+
+    if (ch === '\\') {
+      result += ch;
+      escaped = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = false;
+      result += ch;
+      continue;
+    }
+
+    result += unicodeMap[ch] || ch;
+  }
+
+  // Fail fast before calling the API if serialization ever becomes invalid.
+  const parsed = JSON.parse(result);
+
+  if (!Array.isArray(parsed)) {
+    throw new Error('ARG_DETAIL_JSON must be a JSON array');
+  }
+
+  return result;
+};
+
+
+/**
  * Call Oracle procedure via call-procedure API
  */
 const callProcedure = async (procedureName, params = {}) => {
@@ -97,7 +175,19 @@ export const saveBusinessRegistration = async (registrationData) => {
       argDetailJson = [],
     } = registrationData;
 
-    const detailJsonString = JSON.stringify(argDetailJson);
+    if (!Array.isArray(argDetailJson) || argDetailJson.length === 0) {
+      return {
+        success: false,
+        data: null,
+        error: { message: 'ARG_DETAIL_JSON must contain at least one detail row' },
+      };
+    }
+
+    const detailJsonString = stringifyJsonForOracle(argDetailJson);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('SMT_SAVE_BUSINESS_REG ARG_DETAIL_JSON:', detailJsonString);
+    }
 
     const data = await callProcedure('SMT_SAVE_BUSINESS_REG', {
       ARG_EMP_NO: { value: String(argEmpNo), type: "IN" },
