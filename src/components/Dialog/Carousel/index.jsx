@@ -74,7 +74,8 @@ export default function CarouselDialog() {
     return (
         <Dialog open={open} onOpenChange={openCarousel}>
             <DialogContent
-                className={`${isFullscreen ? "max-w-[100vw] max-h-[100vh] w-full h-full" : "max-w-4xl max-h-[90vh]"} p-0 overflow-hidden`}
+                overlayClassName="z-[1000]"
+                className={`${isFullscreen ? "max-w-[100vw] max-h-[100vh] w-full h-full" : "max-w-4xl max-h-[90vh]"} z-[1001] p-0 overflow-hidden`}
                 onKeyDown={handleKeyDown}
             >
                 {/* Main carousel container */}

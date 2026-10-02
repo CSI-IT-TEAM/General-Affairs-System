@@ -19,7 +19,6 @@
   "title_second": "Request Information",
   "reset_password": "Reset Password",
   "not_found": "No Data Found!!!",
-
   "vehicle_title": "Request Vehicle",
   "vehicle_desc": "Choose from a variety of vehicles to take you from A to B safely",
   "medical_title": "Medical Fee",
@@ -143,10 +142,8 @@
   "event": "Event",
   "no_events_in_range": "No events in this time range.",
   "show_more": "Show {{total}} more events",
-
   "warn": "Warning!!!",
   "logout_desc": "Are you sure you want to logout?",
-
   "login_fail_title": "Login Failed!!!",
   "login_fail_desc": "User ID or Password entered is invalid",
   "under_construction": "Services is under construction",
@@ -202,11 +199,9 @@
   "frm_select_clinic_helper": "If your hopsital dose not listed, please choose 'Add New Hospital' option.",
   "plholder_search_hospital": "🔍 Search hospital...",
   "frm_no_hospital_found": "No hospital found",
-
   "frm_account_name": "Account Name",
   "frm_account_no": "Account No",
   "frm_bank_nm": "Bank",
-
   "btn_request": "Request Now",
   "btn_ok": "OK",
   "btn_close": "Close",
@@ -220,29 +215,21 @@
   "btn_change_password": "Change Password",
   "btn_confirm": "Confirm",
   "btn_back_to_home": "Back to Home",
-
   "btn_already_upload_acc_bank_doc": "Letter Of Confirmation, click to view",
-
   "404_title": "Oops! Page not found",
   "no_passengers_error": "Oops! Please checking Passengers List Again!",
   "404_desc": "The page you are looking for might have been removed, had its name changed or is temporarily unvailable",
-
   "frm_required": "The text field is required",
-
   "title_please_change_password": "Please Change Password",
   "title_please_change_password_text": "First Time, Password and Your ID is same.  You must to change your password.",
   "label_input_new_password": "Please enter new password",
   "input_new_password_place_holder": "Enter new password",
-
   "title_password_must_diff_with_empid": "Password must be different from card number",
   "text_password_must_diff_with_empid": "Password must be different from card number",
-
   "title_password_change_successfully": "Password has changed sucessfully.",
   "text_user_can_login_with_new_password": "You can login with new password.",
-
   "title_wrong_password": "Wrong username or password.",
   "text_if_first_time_password": "If first time login. Password and Your ID is same.",
-
   "title_success": "Success!",
   "title_change_password_sucessfully": "Password has changed succesfully",
   "title_change_password_question": "Would you like to change your password?",
@@ -250,7 +237,6 @@
   "title_password_must_be_same_as_old_password": "New Password Confirm Must Be Same",
   "title_please_checking_new_password": "Please check your new password",
   "title_wrong_password1": "Wrong Password",
-
   "title_old_password_incorrect": "Old Password Incorrect, Please Check Again",
   "title_error": "Error",
   "title_password_change_unsuccessful": "Password Change Failed",
@@ -262,10 +248,8 @@
   "title_have_account": "Already have an account?",
   "title_continue": "Continue",
   "title_reset_pass": "Reset Password",
-
   "title_user_cancel_request_question": "Do you like to cancel?",
   "title_text_user_cancel_request_question": "Cancel this request?",
-
   "title_history": "Request History",
   "title_medical_history": "Fee History",
   "title_request": "Request Date",
@@ -275,14 +259,10 @@
   "title_confirm": "Status",
   "title_invoice_image_list": "Invoice File List Viewer",
   "title_click_to_view_pdf": "Click to view PDF",
-
   "title_medical_bank": "Account No Information",
-
   "text_uploader_once_infor": "You only need to register once",
-
   "error_required_department_select": "The department field is required",
   "error_lack_of_information": "Lack of Information",
-
   "medical": "Medical",
   "fee": "Fee",
   "title_medical": "Medical Fee",
@@ -307,23 +287,18 @@
   "frm_medical_name": "New Hospital Name",
   "frm_history": "History",
   "frm_user_passport": "Passport",
-
   "swal_are_you_sure": "Are you sure?",
   "swal_success": "Successfully!",
   "swal_your_data_uploaded": "Your Data Has Been Uploaded.",
-
   "swal_failed": "Error.",
   "swal_networking_error": "Networking Or Data Error!.",
-
   "swal_deleted": "Deleted!",
   "swal_deleted_content": "Your invoice has been deleted.",
   "swal_deleted_fail": "Failed!",
   "swal_deleted_content_fail": "Your invoice can't deleted.",
-
   "swal_are_you_sure_content": "You won't be able to revert this!",
   "swal_confirm_delete_btn": "Yes, delete it!",
   "swal_cancel_btn": "Cancel",
-
   "swal_data_empty": "Lack of Information...",
   "swal_checking_again": "Please check again.",
   "swal_red_fields_is_blank": "You cannot leave red fields blank!.",
@@ -343,7 +318,6 @@
   "frm_id_required": "Invalid User ID",
   "frm_otp_invalid": "Invalid / Expired OTP",
   "swal_new_reset_pass": "New password is your User ID",
-
   "mail_hello": "Hello",
   "mail_system": "The system has confirmed your request to reset password",
   "mail_warn": "Please do not provide this OTP code to anyone for information security",
@@ -399,7 +373,6 @@
   "login": "Login",
   "hotel_file_upload": "Hotel Information",
   "remarks": "Remarks",
-
   "grievance_title": "Let's Praise",
   "grievance_desc": "Let’s share words of praise to acknowledge efforts, spread positivity to build a great workplace culture!",
   "image": "Image",
@@ -409,6 +382,59 @@
   "not_rated_yet": "Not yet rated",
   "rated": "Rated",
   "confirm_trophy": "Confirm Reward",
+  "grievance_confirm_status": "Confirmation",
+  "grievance_pending_confirm": "Pending",
+  "grievance_winner": "Award",
+  "grievance_winner_badge": "Winner",
+  "grievance_not_winner": "Not a winner",
+  "grievance_rate_action": "Rate",
+  "grievance_view_rating": "View ratings",
+  "grievance_confirmed_rating_title": "Confirmed · View ratings only",
+  "grievance_confirmed_rating_readonly": "This praise is confirmed. You can only view its ratings.",
+  "grievance_average_stars": "average stars",
+  "grievance_no_ratings": "No ratings yet",
+  "grievance_rating_dialog_title": "Rate praise",
+  "grievance_rating_dialog_description": "Choose a star rating and view the evaluators",
+  "grievance_praised_person": "Person praised",
+  "grievance_your_rating_complete": "Your rating (Completed)",
+  "grievance_select_rating": "Select a star rating",
+  "grievance_star_count": "{{value}} stars",
+  "grievance_star_5": "5 stars - Excellent (Very satisfied)",
+  "grievance_star_4": "4 stars - Very good",
+  "grievance_star_3": "3 stars - Satisfactory (Meets expectations)",
+  "grievance_star_2": "2 stars - Needs improvement",
+  "grievance_star_1": "1 star - Below expectations",
+  "grievance_already_rated": "You have already rated this praise and cannot edit your rating.",
+  "grievance_evaluator_list": "Evaluators",
+  "grievance_loading": "Loading...",
+  "grievance_people_count": "{{value}} people",
+  "grievance_loading_evaluators": "Loading evaluators...",
+  "grievance_no_evaluators": "No evaluator data available",
+  "grievance_saving_rating": "Saving rating...",
+  "grievance_save_rating": "Save rating ({{value}} stars)",
+  "grievance_confirm_dialog_description": "Expected award recipients based on ratings",
+  "grievance_confirm_dialog_question": "Confirm all pending praise and announce the winners?",
+  "grievance_confirm_months": "Months with pending praise",
+  "grievance_expected_winners": "Expected award recipients",
+  "grievance_loading_winners": "Loading award recipients...",
+  "grievance_winners_load_error": "Could not load the award recipients. Please close this dialog and try again.",
+  "grievance_no_winners_to_confirm": "There are no award recipients to confirm.",
+  "grievance_select": "Select",
+  "grievance_department": "Department",
+  "grievance_average_rating": "Rating",
+  "grievance_rating_count": "Ratings",
+  "grievance_praise_date": "Praise date",
+  "grievance_content_and_praiser": "Details / Praiser",
+  "grievance_top_candidates": "{{value}} top-rated candidates",
+  "grievance_choose_one": "Choose one person",
+  "grievance_no_candidates": "No candidates",
+  "grievance_select_winner_for_factory": "Select {{person}} for {{factory}}",
+  "grievance_auto_selected": "Selected automatically",
+  "grievance_unnamed": "Name unavailable",
+  "grievance_candidates_changed": "The candidate list has changed. Please choose the winners again.",
+  "grievance_rating_saved_refresh_failed": "Rating saved, but the table could not be refreshed. Please reload the data.",
+  "grievance_view_images": "View praise images",
+  "grievance_praise_image": "Praise image",
   "confirm_rate": "Confirm Rated",
   "topic": "Issue",
   "first_place": "1st Place",
@@ -439,7 +465,14 @@
   "rate_user": "Rate User",
   "filter_title": "Filter",
   "evaluator": "Evaluator",
-
   "invalid_permission": "Invalid User permission",
-  "invalid_confirm_date": "Invalid Confirm Date"
+  "invalid_confirm_date": "Invalid Confirm Date",
+  "factory": "Factory",
+  "factory_all": "All Factories",
+  "factory_vj_desc": "Chang Shin Vietnam",
+  "factory_vj3_desc": "Chang Shin Dong Nai",
+  "grievance_view_list": "View List",
+  "grievance_confirmed": "Confirmed",
+  "grievance_unconfirmed": "Unconfirmed",
+  "grievance_unconfirmed_tooltip": "When selecting 'Unconfirmed', all unconfirmed records will be displayed regardless of date."
 }

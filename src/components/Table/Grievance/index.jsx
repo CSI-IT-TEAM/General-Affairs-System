@@ -1,11 +1,15 @@
 import React from "react";
 import { flexRender } from "@tanstack/react-table";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { isGrievanceWinner } from "../../GrievanceStatusBadges";
 
 // --- COMPONENT: GrievanceTableView Desktop Table ---
 const GrievanceTableView = ({
   table,
   visibleRows,
   columnVisibility,
+  factoryWinnersInfo = { factoryStatus: {} },
+  selectedJudgeWinners = {},
 }) => {
   return (
     <div className="hidden md:block w-full h-full overflow-auto custom-scrollbar">
@@ -27,8 +31,11 @@ const GrievanceTableView = ({
                   columnAlign === "left"
                     ? "text-left"
                     : columnAlign === "right"
-                    ? "text-right"
-                    : "text-center";
+                      ? "text-right"
+                      : "text-center";
+
+                const canSort = header.column.getCanSort();
+                const isSorted = header.column.getIsSorted();
 
                 return (
                   <th
@@ -36,17 +43,35 @@ const GrievanceTableView = ({
                     className={`
                       px-4 py-4
                       ${alignClass}
-                      text-xs font-bold uppercase tracking-wide
+                      text-sm font-bold tracking-wide
                       text-slate-1000 dark:text-slate-200
                       border-r border-slate-200 dark:border-slate-600 last:border-r-0
                       bg-gradient-to-b from-slate-150 to-slate-250/80 dark:from-slate-800 dark:to-slate-900
+                      ${canSort ? 'cursor-pointer select-none hover:bg-blue-50/50 dark:hover:bg-slate-700/50 transition-colors' : ''}
                     `}
                     style={{ width: header.column.getSize() }}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    title={canSort ? 'Bấm để sắp xếp' : undefined}
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    <div className={`flex items-center gap-1.5 ${columnAlign === 'left' ? 'justify-start' : columnAlign === 'right' ? 'justify-end' : 'justify-center'}`}>
+                      <span>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </span>
+                      {canSort && (
+                        <span className="inline-flex shrink-0">
+                          {isSorted === 'asc' ? (
+                            <ArrowUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                          ) : isSorted === 'desc' ? (
+                            <ArrowDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                          ) : (
+                            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 opacity-60 hover:opacity-100" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 );
               })}
@@ -56,22 +81,24 @@ const GrievanceTableView = ({
 
         {/* Premium Body with Hover Effects */}
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-          {visibleRows.map((row, index) => (
-            <tr
-              key={row.id}
-              className={`
-                group
-                transition-all duration-200 ease-out
-                hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/50 hover:to-blue-50/80
-                dark:hover:from-blue-950/30 dark:hover:via-indigo-950/20 dark:hover:to-blue-950/30
-                hover:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]
-                ${
-                  index % 2 === 0
-                    ? "bg-white dark:bg-slate-900/50"
-                    : "bg-slate-50/50 dark:bg-slate-800/30"
-                }
-              `}
-            >
+          {visibleRows.map((row, index) => {
+            const rowStyleClass = isGrievanceWinner(row.original.WINNER_YN)
+              ? "bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-50 dark:from-amber-950/60 dark:via-slate-900 dark:to-slate-900 border-l-4 border-amber-500 hover:from-amber-200 hover:via-amber-100 dark:hover:from-amber-900/60 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]"
+              : `${
+              index % 2 === 0
+                ? "bg-white dark:bg-slate-900/50"
+                : "bg-slate-50/50 dark:bg-slate-800/30"
+            } hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/50 hover:to-blue-50/80 dark:hover:from-blue-950/30 dark:hover:via-indigo-950/20 dark:hover:to-blue-950/30 hover:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]`;
+
+            return (
+              <tr
+                key={row.id}
+                className={`
+                  group
+                  transition-all duration-200 ease-out
+                  ${rowStyleClass}
+                `}
+              >
               {row.getVisibleCells().map((cell) => {
                 const columnAlign =
                   cell.column.columnDef.meta?.align || "center";
@@ -80,8 +107,8 @@ const GrievanceTableView = ({
                   columnAlign === "left"
                     ? "text-left"
                     : columnAlign === "right"
-                    ? "text-right"
-                    : "text-center";
+                      ? "text-right"
+                      : "text-center";
 
                 return (
                   <td
@@ -103,7 +130,8 @@ const GrievanceTableView = ({
                 );
               })}
             </tr>
-          ))}
+          );
+        })}
         </tbody>
       </table>
     </div>
