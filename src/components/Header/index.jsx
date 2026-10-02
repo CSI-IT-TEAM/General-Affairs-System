@@ -11,7 +11,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import i18next from "i18next";
 
 import avatarImage from "../../assets/images/avatar.png";
@@ -67,7 +67,7 @@ const Header = () => {
     ];
   }
 
-  const handleChange = (event: SelectChangeEvent) => {
+  const handleChange = (event) => {
     i18next.changeLanguage(event.target.value);
     setLang(event.target.value);
   };
@@ -138,7 +138,7 @@ const Header = () => {
                 <img src={langImage} alt="Language" />
               </Box> */}
               <FormControl
-                sx={{ m: 1 }}
+                sx={{ m: 0.5 }}
                 size="small"
                 variant="standard"
                 className="s-language__select"

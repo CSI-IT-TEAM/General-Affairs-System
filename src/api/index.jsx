@@ -45,6 +45,33 @@ const MedicalAccountBankDocURL =
   baseURL + "LMES/PKG_MEDICAL_FEE_SYSTEM.ACC_BANK_DOC_SELECT";
 const SendEmailURL = "http://vjweb.dskorea.com/send-email";
 
+// Pickleball Booking API URLs
+const PickleballCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+const PickleballSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-procedure";
+const PickleballDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
+const PickleballEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
+
+// Meeting Room Booking API URLs
+const MeetingRoomCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+const MeetingRoomSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-procedure";
+const MeetingRoomDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
+const MeetingRoomEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
+
+// Car Booking API URLs
+const CarBookingCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+
+// Canteen Attendance API URLs
+const CanteenAttendanceCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+
+// Temporary Residence API URLs
+const TemporaryResidenceCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+const TemporaryResidenceSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/save-procedure";
+const TemporaryResidenceDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
+const TemporaryResidenceEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
+
+// Meeting Room Booking API URLs
+const GrievanceCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+
 export {
   downloadURL,
   uploadURL,
@@ -68,4 +95,19 @@ export {
   MedicalImageListSelectURL,
   MedicalAccountBankDocURL,
   SendEmailURL,
+  PickleballCallProcedureURL,
+  PickleballSaveProcedureURL,
+  PickleballDeleteProcedureURL,
+  PickleballEmployeeInfoURL,
+  MeetingRoomCallProcedureURL,
+  MeetingRoomSaveProcedureURL,
+  MeetingRoomDeleteProcedureURL,
+  MeetingRoomEmployeeInfoURL,
+  CarBookingCallProcedureURL,
+  CanteenAttendanceCallProcedureURL,
+  TemporaryResidenceCallProcedureURL,
+  TemporaryResidenceSaveProcedureURL,
+  TemporaryResidenceDeleteProcedureURL,
+  TemporaryResidenceEmployeeInfoURL,
+  GrievanceCallProcedureURL
 };

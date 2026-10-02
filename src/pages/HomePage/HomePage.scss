@@ -1,38 +1,172 @@
 @import "../../styles/color.scss";
 
 .s-home{
-    padding: 40px 0;
-    padding-top: 120px;
+    margin-top: 80px;
+    margin-bottom: 40px;
+    min-height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+
+    &-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
 
     &-title {
         color: $color-text-gray;
-        font-size: 40px;
+        font-size: 36px;
         text-align: center;
-        margin: 0 0 20px;
+        margin: 0 0 30px;
         font-weight: bold;
         line-height: 1.2;
+        flex-shrink: 0;
 
         & > span {
             color: $color-text-purple;
         }
     }
 
-    @media screen and (max-width: 479px) {
-        padding: 30px 0;
-        padding-top: 95px;
+    &-grid-wrapper {
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+        max-height: calc(100vh - 200px);
+        overflow: visible;
+        width: 100%;
+
+        @media screen and (min-width: 1280px) {
+            max-height: calc(100vh - 180px);
+        }
+    }
+
+    // Đảm bảo Grid items có cùng height và width cố định
+    .MuiGrid-container {
+        align-items: stretch;
+        width: 100%;
+        margin: 0 !important;
+        justify-content: center !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        padding-bottom: 30px !important;
+    }
+
+    .MuiGrid-item {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        
+        // Đảm bảo tất cả Grid items có cùng height
+        & > * {
+            width: 100% !important;
+            height: 100% !important;
+            flex: 1 1 auto !important;
+        }
+
+        // Đặt width cố định cho cards trên màn hình lớn
+        @media screen and (min-width: 1280px) {
+            max-width: 400px !important;
+            width: 400px !important;
+            flex: 0 0 400px !important;
+        }
+    }
+
+    // Tăng độ rộng Container và card trên màn hình lớn
+    @media screen and (min-width: 1280px) {
+        .MuiContainer-root {
+            max-width: 1400px !important;
+        }
 
         &-title {
-            margin-bottom: 15px;
-            font-size: 30px;
+            font-size: 40px;
+            margin-bottom: 40px;
+        }
+    }
+
+    @media screen and (min-width: 1920px) {
+        .MuiContainer-root {
+            max-width: 1600px !important;
+        }
+
+        &-title {
+            font-size: 44px;
+            margin-bottom: 50px;
+        }
+    }
+
+    @media screen and (max-width: 1279px) {
+        &-title {
+            font-size: 32px;
+            margin-bottom: 25px;
+        }
+    }
+
+    @media screen and (max-width: 767px) {
+        margin-top: 70px;
+        margin-bottom: 20px;
+
+        &-container {
+            padding: 0 8px;
+        }
+
+        &-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding: 0 8px;
+        }
+
+        &-grid-wrapper {
+            max-height: none;
+            align-items: flex-start;
+            padding-top: 0;
+        }
+
+        .MuiGrid-container {
+            padding: 0 !important;
+        }
+
+        .MuiGrid-item {
+            padding: 8px !important;
+            margin-bottom: 8px;
+        }
+    }
+
+    @media screen and (max-width: 479px) {
+        &-container {
+            padding: 0 4px;
+        }
+
+        &-title {
+            font-size: 24px;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        &-grid-wrapper {
+            padding-top: 0;
+        }
+
+        .MuiGrid-item {
+            padding: 6px !important;
+            margin-bottom: 6px;
         }
     }
 
     @media screen and (max-width: 375px) {
-        padding: 20px 0;
-        padding-top: 85px;
+        &-container {
+            padding: 0 2px;
+        }
 
         &-title {
-            font-size: 28px;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .MuiGrid-item {
+            padding: 4px !important;
+            margin-bottom: 4px;
         }
     }
 }
