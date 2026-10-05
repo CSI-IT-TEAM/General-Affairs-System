@@ -69,6 +69,9 @@ const TemporaryResidenceSaveProcedureURL = "http://vjweb.dskorea.com:9090/api/sa
 const TemporaryResidenceDeleteProcedureURL = "http://vjweb.dskorea.com:9090/api/delete-procedure";
 const TemporaryResidenceEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/common/employee-info";
 
+// Meeting Room Booking API URLs
+const GrievanceCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
+
 export {
   downloadURL,
   uploadURL,
@@ -106,4 +109,5 @@ export {
   TemporaryResidenceSaveProcedureURL,
   TemporaryResidenceDeleteProcedureURL,
   TemporaryResidenceEmployeeInfoURL,
+  GrievanceCallProcedureURL
 };

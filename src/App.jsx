@@ -18,6 +18,7 @@ import MeetingRoomBooking from "./pages/MeetingRoomBooking";
 import TemporaryResidence from "./pages/TemporaryResidence";
 import CanteenAttendanceRegistration from "./pages/CanteenAttendanceRegistration";
 import BusinessTripForm from "./pages/FormPage/BusinessTripForm";
+import GrievancePage from "./pages/GrievancePage";
 const router = createBrowserRouter([
     {
         path: "/signin",
@@ -114,7 +115,6 @@ const router = createBrowserRouter([
             </Layout>
         ),
     },
-
     {
         path: "/registration/business-trip",
         errorElement: <ErrorPage />,
@@ -122,6 +122,15 @@ const router = createBrowserRouter([
             // <Layout>
                 <BusinessTripForm />
             // </Layout>
+        ),
+    },
+    {
+        path: "/grievance-praise",
+        errorElement: <ErrorPage />,
+        element: (
+            <Layout>
+                <GrievancePage />
+            </Layout>
         ),
     },
     {
