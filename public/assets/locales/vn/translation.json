@@ -431,5 +431,6 @@
   "evaluator": "Người đánh giá",
 
   "invalid_permission": "Quyền người dùng không hợp lệ",
-  "invalid_confirm_date": "Ngày xác nhận không hợp lệ"
+  "invalid_confirm_date": "Ngày xác nhận không hợp lệ",
+  "hotel_reservation_upload": "Tải lên đặt phòng khách sạn ( Tùy chọn )"
 }

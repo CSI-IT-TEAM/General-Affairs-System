@@ -410,5 +410,6 @@
   "evaluator": "평가자",
 
     "invalid_permission": "사용자 권한이 올바르지 않습니다",
-  "invalid_confirm_date": "확인 날짜가 올바르지 않습니다"
+  "invalid_confirm_date": "확인 날짜가 올바르지 않습니다",
+  "hotel_reservation_upload": "호텔 예약 업로드 (선택 사항)"
 }

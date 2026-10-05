@@ -441,5 +441,6 @@
   "evaluator": "Evaluator",
 
   "invalid_permission": "Invalid User permission",
-  "invalid_confirm_date": "Invalid Confirm Date"
+  "invalid_confirm_date": "Invalid Confirm Date",
+  "hotel_reservation_upload": "Upload Hotel Reservation ( Optional )"
 }
