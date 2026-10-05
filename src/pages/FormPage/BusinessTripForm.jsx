@@ -475,13 +475,14 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
 };
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
+/*
 const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@changshininc.com; LOAN.GENERAL@changshininc.com; NHI.GENERAL@changshininc.com; TUYEN.GENERAL@changshininc.com; NAM.GENERAL@changshininc.com;";
 const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com";
-const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; 
+const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; */
 
-/*const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
 const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com";*/
+const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com";
 
 const splitEmailRecipients = (value) =>
   String(value || "")
@@ -532,6 +533,7 @@ const getEmailResponseErrorMessage = (value) => {
 const EMPTY_FILE_DATA = {
   eVisaFiles: [],
   flightTicketFiles: [],
+  hotelReservationFiles: [],
 };
 
 const getRowValue = (row, keys, defaultValue = "") => {
@@ -1662,6 +1664,7 @@ export default function BusinessTripFormNewLayout() {
   const buildBusinessTripEmailHtml = ({
     eVisaForSave,
     flightTicketForSave,
+    hotelReservationForSave,
     entryDateTimeForSave,
     exitDateTimeForSave,
     hotelReserveDateForSave,
@@ -1698,6 +1701,7 @@ export default function BusinessTripFormNewLayout() {
       buildEmailTableRow("Airline tickets", renderEmailTableFileLink(flightTicketForSave, "Click to view flight tickets")),
       buildEmailTableRow("E-Visa / APEC Card", renderEmailTableFileLink(eVisaForSave, "Click to view E-VISA / APEC CARD")),
       buildEmailTableRow("Hotel booking date", escapeHtml(hotelBookingPeriod)),
+      buildEmailTableRow("Hotel Reservation", renderEmailTableFileLink(hotelReservationForSave, "Click to view hotel reservation")),
       buildEmailTableRow("Relevant departments", escapeHtml(formData.relateDept)),
       buildEmailTableRow("Airport Pick-up", formData.airportPickupYn === "Y" ? "Required" : "Not Needed"),
       buildEmailTableRow("Airport Drop-off Time", escapeHtml(airportDropoffText)),
@@ -1720,6 +1724,7 @@ export default function BusinessTripFormNewLayout() {
     empNo,
     eVisaForSave,
     flightTicketForSave,
+    hotelReservationForSave,
     entryDateTimeForSave,
     exitDateTimeForSave,
     hotelReserveDateForSave,
@@ -1736,6 +1741,7 @@ export default function BusinessTripFormNewLayout() {
         empNo,
         eVisaForSave,
         flightTicketForSave,
+        hotelReservationForSave,
         entryDateTimeForSave,
         exitDateTimeForSave,
         hotelReserveDateForSave,
@@ -1826,8 +1832,18 @@ export default function BusinessTripFormNewLayout() {
         addPersonId: userId,
       });
 
+      const hotelReservationUpload = await uploadBusinessTripFiles({
+          empNo,
+          docId: uploadDocId,
+          docName: "BUSINESS_TRIP_HOTEL_RESERVATION",
+          files: fileData.hotelReservationFiles,
+          note: uploadNote,
+          addPersonId: userId,
+        });
+
       const eVisaForSave = eVisaUpload.fileUrls || formData.eVisa;
       const flightTicketForSave = flightTicketUpload.fileUrls || formData.businessTripFlightTicket;
+      const hotelReservationForSave = hotelReservationUpload.fileUrls || formData.hotelReservation;
 
       const entryDateTimeForSave = formatDateTimeForSave(formData.entryDateTime);
       const exitDateTimeForSave = formatDateTimeForSave(formData.exitDateTime);
@@ -1855,6 +1871,7 @@ export default function BusinessTripFormNewLayout() {
           EXIT_DATE_TIME: exitDateTimeForSave,
           HOTEL_RESERVE_DATE: hotelReserveDateForSave,
           HOTEL_RESERVE_DATE_TO: hotelReserveDateToForSave,
+          HOTEL_RESERVATION_FILE: hotelReservationForSave,
           AIRPORT_PICKUP_YN: formData.airportPickupYn,
           AIRPORT_DROPOFF_TIME: airportDropoffTimeForSave,
           CREATED_BY: userId,
@@ -1886,6 +1903,7 @@ export default function BusinessTripFormNewLayout() {
             empNo,
             eVisaForSave,
             flightTicketForSave,
+            hotelReservationForSave,
             entryDateTimeForSave,
             exitDateTimeForSave,
             hotelReserveDateForSave,
@@ -2668,6 +2686,56 @@ export default function BusinessTripFormNewLayout() {
                   lang: "en-GB",
                 }}
               />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  component="label"
+                  sx={{
+                    width: 280,
+                    minWidth: 280,
+                    justifyContent: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                 {t("hotel_reservation_upload")}                
+                  <input
+                    hidden
+                    multiple
+                    type="file"
+                    accept={FILE_INPUT_ACCEPT}
+                    onChange={handleFileChange( "hotelReservationFile", "hotelReservationFiles"
+                    )}
+                  />
+                </Button>
+
+                {formData.hotelReservationFile && (
+                  <Typography
+                    variant="caption"
+                    component="div"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {getSelectedFilesDisplay(
+                      fileData.hotelReservationFiles,
+                      formData.hotelReservationFile
+                    )}
+                  </Typography>
+                )}
+              </Box>
             </Grid>
 
             <Grid item xs={12} md={3}>

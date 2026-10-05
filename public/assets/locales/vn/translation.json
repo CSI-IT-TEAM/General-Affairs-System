@@ -389,6 +389,7 @@
     "required_note":"(*) Các trường bắt buộc",
     "login": "Đăng nhập",
     "hotel_file_upload": "Thông tin khách sạn",
-    "remarks": "Ghi chú"
+    "remarks": "Ghi chú",
+    "hotel_reservation_upload": "Tải lên đặt phòng khách sạn (Tùy chọn)"
 
      }

@@ -367,7 +367,8 @@
     "required_note":"(*) 필수 입력 사항",
     "login": "로그인",
     "hotel_file_upload": "호텔 정보",
-    "remarks": "비고"   
+    "remarks": "비고"   ,
+     "hotel_reservation_upload": "호텔 예약 업로드 (선택 사항)"
 
 
 }
