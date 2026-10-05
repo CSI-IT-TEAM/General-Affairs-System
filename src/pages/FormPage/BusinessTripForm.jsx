@@ -27,7 +27,6 @@ import {
   Avatar,
   Menu,
 } from "@mui/material";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import i18next from "i18next";
@@ -475,14 +474,14 @@ const getSaveAlertMessage = (selectedLanguage, type, detail = "") => {
 };
 
 const SEND_EMAIL_URL = "http://vjweb.dskorea.com/send-email";
-/*
+
 const BUSINESS_TRIP_EMAIL_TO = "THACH.GENERAL@changshininc.com; PHUONG.GENERAL@changshininc.com; LOAN.GENERAL@changshininc.com; NHI.GENERAL@changshininc.com; TUYEN.GENERAL@changshininc.com; NAM.GENERAL@changshininc.com;";
 const BUSINESS_TRIP_EMAIL_CC = "jinwook.kim@changshininc.com";
-const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; */
-
+const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com; DO.IT@changshininc.com"; 
+/*
 const BUSINESS_TRIP_EMAIL_TO = "LENL.IT@changshininc.com";
 const BUSINESS_TRIP_EMAIL_CC = "LENL.IT@changshininc.com";
-const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com";
+const BUSINESS_TRIP_EMAIL_BCC = "LENL.IT@changshininc.com";*/
 
 const splitEmailRecipients = (value) =>
   String(value || "")
@@ -1701,7 +1700,7 @@ export default function BusinessTripFormNewLayout() {
       buildEmailTableRow("Airline tickets", renderEmailTableFileLink(flightTicketForSave, "Click to view flight tickets")),
       buildEmailTableRow("E-Visa / APEC Card", renderEmailTableFileLink(eVisaForSave, "Click to view E-VISA / APEC CARD")),
       buildEmailTableRow("Hotel booking date", escapeHtml(hotelBookingPeriod)),
-      buildEmailTableRow("Hotel Reservation", renderEmailTableFileLink(hotelReservationForSave, "Click to view hotel reservation")),
+      buildEmailTableRow("Hotel Reservation Upload ( Optional )", renderEmailTableFileLink(hotelReservationForSave, "Click to view hotel reservation")),
       buildEmailTableRow("Relevant departments", escapeHtml(formData.relateDept)),
       buildEmailTableRow("Airport Pick-up", formData.airportPickupYn === "Y" ? "Required" : "Not Needed"),
       buildEmailTableRow("Airport Drop-off Time", escapeHtml(airportDropoffText)),
