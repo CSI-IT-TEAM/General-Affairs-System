@@ -1764,8 +1764,8 @@ const GrievancePage = () => {
                                                         <tbody key={group} className="divide-y divide-slate-100 dark:divide-slate-700/70">
                                                             <tr className={cn(
                                                                 "border-y",
-                                                                isVJ3 
-                                                                    ? "bg-purple-50/70 dark:bg-purple-950/30 border-purple-200/60 dark:border-purple-800/40" 
+                                                                isVJ3
+                                                                    ? "bg-purple-50/70 dark:bg-purple-950/30 border-purple-200/60 dark:border-purple-800/40"
                                                                     : "bg-blue-50/70 dark:bg-blue-950/30 border-blue-200/60 dark:border-blue-800/40"
                                                             )}>
                                                                 <th colSpan={9} scope="rowgroup" className="px-3 py-2.5 text-left">
