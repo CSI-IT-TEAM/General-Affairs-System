@@ -468,5 +468,6 @@
   "grievance_view_list": "Danh sách xem",
   "grievance_confirmed": "Đã xác nhận",
   "grievance_unconfirmed": "Chưa được xác nhận",
-  "grievance_unconfirmed_tooltip": "Khi chọn Chưa được xác nhận thì hiển thị tất cả danh sách chưa được xác nhận, không quan tâm ngày."
+  "grievance_unconfirmed_tooltip": "Khi chọn Chưa được xác nhận thì hiển thị tất cả danh sách chưa được xác nhận, không quan tâm ngày.",
+  "hotel_reservation_upload": "Tải lên đặt phòng khách sạn (Tùy chọn)"
 }

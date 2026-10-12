@@ -469,5 +469,6 @@
   "grievance_view_list": "조회 목록",
   "grievance_confirmed": "확인됨",
   "grievance_unconfirmed": "미확인",
-  "grievance_unconfirmed_tooltip": "'미확인' 선택 시 날짜와 무관하게 모든 미확인 목록이 표시됩니다."
+  "grievance_unconfirmed_tooltip": "'미확인' 선택 시 날짜와 무관하게 모든 미확인 목록이 표시됩니다.",
+  "hotel_reservation_upload": "호텔 예약 업로드 (선택 사항)"
 }

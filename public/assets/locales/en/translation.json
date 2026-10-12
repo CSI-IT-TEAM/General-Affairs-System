@@ -474,5 +474,6 @@
   "grievance_view_list": "View List",
   "grievance_confirmed": "Confirmed",
   "grievance_unconfirmed": "Unconfirmed",
-  "grievance_unconfirmed_tooltip": "When selecting 'Unconfirmed', all unconfirmed records will be displayed regardless of date."
+  "grievance_unconfirmed_tooltip": "When selecting 'Unconfirmed', all unconfirmed records will be displayed regardless of date.",
+  "hotel_reservation_upload": "Hotel Reservation Upload (Optional)"
 }
