@@ -83,11 +83,11 @@ export const getGrievanceRegistration = async ({
   argPraiseID = null,
 } = {}) => {
   try {
-    const data = await callProcedure('SEL_GRIEVANCE_DATA', {
+    const data = await callProcedure('SEL_GRIEVANCE_DATA_V2', {
       ARG_QTYPE: { value: argQType, type: "IN" },
       ARG_FROM_DATE: { value: argFromDate, type: "IN" },
       ARG_TO_DATE: { value: argToDate, type: "IN" },
-        ARG_PRAISE_ID: { value: argPraiseID, type: "IN" },
+      ARG_PRAISE_ID: { value: argPraiseID, type: "IN" },
       OUT_CURSOR: { type: "OUT", dataType: "CURSOR" },
     });
 
@@ -136,7 +136,7 @@ export const saveGrievanceRegistration = async (registrationData) => {
       argPic
     } = registrationData;
 
-    const data = await callProcedure('UPLOAD_GRIEVANCE_DATA', {
+    const data = await callProcedure('UPLOAD_GRIEVANCE_DATA_V2', {
       ARG_TYPE: { value: String(argType), type: "IN" },
       ARG_PRAISE_ID: { value: String(argPraiseId), type: "IN" },
       ARG_RATE: { value: String(argRate || ''), type: "IN" },

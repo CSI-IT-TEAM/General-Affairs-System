@@ -1,34 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { User, CheckCircle, Clock, Edit, Eye, Phone, ChevronDown, ChevronUp, Calendar, UserCheck, Timer, AlertCircle, Hash, Paperclip, ClockCheck, Inbox } from 'lucide-react';
+import { User, CheckCircle, Clock, Edit, Eye, Phone, ChevronDown, ChevronUp, Calendar, UserCheck, Timer, AlertCircle, Hash, Paperclip, ClockCheck, Inbox, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getTopicContent } from '../../../hooks/useGrievanceTable';
-import { handleRenderStar } from '../../../hooks/useGrievanceTable';
+import { getTopicContent, handleRenderStar } from '../../../hooks/useGrievanceTable';
+import { ConfirmationStatusBadge, WinnerStatusBadge, isGrievanceWinner } from '../../GrievanceStatusBadges';
 
 const handleStatus = (data, t) => {
     if(!data) return <></>;
-    const _code = data.TOPIC;
-    const { _, className, icon } = getTopicContent(data.TOPIC, data.TOPIC_NAME);
-    let label = "";
-
-    switch(_code){
-        case "0001":
-            label = t('support_job');
-            break;
-        case "0002":
-            label = t('friendly_alter');
-            break;
-        case "0003":
-            label = t('safe_envir');
-            break;
-        case "0004":
-            label = t('good_kind');
-            break;
-        case "0005":
-            label = t('other');
-            break;
-        default:
-            break;
-    }
+    const { label, className, icon } = getTopicContent(data.TOPIC, t);
 
     return (
         <span className={className}>
@@ -36,12 +14,15 @@ const handleStatus = (data, t) => {
             {label}
         </span>
     );
-}
+};
 
 const PraiseCard = ({
     data,
     onOpenImageDialog,
-    onOpenRatePanel
+    onOpenRatePanel,
+    factoryWinnersInfo = { factoryStatus: {} },
+    selectedJudgeWinners = {},
+    onSelectJudgeWinner,
 }) => {
 
     const { t } = useTranslation();
@@ -61,16 +42,24 @@ const PraiseCard = ({
     },[data])
 
     return (
-        <div className="bg-white dark:bg-gray-900/50 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-200 mb-4">
+        <div className={`rounded-2xl overflow-hidden transition-all duration-200 mb-4 ${isGrievanceWinner(data.WINNER_YN)
+            ? 'border-2 border-amber-400 bg-amber-50/60 dark:bg-amber-950/20 shadow-md shadow-amber-200/50 dark:shadow-amber-900/20'
+            : 'bg-white dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 shadow-sm'}`}>
             {/* 1. Header: ID & Status */}
             <div className="px-4 py-3 flex items-start justify-between gap-3 border-b border-gray-50 dark:border-gray-800/50 bg-gray-50/30 dark:bg-white/5">
                 <div className="flex items-center justify-center gap-1 font-bold text-sm text-emerald-700 dark:text-emerald-400 whitespace-nowrap tabular-nums">
-                    {handleRenderStar(data.PRAISE_ID, data.RATE, data.CONFIRM_YN === 'N' ? onOpenRatePanel : null)}
+                    {handleRenderStar(data.PRAISE_ID, data.RATE, onOpenRatePanel
+                        ? (_, star) => onOpenRatePanel(data.PRAISE_ID, String(data.CONFIRM_YN).toUpperCase() === 'Y' ? data.RATE : star, data)
+                        : null)}
                 </div>
                 
                 <div className="flex justify-center">
                     {handleStatus(data,t)}
                 </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800/50">
+                <ConfirmationStatusBadge value={data.CONFIRM_YN} />
+                {isGrievanceWinner(data.WINNER_YN) && <WinnerStatusBadge value={data.WINNER_YN} />}
             </div>
 
             {/* 2. User Info */}
@@ -93,9 +82,18 @@ const PraiseCard = ({
                             </div>
                         )}
                         
-                        <p className="text-xs text-gray-700 dark:text-gray-400 truncate font-semibold">
-                            {data.DEPT_NM || 'Không có bộ phận'}
-                        </p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs text-gray-700 dark:text-gray-400 truncate font-semibold">
+                                {data.DEPT_NM || 'Không có bộ phận'}
+                            </span>
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                String(data.DEPT_NM || '').toUpperCase().includes('VJ3')
+                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+                            }`}>
+                                {String(data.DEPT_NM || '').toUpperCase().includes('VJ3') ? 'VJ3' : 'VJ'}
+                            </span>
+                        </div>
                     </div>
 
                         {/* User Upload Image Indicator */}
@@ -160,13 +158,29 @@ const PraiseCard = ({
                         color="text-purple-500"
                         bg="bg-purple-50 dark:bg-purple-900/20"
                     />
-                    <TimelineItem 
-                        icon={CheckCircle} 
-                        label={t('rate_user')}
-                        value={data.RATE_USER_NM || 'Chưa đánh giá'} 
-                        color="text-emerald-500"
-                        bg="bg-emerald-50 dark:bg-emerald-900/20"
-                    />
+                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800 col-span-2 sm:col-span-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 shrink-0">
+                                <CheckCircle className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-[10px] uppercase font-bold text-gray-400">{t('evaluator') || 'Người đánh giá'}</span>
+                                <span className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                    {data.RATE_USER_NM || 'Chưa đánh giá'}
+                                </span>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => onOpenRatePanel && onOpenRatePanel(data.PRAISE_ID, data.RATE, data)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-sm shadow-blue-500/25 transition-all whitespace-nowrap cursor-pointer shrink-0 ml-2"
+                        >
+                            {String(data.CONFIRM_YN).toUpperCase() === 'Y'
+                                ? <Eye className="h-3 w-3" />
+                                : <Star className="h-3 w-3 fill-amber-300 text-amber-300" />}
+                            <span>{Number(data.NUM_RATE ?? data.num_rate ?? 0)} {t('evaluator') || 'Evaluator'}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
