@@ -328,7 +328,7 @@
   "report": "출장 보고",
   "business": "출장",
   "business_trip_register": "출장 신청",
-  "business_trip_name_en": "영문 이름",
+  "business_trip_name_en": "영문 이름 (여권에 기재된 이름과 일치)",
   "business_trip_name_kr": "한글 이름",
   "business_trip_dept_from": "부서",
   "business_trip_factory": "소속",
