@@ -175,3 +175,74 @@ export const saveGrievanceRegistration = async (registrationData) => {
     };
   }
 };
+
+/**
+ * Save Grievance Feedback by calling UPLOAD_GRIEVANCE_FEEDBACK procedure
+ * @param {Object} feedbackData
+ * @returns {Promise<{success: boolean, data: object|null, error: object|null}>}
+ */
+export const saveGrievanceFeedback = async (feedbackData) => {
+  try {
+    const {
+      argPraiseId,
+      argMailFrom = 'it.daas@dskorea.com',
+      argMailTo,
+      argMailCc = '',
+      argMailBcc = '',
+      argSubject,
+      argMessage,
+      argIsHtml = 'Y',
+      argAttachments = '',
+      argAttachmentsCount = 0,
+      argSendStatus = 'SUCCESS',
+      argErrorMsg = '',
+      argPic = '',
+    } = feedbackData;
+
+    const data = await callProcedure('UPLOAD_GRIEVANCE_FEEDBACK', {
+      ARG_PRAISE_ID: { value: String(argPraiseId ?? ''), type: "IN" },
+      ARG_MAIL_FROM: { value: String(argMailFrom || 'it.daas@dskorea.com'), type: "IN" },
+      ARG_MAIL_TO: { value: String(argMailTo || ''), type: "IN" },
+      ARG_MAIL_CC: { value: String(argMailCc || ''), type: "IN" },
+      ARG_MAIL_BCC: { value: String(argMailBcc || ''), type: "IN" },
+      ARG_SUBJECT: { value: String(argSubject || ''), type: "IN" },
+      ARG_MESSAGE: { value: String(argMessage || ''), type: "IN" },
+      ARG_IS_HTML: { value: String(argIsHtml || 'Y'), type: "IN" },
+      ARG_ATTACHMENTS: { value: String(argAttachments || ''), type: "IN" },
+      ARG_ATTACHMENTS_COUNT: { value: Number(argAttachmentsCount || 0), type: "IN" },
+      ARG_SEND_STATUS: { value: String(argSendStatus || 'SUCCESS'), type: "IN" },
+      ARG_ERROR_MSG: { value: String(argErrorMsg || ''), type: "IN" },
+      ARG_PIC: { value: String(argPic || ''), type: "IN" },
+      OUT_STATUS: { type: "OUT", dataType: "VARCHAR2" },
+      OUT_MSG: { type: "OUT", dataType: "VARCHAR2" },
+    });
+
+    if (data && data.success && data.data) {
+      return {
+        success: data.data.OUT_STATUS === 'SUCCESS',
+        data: {
+          status: data.data.OUT_STATUS,
+          message: data.data.OUT_MSG,
+        },
+        error: data.data.OUT_STATUS !== 'SUCCESS'
+          ? { message: data.data.OUT_MSG }
+          : null,
+      };
+    }
+
+    return {
+      success: false,
+      data: null,
+      error: data?.error || { message: 'No data returned from procedure' },
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error saving grievance feedback:', error);
+    }
+    return {
+      success: false,
+      data: null,
+      error: { message: error.message },
+    };
+  }
+};
