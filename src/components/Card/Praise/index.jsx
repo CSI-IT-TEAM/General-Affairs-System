@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, CheckCircle, Clock, Edit, Eye, Phone, ChevronDown, ChevronUp, Calendar, UserCheck, Timer, AlertCircle, Hash, Paperclip, ClockCheck, Inbox, Star } from 'lucide-react';
+import { User, CheckCircle, Clock, Edit, Eye, Mail, Phone, ChevronDown, ChevronUp, Calendar, UserCheck, Timer, AlertCircle, Hash, Paperclip, ClockCheck, Inbox, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getTopicContent, handleRenderStar } from '../../../hooks/useGrievanceTable';
 import { ConfirmationStatusBadge, WinnerStatusBadge, isGrievanceWinner } from '../../GrievanceStatusBadges';
@@ -20,6 +20,7 @@ const PraiseCard = ({
     data,
     onOpenImageDialog,
     onOpenRatePanel,
+    onOpenFeedbackDialog,
     factoryWinnersInfo = { factoryStatus: {} },
     selectedJudgeWinners = {},
     onSelectJudgeWinner,
@@ -57,9 +58,27 @@ const PraiseCard = ({
                     {handleStatus(data,t)}
                 </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800/50">
-                <ConfirmationStatusBadge value={data.CONFIRM_YN} />
-                {isGrievanceWinner(data.WINNER_YN) && <WinnerStatusBadge value={data.WINNER_YN} />}
+            <div className="flex items-center justify-between gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800/50">
+                <div className="flex items-center gap-2">
+                    <ConfirmationStatusBadge value={data.CONFIRM_YN} />
+                    {isGrievanceWinner(data.WINNER_YN) && <WinnerStatusBadge value={data.WINNER_YN} />}
+                </div>
+                {String(data.EMAIL ?? data.email ?? '').trim() !== '' && (
+                    <button
+                        type="button"
+                        onClick={() => onOpenFeedbackDialog && onOpenFeedbackDialog(data)}
+                        className="relative inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow-sm shadow-indigo-500/25 transition-all whitespace-nowrap cursor-pointer shrink-0"
+                        title={String(data.EMAIL ?? data.email ?? '').trim()}
+                    >
+                        <Mail className="h-3 w-3" />
+                        <span>{t('grievance_feedback')}</span>
+                        {Number(data.EMAIL_SEND_COUNT ?? data.email_send_count ?? 0) > 0 && (
+                            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm ring-2 ring-white dark:ring-slate-900 tabular-nums">
+                                {Number(data.EMAIL_SEND_COUNT ?? data.email_send_count ?? 0)}
+                            </span>
+                        )}
+                    </button>
+                )}
             </div>
 
             {/* 2. User Info */}

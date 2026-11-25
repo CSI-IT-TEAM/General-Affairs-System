@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { CheckCircle, Clock, Eye, HeartPulse, Lightbulb, Star, TicketCheck, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Eye, HeartPulse, Lightbulb, Mail, Star, TicketCheck, Zap } from 'lucide-react';
 import { decodeBase64UTF8, removeVietnameseDiacritics } from '../lib/base64Utils';
 import { ConfirmationStatusBadge, WinnerStatusBadge } from '../components/GrievanceStatusBadges';
 import {
@@ -273,6 +273,7 @@ export const useGrievanceTable = ({
     orders,
     onOpenImageDialog,
     onOpenRatePanel,
+    onOpenFeedbackDialog,
     formatDateDisplay,
     sorting,
     setSorting,
@@ -566,12 +567,44 @@ export const useGrievanceTable = ({
                     meta: { align: 'center' },
                     cell: ({ getValue }) => <WinnerStatusBadge value={getValue()} />
                 },
+                {
+                    id: 'feedback',
+                    header: t('grievance_feedback'),
+                    size: 130,
+                    meta: { align: 'center' },
+                    enableSorting: false,
+                    cell: ({ row }) => {
+                        const email = String(row.original.EMAIL ?? row.original.email ?? '').trim();
+                        if (!email) {
+                            return <span className="text-gray-300 dark:text-gray-600">-</span>;
+                        }
+                        const emailSendCount = Number(row.original.EMAIL_SEND_COUNT ?? row.original.email_send_count ?? 0);
+                        return (
+                            <div className="flex items-center justify-center">
+                                <button
+                                    type="button"
+                                    onClick={() => onOpenFeedbackDialog && onOpenFeedbackDialog(row.original)}
+                                    className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow-sm shadow-indigo-500/25 hover:shadow-md hover:shadow-indigo-500/40 transition-all duration-200 whitespace-nowrap cursor-pointer"
+                                    title={email}
+                                >
+                                    <Mail className="h-3.5 w-3.5" />
+                                    <span>{t('grievance_feedback')}</span>
+                                    {emailSendCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm ring-2 ring-white dark:ring-slate-900 tabular-nums">
+                                            {emailSendCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                        );
+                    }
+                },
             ];
 
             return cols;
 
         },
-        [onOpenImageDialog, onOpenRatePanel, factoryWinnersInfo, selectedJudgeWinners, onSelectJudgeWinner, t]
+        [onOpenImageDialog, onOpenRatePanel, onOpenFeedbackDialog, factoryWinnersInfo, selectedJudgeWinners, onSelectJudgeWinner, t]
     );
 
     // --- TABLE INSTANCE ---

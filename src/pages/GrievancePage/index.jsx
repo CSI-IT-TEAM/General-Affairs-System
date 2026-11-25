@@ -15,6 +15,7 @@ import { useGrievanceTable, evaluateFactoryWinners, getTopicLabel } from "../../
 import { formatDateDisplay, formatDateToYYYYMMDD } from '../../lib/dateUtils'
 import { TopicFilter, RateFilter, FactoryFilter, ViewModeFilter } from "../../components/Filters/GrievanceFilters";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../../components/Dialog/Carousel/ui/dialog"
+import FeedbackEmailDialog from "../../components/Dialog/FeedbackEmailDialog";
 import StatsCard from "../../components/Card/Stats";
 import { cn } from "../../lib/utils";
 import PraiseCard from "../../components/Card/Praise";
@@ -258,6 +259,17 @@ const GrievancePage = () => {
     const [confirmDialogState, setConfirmDialogState] = useState({
         isOpen: false,
     });
+    // Feedback Email Dialog State
+    const [feedbackDialogState, setFeedbackDialogState] = useState({
+        isOpen: false,
+        itemData: null,
+    });
+    const openFeedbackDialog = useCallback((itemData) => {
+        setFeedbackDialogState({
+            isOpen: true,
+            itemData: itemData || null,
+        });
+    }, []);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [confirmListLoading, setConfirmListLoading] = useState(false);
     const [confirmWinners, setConfirmWinners] = useState([]);
@@ -327,6 +339,7 @@ const GrievancePage = () => {
         RATE_USER_NM: true,
         CONFIRM_YN: true,
         WINNER_YN: true,
+        feedback: true,
         action: true,
     });
 
@@ -458,6 +471,7 @@ const GrievancePage = () => {
         orders,
         onOpenImageDialog: handleThumbClick,
         onOpenRatePanel: openRatePanel,
+        onOpenFeedbackDialog: openFeedbackDialog,
         formatDateDisplay,
         sorting,
         setSorting,
@@ -952,6 +966,10 @@ const GrievancePage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="hidden xl:flex items-center gap-1.5 h-10 px-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium shadow-sm">
+                                <Info className="w-4 h-4 text-amber-500 shrink-0" />
+                                <span className="whitespace-nowrap">Note: Praises with feedback will be skipped when confirming rewards.</span>
+                            </div>
                             <div className="hidden md:flex items-center h-10 px-3 rounded-xl bg-white border border-blue-100 shadow-sm">
                                 <div className="flex items-center gap-2 px-2">
                                     <p className="text-lg font-bold leading-tight text-slate-800">{filterCounts.status.all}</p>
@@ -975,6 +993,11 @@ const GrievancePage = () => {
                                 <span className="hidden sm:inline">{t('confirm_trophy')}</span>
                             </button>
                         </div>
+                    </div>
+
+                    <div className="xl:hidden flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium shadow-sm">
+                        <Info className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>Note: Praises with feedback will be skipped when confirming rewards.</span>
                     </div>
 
                     <div className="md:hidden flex-shrink-0 grid grid-cols-3 gap-2">
@@ -1380,6 +1403,7 @@ const GrievancePage = () => {
                                 data={item}
                                 onOpenImageDialog={handleThumbClick}
                                 onOpenRatePanel={openRatePanel}
+                                onOpenFeedbackDialog={openFeedbackDialog}
                                 factoryWinnersInfo={factoryWinnersInfo}
                                 selectedJudgeWinners={selectedJudgeWinners}
                                 onSelectJudgeWinner={handleSelectJudgeWinner}
@@ -1864,6 +1888,31 @@ const GrievancePage = () => {
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
+                    {/* Feedback Email Dialog */}
+                    <FeedbackEmailDialog
+                        isOpen={feedbackDialogState.isOpen}
+                        onClose={() => setFeedbackDialogState({ isOpen: false, itemData: null })}
+                        itemData={feedbackDialogState.itemData}
+                        onSentSuccess={(recipientEmail, meta = {}) => {
+                            if (meta.savedToTable && meta.praiseId !== undefined && meta.praiseId !== '') {
+                                setOrders((prev) =>
+                                    prev.map((item) =>
+                                        String(item.PRAISE_ID) === String(meta.praiseId)
+                                            ? {
+                                                ...item,
+                                                EMAIL_SEND_COUNT:
+                                                    Number(item.EMAIL_SEND_COUNT ?? item.email_send_count ?? 0) + 1,
+                                            }
+                                            : item
+                                    )
+                                );
+                            }
+                            setToast({
+                                type: "success",
+                                message: t('grievance_feedback_send_success', { email: recipientEmail }),
+                            });
+                        }}
+                    />
                 </div>
             </div>
             {toast &&

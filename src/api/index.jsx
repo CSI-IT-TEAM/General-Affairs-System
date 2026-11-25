@@ -72,6 +72,10 @@ const TemporaryResidenceEmployeeInfoURL = "http://vjweb.dskorea.com:9090/api/com
 // Meeting Room Booking API URLs
 const GrievanceCallProcedureURL = "http://vjweb.dskorea.com:9090/api/call-procedure";
 
+// Mail Service API URLs
+const MailUploadURL = "http://172.30.10.124:5001/api/Mail/upload";
+const MailSendURL = "http://172.30.10.124:5001/api/Mail/send";
+
 export {
   downloadURL,
   uploadURL,
@@ -109,5 +113,7 @@ export {
   TemporaryResidenceSaveProcedureURL,
   TemporaryResidenceDeleteProcedureURL,
   TemporaryResidenceEmployeeInfoURL,
-  GrievanceCallProcedureURL
+  GrievanceCallProcedureURL,
+  MailUploadURL,
+  MailSendURL
 };
